@@ -14,7 +14,10 @@ class Visual_wrapper(object):
         self.ax = plt.axes(projection='3d')
         beta_cloud = self.scene.volume.beta_cloud
         grid = self.scene.volume.grid
-        beta_norm = (beta_cloud - beta_cloud.min()) / (beta_cloud.max() - beta_cloud.min())
+        if beta_cloud.max() != beta_cloud.min():
+            beta_norm = (beta_cloud - beta_cloud.min()) / (beta_cloud.max() - beta_cloud.min())
+        else:
+            beta_norm = 0.5 * np.ones_like(beta_cloud)
         beta_colors = 1 - beta_norm
         # set the colors of each object
         x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], grid.shape[0] + 1)

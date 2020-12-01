@@ -26,8 +26,10 @@ class Camera(object):
         points_2d = points_2d_h[:2] / points_2d_h[2]
         points_2d = points_2d.reshape(-1)
         condition = (points_2d >= 0) * (points_2d <= self.pixels)
+
         points_2d[np.logical_not(condition)] = -1
         points_2d = np.floor(points_2d).astype("int")
+
         return points_2d
 
 

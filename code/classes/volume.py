@@ -34,7 +34,7 @@ class Volume(object):
             # seg_size += 1
             if current_tau >= tau_rand:
                 step_back = (current_tau - tau_rand) / beta
-                current_point -= step_back * direction
+                current_point = next_point - step_back * direction
                 in_medium = True
                 break
 
@@ -69,7 +69,7 @@ class Volume(object):
             if current_tau >= tau_rand:
                 step_back = (current_tau - tau_rand) / beta
                 seg_lengths[-1] -= step_back
-                current_point -= step_back * direction
+                current_point = next_point - step_back * direction
                 in_medium = True
                 break
 
@@ -77,7 +77,8 @@ class Volume(object):
             current_voxel = next_voxel
             current_point = next_point
 
-
+        seg_voxels = np.vstack(seg_voxels)
+        seg_lengths = np.array(seg_lengths)
         return current_point, current_voxel, in_medium, seg_voxels, seg_lengths, seg_size, beta
 
 
@@ -103,7 +104,7 @@ class Volume(object):
                 step_back = current_distance - distance
                 tau -= step_back * beta
                 length -= step_back
-                current_point -= step_back * camera_direction
+                current_point = next_point - step_back * camera_direction
                 break
             current_point = next_point
             current_voxel = next_voxel
@@ -136,9 +137,11 @@ class Volume(object):
                 step_back = current_distance - distance
                 tau -= step_back * beta
                 seg_lengths[-1] -= step_back
-                current_point -= step_back * camera_direction
+                current_point = next_point - step_back * camera_direction
                 break
             current_point = next_point
             current_voxel = next_voxel
         local_est = np.exp(-tau)
-        return local_est, seg_voxels, seg_lengths,
+        seg_voxels = np.vstack(seg_voxels)
+        seg_lengths = np.array(seg_lengths)
+        return local_est, seg_voxels, seg_lengths

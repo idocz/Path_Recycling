@@ -45,8 +45,8 @@ def main():
     #######################
     N_cams = 2
     focal_length = 70e-3
-    sensor_size = np.array((40e-3, 40e-3))
-    ps = 15
+    sensor_size = np.array((80e-3, 80e-3))
+    ps = 5
     pixels = np.array((ps, ps))
 
     t1 = np.array([0.5, 0.5, 2])
@@ -68,7 +68,7 @@ def main():
 
     plot_scene = True
     sparse_render = True
-    graph_render = True
+    graph_render = False
     basic_render = True
 
 
@@ -79,7 +79,7 @@ def main():
         visual.plot_cameras()
         plt.show()
 
-    fake_cloud = beta_cloud * 1.5
+    fake_cloud = beta_cloud * 1#.5
     # fake_cloud = construct_beta(grid_size, False, beta + 2)
     if sparse_render:
         print("####### sparse renderer ########")
@@ -91,11 +91,11 @@ def main():
         print(" start rendering...")
         start = time()
         I_total = scene_sparse.render(paths)
-        max_val = I_total.max()
-        print(I_total[0].T)
-        print(I_total[1].T)
+        max_val = np.max(I_total, axis=(1,2))
+
         print(f" rendering took: {time() - start}")
-        visual.plot_images(I_total, "sparse")
+        print(I_total)
+        visual.plot_images(I_total, max_val, "sparse")
         plt.show()
 
     if graph_render:
@@ -108,21 +108,19 @@ def main():
         print(" start rendering...")
         start = time()
         I_total = scene_graph.render(paths)
-        print(I_total[0].T)
-        print(I_total[1].T)
         print(f" rendering took: {time() - start}")
-        visual.plot_images(I_total, "graph")
+        visual.plot_images(I_total, max_val, "graph")
         plt.show()
 
     if basic_render:
         print("####### basic renderer ########")
         print(" start rendering...")
         start = time()
-        I_total = scene.render(Np, Ns, 1)
+        I_total = scene.render(Np, Ns)
         print(I_total[0].T)
         print(I_total[1].T)
         print(f" rendering took: {time() - start}")
-        visual.plot_images(I_total, "basic")
+        visual.plot_images(I_total, max_val, "basic")
         plt.show()
 
 

@@ -57,7 +57,7 @@ class SceneSparse(object):
             scatter_tensor[:,seg] = current_voxel
 
             # segments_size.append(seg_size)
-            ISs[seg] = (1 / (beta * (1 - p)))
+            ISs[seg] = 1 / (beta * (1 - p))
 
             # measuring local estimations to each camera
             for k in range(self.N_cams):
@@ -81,7 +81,7 @@ class SceneSparse(object):
                     cam_vec.extend([k] * cam_seg_size)
                     seg_vec.extend([seg] * cam_seg_size)
                     lengths.extend(cam_seg_lengths)
-                    camera_ISs[k,seg] = (1 / ((distance_to_camera**2) * 4*np.pi))
+                    camera_ISs[k,seg] = 1 / ((distance_to_camera**2) * 4*np.pi)
             cos_theta = (np.random.rand() - 0.5) * 2
             angles[0] = np.arccos(cos_theta)
             angles[1] = np.random.rand() * 2 * np.pi
@@ -134,31 +134,60 @@ class SceneSparse(object):
                 optical_length[cam_ind, seg] += betas[i, j, k] * L
 
         si = path.scatter_inds
-        scatter_cont = (betas[si[0],si[1],si[2]])
+        scatter_cont = np.copy(betas[si[0],si[1],si[2]])
         scatter_cont = np.cumprod(scatter_cont).reshape(1,-1)
-        res = np.exp(-optical_length) * scatter_cont * path.ISs_mat
+        res = (scatter_cont * np.exp(-optical_length)) * path.ISs_mat
         return res
 
     def update_gradient(self, total_grad, path, res):
+        betas = self.volume.betas
+        all_cams = np.arange(path.N_cams)
+        for row_ind in range(path.lengths.shape[0]):
+            i, j, k, cam_ind, seg = path.length_inds[row_ind]
+            L = path.lengths[row_ind]
+            if cam_ind == -1:
+                pixel = path.camera_pixels[:,:, seg:]
+                # for pi in range(pixel.shape[1]):
+                for pj in range(pixel.shape[2]):
+                    total_grad[i,j,k,all_cams,pixel[0,:,pj],pixel[1,:,pj]] -= L * res[:, seg + pj]# * (pixel!=-1).all(axis=0)[:,:,None]
+            else:
+                pixel = path.camera_pixels[:, cam_ind, seg]
+                total_grad[i, j, k, cam_ind, pixel[0], pixel[1]] -= L * res[cam_ind, seg]
+
+
+        si = path.scatter_inds
+        scatter_beta = (betas[si[0], si[1], si[2]])
+        for seg in range(path.N_seg):
+            pixel = path.camera_pixels[:, :, seg:]
+            for pj in range(pixel.shape[2]):
+                total_grad[si[0,seg], si[1,seg], si[2, seg], all_cams, pixel[0,:,pj], pixel[1,:,pj]] += \
+                  (scatter_beta[seg] ** (-1)) * res[:, seg + pj]
+
+
+    def update_gradient_temp(self, total_grad, path, res):
         betas = self.volume.betas
         for row_ind in range(path.lengths.shape[0]):
             i, j, k, cam_ind, seg = path.length_inds[row_ind]
             L = path.lengths[row_ind]
             if cam_ind == -1:
-                pixel = path.camera_pixels[:,:, seg]
-                total_grad[i,j,k,:,pixel[0],pixel[1]] -= L * np.sum(res[cam_ind, seg:])
+                pixel = path.camera_pixels[:,:, seg:]
+                # for pi in range(pixel.shape[1]):
+                for pi in range(path.N_cams):
+                    for pj in range(pixel.shape[2]):
+                        total_grad[i,j,k,pi,pixel[0,pi,pj],pixel[1,pi,pj]] -= L * res[pi, seg + pj]
             else:
                 pixel = path.camera_pixels[:, cam_ind, seg]
                 total_grad[i, j, k, cam_ind, pixel[0], pixel[1]] -= L * res[cam_ind, seg]
 
+
         si = path.scatter_inds
         scatter_beta = (betas[si[0], si[1], si[2]])
         for seg in range(path.N_seg):
-            for cam_ind in range(self.N_cams):
-                pixel = path.camera_pixels[:, cam_ind, seg:]
-                if (pixel != -1).all():
-                    total_grad[si[0,seg], si[1,seg], si[2, seg], cam_ind, pixel[0], pixel[1]] += \
-                      (scatter_beta[seg] ** (-1)) * np.sum(res[cam_ind, seg:])
+            pixel = path.camera_pixels[:, :, seg:]
+            for pi in range(path.N_cams):
+                for pj in range(pixel.shape[2]):
+                    total_grad[si[0,seg], si[1,seg], si[2, seg], pi, pixel[0,pi,pj], pixel[1,pi,pj]] += \
+                      (scatter_beta[seg] ** (-1)) * res[pi, seg + pj]
 
 
 
