@@ -6,11 +6,12 @@ from tqdm import tqdm
 import math
 
 class SceneSparse(object):
-    def __init__(self, volume: Volume, cameras, sun_angles):
+    def __init__(self, volume: Volume, cameras, sun_angles, phase_function):
         self.volume = volume
         self.sun_angles = sun_angles * (np.pi / 180)
         self.sun_direction = theta_phi_to_direction(*sun_angles)
         self.cameras = cameras
+        self.phase_function = phase_function
         self.N_cams = len(cameras)
         self.N_pixels = cameras[0].pixels
         self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
@@ -34,7 +35,6 @@ class SceneSparse(object):
         lengths = []
 
         direction =np.copy(self.sun_direction)
-        angles = np.empty(2, dtype=np.float64)
         # sample entering point
         start_x = grid.bbox_size[0] * np.random.rand() + grid.bbox[0, 0]
         start_y = grid.bbox_size[1] * np.random.rand() + grid.bbox[1, 0]
@@ -81,11 +81,9 @@ class SceneSparse(object):
                     cam_vec.extend([k] * cam_seg_size)
                     seg_vec.extend([seg] * cam_seg_size)
                     lengths.extend(cam_seg_lengths)
-                    camera_ISs[k,seg] = 1 / ((distance_to_camera**2) * 4*np.pi)
-            cos_theta = (np.random.rand() - 0.5) * 2
-            angles[0] = np.arccos(cos_theta)
-            angles[1] = np.random.rand() * 2 * np.pi
-            direction = theta_phi_to_direction(*angles)
+                    cos_theta = np.dot(direction, cam_direction)
+                    camera_ISs[k,seg] = (1 / (distance_to_camera**2)) * self.phase_function.pdf(cos_theta)
+            direction = self.phase_function.sample_direction(direction)
 
         N_seg = seg + in_medium
 
@@ -124,6 +122,7 @@ class SceneSparse(object):
     def render_path(self, path:SparsePath ):
         optical_length = np.zeros((self.N_cams, path.N_seg))
         betas = self.volume.betas
+        volume = self.volume
 
         for row_ind in range(path.lengths.shape[0]):
             i, j, k, cam_ind, seg = path.length_inds[row_ind]
@@ -134,13 +133,13 @@ class SceneSparse(object):
                 optical_length[cam_ind, seg] += betas[i, j, k] * L
 
         si = path.scatter_inds
-        scatter_cont = np.copy(betas[si[0],si[1],si[2]])
+        scatter_cont = volume.w0_cloud*volume.beta_cloud[si[0],si[1],si[2]] + volume.w0_air*volume.beta_air
         scatter_cont = np.cumprod(scatter_cont).reshape(1,-1)
         res = (scatter_cont * np.exp(-optical_length)) * path.ISs_mat
         return res
 
     def update_gradient(self, total_grad, path, res):
-        betas = self.volume.betas
+        volume = self.volume
         all_cams = np.arange(path.N_cams)
         for row_ind in range(path.lengths.shape[0]):
             i, j, k, cam_ind, seg = path.length_inds[row_ind]
@@ -154,42 +153,13 @@ class SceneSparse(object):
                 pixel = path.camera_pixels[:, cam_ind, seg]
                 total_grad[i, j, k, cam_ind, pixel[0], pixel[1]] -= L * res[cam_ind, seg]
 
-
         si = path.scatter_inds
-        scatter_beta = (betas[si[0], si[1], si[2]])
+        beta_scatter = volume.w0_cloud*volume.beta_cloud[si[0],si[1],si[2]] + volume.w0_air*volume.beta_air
         for seg in range(path.N_seg):
             pixel = path.camera_pixels[:, :, seg:]
             for pj in range(pixel.shape[2]):
                 total_grad[si[0,seg], si[1,seg], si[2, seg], all_cams, pixel[0,:,pj], pixel[1,:,pj]] += \
-                  (scatter_beta[seg] ** (-1)) * res[:, seg + pj]
-
-
-    def update_gradient_temp(self, total_grad, path, res):
-        betas = self.volume.betas
-        for row_ind in range(path.lengths.shape[0]):
-            i, j, k, cam_ind, seg = path.length_inds[row_ind]
-            L = path.lengths[row_ind]
-            if cam_ind == -1:
-                pixel = path.camera_pixels[:,:, seg:]
-                # for pi in range(pixel.shape[1]):
-                for pi in range(path.N_cams):
-                    for pj in range(pixel.shape[2]):
-                        total_grad[i,j,k,pi,pixel[0,pi,pj],pixel[1,pi,pj]] -= L * res[pi, seg + pj]
-            else:
-                pixel = path.camera_pixels[:, cam_ind, seg]
-                total_grad[i, j, k, cam_ind, pixel[0], pixel[1]] -= L * res[cam_ind, seg]
-
-
-        si = path.scatter_inds
-        scatter_beta = (betas[si[0], si[1], si[2]])
-        for seg in range(path.N_seg):
-            pixel = path.camera_pixels[:, :, seg:]
-            for pi in range(path.N_cams):
-                for pj in range(pixel.shape[2]):
-                    total_grad[si[0,seg], si[1,seg], si[2, seg], pi, pixel[0,pi,pj], pixel[1,pi,pj]] += \
-                      (scatter_beta[seg] ** (-1)) * res[pi, seg + pj]
-
-
+                    (volume.w0_cloud/beta_scatter[seg]) * res[:, seg + pj]
 
 
 

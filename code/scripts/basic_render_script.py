@@ -6,7 +6,7 @@ from classes.visual import *
 from utils import construct_beta
 from time import time
 import matplotlib.pyplot as plt
-
+from classes.phase_function import *
 def main():
     ###################
     # Grid parameters #
@@ -28,17 +28,25 @@ def main():
     #####################
     # construct betas
     grid_size = 3
-    mid = grid_size // 2
-    beta = 4
-    # beta_cloud = construct_beta(grid_size, False, beta)
-    beta_cloud = np.zeros((grid_size,grid_size,grid_size))
-    beta_cloud[mid,mid,mid] = beta
-    print(beta_cloud)
     beta_air = 0.1
+    beta_cloud = np.array([[[0, 0, 0],
+                            [0, 2, 0],
+                            [0, 0, 0]],
 
+                           [[0, 3, 0],
+                            [3, 4, 3],
+                            [0, 3, 0]],
+
+                           [[0, 0, 0],
+                            [0, 5, 0],
+                            [0, 0, 0]]])
+    w0_air = 0.8
+    w0_cloud = 0.7
     # Declerations
     grid = Grid(bbox, beta_cloud.shape)
-    volume = Volume(grid, beta_cloud, beta_air)
+    volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
+    # phase_function = UniformPhaseFunction()
+    phase_function = HGPhaseFunction(g=0.5)
     print(volume.betas)
     #######################
     # Cameras declaration #
@@ -46,7 +54,7 @@ def main():
     N_cams = 2
     focal_length = 70e-3
     sensor_size = np.array((80e-3, 80e-3))
-    ps = 5
+    ps = 1
     pixels = np.array((ps, ps))
 
     t1 = np.array([0.5, 0.5, 2])
@@ -59,16 +67,14 @@ def main():
 
     cameras = [camera1,camera2]
 
-    scene = Scene(volume, cameras, sun_angles)
-    scene_graph = SceneGraph(volume, cameras, sun_angles)
-    scene_sparse = SceneSparse(volume, cameras, sun_angles)
+    scene = Scene(volume, cameras, sun_angles, phase_function)
+    scene_sparse = SceneSparse(volume, cameras, sun_angles, phase_function)
 
     Np = int(1e5)
     Ns = 15
 
     plot_scene = True
     sparse_render = True
-    graph_render = False
     basic_render = True
 
 
@@ -81,6 +87,8 @@ def main():
 
     fake_cloud = beta_cloud * 1#.5
     # fake_cloud = construct_beta(grid_size, False, beta + 2)
+
+    max_val = None
     if sparse_render:
         print("####### sparse renderer ########")
         print("generating paths")
@@ -98,20 +106,6 @@ def main():
         visual.plot_images(I_total, max_val, "sparse")
         plt.show()
 
-    if graph_render:
-        print("####### graph renderer ########")
-        print("generating paths")
-
-        volume.set_beta_cloud(fake_cloud)
-        paths = scene_graph.build_paths_list(Np, Ns)
-        volume.set_beta_cloud(beta_cloud)
-        print(" start rendering...")
-        start = time()
-        I_total = scene_graph.render(paths)
-        print(f" rendering took: {time() - start}")
-        visual.plot_images(I_total, max_val, "graph")
-        plt.show()
-
     if basic_render:
         print("####### basic renderer ########")
         print(" start rendering...")
@@ -120,6 +114,8 @@ def main():
         print(I_total[0].T)
         print(I_total[1].T)
         print(f" rendering took: {time() - start}")
+        if max_val is None:
+            max_val = np.max(I_total, axis=(1, 2))
         visual.plot_images(I_total, max_val, "basic")
         plt.show()
 

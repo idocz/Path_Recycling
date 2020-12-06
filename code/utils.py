@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import os
 from os.path import join
 from datetime import datetime
+from scipy.ndimage import zoom
+from scipy.io import loadmat
 
 def theta_phi_to_direction(theta, phi):
     return np.array([np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)])
@@ -85,4 +87,94 @@ def update_tensorboard(writer, loss, iter):
     writer.add_scalar("loss", loss, global_step=iter)
 
 
+def angles_between_vectors(v1, v2):
+    angle = np.arccos(np.dot(v1, v2))
+    return angle
 
+def remove_zero_planes(beta_cloud):
+
+    print(f"original shape:{beta_cloud.shape}")
+    Xsize, Ysize, Zsize = beta_cloud.shape
+    # remove zero ZY planes
+    flag1, flag2 = False, False
+    top_cut, bottom_cut = 0, 0
+    for i in range(Xsize):
+        if beta_cloud[i, :, :].sum() == 0 and not flag1:
+            top_cut += 1
+        else:
+            flag1 = True
+
+        if beta_cloud[Xsize - 1 - i, :, :].sum() == 0 and not flag2:
+            bottom_cut += 1
+        else:
+            flag2 = True
+
+        if flag1 and flag2:
+            break
+    beta_cloud = beta_cloud[top_cut:Xsize - bottom_cut, :, :]
+    Xsize -= bottom_cut + top_cut
+
+    # remove zero ZX planes
+    flag1, flag2 = False, False
+    top_cut, bottom_cut = 0, 0
+    for i in range(Ysize):
+        if beta_cloud[:, i, :].sum() == 0 and not flag1:
+            top_cut += 1
+        else:
+            flag1 = True
+
+        if beta_cloud[:, Ysize - 1 - i, :].sum() == 0 and not flag2:
+            bottom_cut += 1
+        else:
+            flag2 = True
+
+        if flag1 and flag2:
+            break
+    beta_cloud = beta_cloud[:, top_cut:Ysize - bottom_cut, :]
+    Ysize -= bottom_cut + top_cut
+
+    # remove zero ZX planes
+    flag1, flag2 = False, False
+    top_cut, bottom_cut = 0, 0
+    for i in range(Zsize):
+        if beta_cloud[:, :, i].sum() == 0 and not flag1:
+            top_cut += 1
+        else:
+            flag1 = True
+
+        if beta_cloud[:, :, Zsize - 1 - i].sum() == 0 and not flag2:
+            bottom_cut += 1
+        else:
+            flag2 = True
+
+        if flag1 and flag2:
+            break
+    beta_cloud = beta_cloud[:, :, top_cut:Zsize - bottom_cut]
+    Zsize -= bottom_cut + top_cut
+
+    print(f"new shape:{beta_cloud.shape}  validate:{(Xsize, Ysize, Zsize)}")
+    return beta_cloud
+
+def resize_to_cubic_shape(beta_cloud):
+    size = max(beta_cloud.shape)
+    cubic_data = np.zeros([size] * 3)
+    Xsize, Ysize, Zsize = beta_cloud.shape
+    cubic_data[(size - Xsize) // 2:(size + Xsize) // 2, (size - Ysize) // 2:(size + Ysize) // 2,
+    (size - Zsize) // 2:(size + Zsize) // 2] = beta_cloud
+
+    print(f"new cubic shape:{cubic_data}")
+    return cubic_data
+
+def downsample_3D(beta_cloud, new_shape):
+    factor = np.array(new_shape) / np.array(beta_cloud.shape)
+    return zoom(beta_cloud, factor)
+
+def cloud_loader(file_name, beta_max):
+    beta_cloud = loadmat(join("code", "data", file_name))["beta"]
+    beta_cloud = remove_zero_planes(beta_cloud)
+    # beta_cloud = resize_to_cubic_shape(beta_cloud)
+    beta_cloud = downsample_3D(beta_cloud, (16, 16, 16))
+    beta_cloud[beta_cloud<=0] = 0
+    beta_cloud = (beta_cloud - beta_cloud.min())/(beta_cloud.max()-beta_cloud.min())
+    beta_cloud *= 5
+    return beta_cloud

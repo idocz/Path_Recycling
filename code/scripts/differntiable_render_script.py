@@ -3,6 +3,7 @@ from classes.scene_graph import *
 from classes.scene_sparse import *
 from classes.camera import *
 from classes.visual import *
+from classes.phase_function import HGPhaseFunction
 from utils import construct_beta
 from time import time
 import matplotlib.pyplot as plt
@@ -35,10 +36,12 @@ def main():
     # beta_cloud[mid,mid,mid] = beta
     beta_cloud = np.ones((1,1,1)) * beta
     beta_air = 0.1
-
+    w0_air = 0.8
+    w0_cloud = 0.7
     # Declerations
     grid = Grid(bbox, beta_cloud.shape)
-    volume = Volume(grid, beta_cloud, beta_air)
+    volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
+    phase_function = HGPhaseFunction(g=0.5)
     print(volume.betas)
     #######################
     # Cameras declaration #
@@ -59,23 +62,22 @@ def main():
 
     cameras = [camera1,camera2]
 
-    N_cams = 7
-    cameras = []
-    for cam_ind in range(N_cams):
-        phi = 0
-        theta = (-(N_cams // 2) + cam_ind) * 40
-        theta_rad = theta * (np.pi / 180)
-        t = 1.5 * theta_phi_to_direction(theta_rad, phi) + np.array([0.5, 0.5, 0.5])
-        euler_angles = np.array((180, theta, 0))
-        camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
-        cameras.append(camera)
+    # N_cams = 7
+    # cameras = []
+    # for cam_ind in range(N_cams):
+    #     phi = 0
+    #     theta = (-(N_cams // 2) + cam_ind) * 40
+    #     theta_rad = theta * (np.pi / 180)
+    #     t = 1.5 * theta_phi_to_direction(theta_rad, phi) + np.array([0.5, 0.5, 0.5])
+    #     euler_angles = np.array((180, theta, 0))
+    #     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
+    #     cameras.append(camera)
 
 
-    scene = Scene(volume, cameras, sun_angles)
-    scene_graph = SceneGraph(volume, cameras, sun_angles)
-    scene_sparse = SceneSparse(volume, cameras, sun_angles)
+    scene = Scene(volume, cameras, sun_angles, phase_function)
+    scene_sparse = SceneSparse(volume, cameras, sun_angles, phase_function)
 
-    Np = int(1e4)
+    Np = int(1e5)
     Ns = 15
 
     plot_scene = True

@@ -3,6 +3,7 @@ from classes.scene_graph import *
 from classes.scene_sparse import *
 from classes.camera import *
 from classes.visual import *
+from classes.phase_function import HGPhaseFunction, UniformPhaseFunction
 from utils import construct_beta
 from time import time
 from utils import *
@@ -27,44 +28,27 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-grid_size = 1
-mid = grid_size // 2
-beta = 3
-# beta_cloud = construct_beta(grid_size, False, beta)
-# beta_cloud = np.zeros((grid_size, grid_size, grid_size))
-# beta_cloud[mid, mid, mid] = beta
-# beta_cloud = np.zeros((2,2,2), dtype=np.float64)
-# beta_cloud[0,0,:] = 2
-# beta_cloud[1,0,:] = 4
-# beta_cloud[0,1,:] = 3
-# beta_cloud[1,1,:] = 5
-beta_cloud = np.array([[[0,0,0],
-                        [0,2,0],
-                        [0,0,0]],
+beta_cloud = cloud_loader("clouds_dist.mat", beta_max=5)
 
-                       [[0, 3, 0],
-                        [3, 4, 3],
-                        [0, 3, 0]],
-
-                       [[0, 0, 0],
-                        [0, 5, 0],
-                        [0, 0, 0]]
-                       ])
 print(beta_cloud)
 
 beta_air = 0.1
+w0_air = 1.0
+w0_cloud = 0.8
 
 # Declerations
 grid = Grid(bbox, beta_cloud.shape)
-volume = Volume(grid, beta_cloud, beta_air)
+volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
+phase_function = HGPhaseFunction(g=0.5)
+# phase_function = (UniformPhaseFunction)
 #######################
 # Cameras declaration #
 #######################
 
 
-focal_length = 15e-3
+focal_length = 25e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 5
+ps = 25
 pixels = np.array((ps, ps))
 
 t1 = np.array([0.5, 0.5, 2])
@@ -91,9 +75,9 @@ for cam_ind in range(N_cams):
     euler_angles = np.array((180, theta, 0))
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
-scene = Scene(volume, cameras, sun_angles)
+scene = Scene(volume, cameras, sun_angles, phase_function)
 
-scene_sparse = SceneSparse(volume, cameras, sun_angles)
+scene_sparse = SceneSparse(volume, cameras, sun_angles, phase_function)
 visual = Visual_wrapper(scene)
 
 plot_3D = True
@@ -106,14 +90,15 @@ if plot_3D:
 
 Np = int(1e4)
 Ns = 15
-iteration = 1000
+iteration = 2000
 resample_freq = 10
-step_size = 1e5
+step_size = 5e8
 I_gt = scene.render(Np*10, Ns)
 # paths = scene_sparse.build_paths_list(Np*10, Ns)
 # I_gt = scene_sparse.render(paths, False)
 max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, max_val, "GT")
+plt.show()
 
 beta_init = np.ones_like(beta_cloud) * np.mean(beta_cloud)
 # beta_init = np.zeros_like(beta_cloud)
@@ -124,7 +109,13 @@ tensorboard_freq = 1
 #     writer = init_tensorboard(I_gt)
 
 for iter in range(iteration):
-    print(f"mean_dist = {np.mean(np.abs(beta_cloud - beta_opt))}")
+    abs_dist = np.abs(beta_cloud - beta_opt)
+    mean_dist = np.mean(abs_dist)
+    max_dist = np.max(abs_dist)
+    print(f"mean_dist = {mean_dist}, max_dist={max_dist}")
+    if iter > 500:
+        Np = int(1e5)
+        resample_freq = 30
     beta_opt[beta_opt<0] = 0
     volume.set_beta_cloud(beta_opt)
     if iter % resample_freq == 0:
@@ -132,7 +123,7 @@ for iter in range(iteration):
             visual.plot_images(I_opt, max_val, f"iter:{iter}")
             plt.show()
             print(f"iter {iter}")
-            print(beta_opt)
+            # print(beta_opt)
             print()
         paths = scene_sparse.build_paths_list(Np, Ns)
 

@@ -2,19 +2,19 @@ import numpy as np
 from classes.grid import *
 
 class Volume(object):
-    def __init__(self, grid:Grid, beta_cloud, beta_air, w0_cloud=None, w0_air=None):
+    def __init__(self, grid:Grid, beta_cloud, beta_air, w0_cloud, w0_air):
         self.grid = grid
         self.beta_cloud = beta_cloud
         self.beta_air = beta_air
         self.betas = beta_cloud + beta_air
         self.w0_cloud = w0_cloud
         self.w0_air = w0_air
-        # self.single_scattering_coeffs = (w0_air * beta_air) + (w0_cloud * beta_cloud)
-        # self.single_scattering_coeffs /= self.betas
+
 
     def set_beta_cloud(self, beta_cloud):
         self.beta_cloud = beta_cloud
         self.betas = beta_cloud + self.beta_air
+
 
     def voxel_traversal_algorithm(self, start_point, current_voxel, direction, tau_rand):
         # easy assignment
