@@ -89,7 +89,7 @@ if plot_3D:
     plt.show()
 
 
-Np = int(1e4)
+Np = int(1e2)
 Ns = 15
 iteration = 1000
 resample_freq = 10
@@ -104,8 +104,8 @@ beta_init = np.ones_like(beta_cloud) * np.mean(beta_cloud)
 beta_opt = np.copy(beta_init)
 tensorboard = True
 tensorboard_freq = 1
-# if tensorboard:
-#     writer = init_tensorboard(I_gt)
+if tensorboard:
+    writer = init_tensorboard(I_gt)
 
 for iter in range(iteration):
     print(f"#### iter {iter} ####")
@@ -118,6 +118,8 @@ for iter in range(iteration):
     total_grad = np.sum(total_grad, axis=(3,4,5)) / N_cams
     beta_opt -= step_size * total_grad
     loss = 0.5 * np.sum(dif ** 2)
+    if tensorboard and iter % tensorboard_freq == 0:
+        update_tensorboard(writer, loss, iter)
     print(f"loss = {loss}")
     print(f"mean_dist = {np.mean(np.abs(beta_cloud - beta_opt))}")
     print(beta_opt)

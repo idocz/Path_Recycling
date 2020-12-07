@@ -75,17 +75,28 @@ def construct_beta(shape, is_step, beta):
 
 
 def init_tensorboard(I_gt):
-    time = datetime.now().strftime("%d%m-%H%M")
+    time = datetime.now().strftime("%d%m-%H%M-%S")
     train_id = time
     writer = SummaryWriter(log_dir=f"checkpoints/{train_id}")
     os.mkdir(join("checkpoints",train_id,"data"))
     # np.savez(join("checkpoints",train_id,"data","gt"), betas=betas_gt, images=I_gt, max_pixel_val=max_pixel_val)
-    writer.add_image("images/ground_truth", I_gt)
+    for i in range(I_gt.shape[0]):
+        writer.add_image(f"ground_truth/{i}", transform_image_for_tensorboard(I_gt[i].T[None,:,:]))
     return writer
 
-def update_tensorboard(writer, loss, iter):
+def update_tensorboard(writer, I_opt, loss, mean_dist, max_dist, iter):
+    for i in range(I_opt.shape[0]):
+        writer.add_image(f"simulated_images/{i}", transform_image_for_tensorboard(I_opt[i].T[None,:,:]), global_step=iter)
     writer.add_scalar("loss", loss, global_step=iter)
+    writer.add_scalar("mean_dist", mean_dist, global_step=iter)
+    writer.add_scalar("max_dist", max_dist, global_step=iter)
 
+def transform_image_for_tensorboard(im):
+    im_max = im.max()
+    im_min = im.min()
+    im = (im - im_min)/(im_max - im_min)
+    im *= 255
+    return im.astype("uint8")
 
 def angles_between_vectors(v1, v2):
     angle = np.arccos(np.dot(v1, v2))
@@ -170,7 +181,7 @@ def downsample_3D(beta_cloud, new_shape):
     return zoom(beta_cloud, factor)
 
 def cloud_loader(file_name, beta_max):
-    beta_cloud = loadmat(join("code", "data", file_name))["beta"]
+    beta_cloud = loadmat(join("data", file_name))["beta"]
     beta_cloud = remove_zero_planes(beta_cloud)
     # beta_cloud = resize_to_cubic_shape(beta_cloud)
     beta_cloud = downsample_3D(beta_cloud, (16, 16, 16))

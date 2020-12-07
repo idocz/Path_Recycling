@@ -105,8 +105,8 @@ beta_init = np.ones_like(beta_cloud) * np.mean(beta_cloud)
 beta_opt = np.copy(beta_init)
 tensorboard = True
 tensorboard_freq = 1
-# if tensorboard:
-#     writer = init_tensorboard(I_gt)
+if tensorboard:
+    writer = init_tensorboard(I_gt)
 
 for iter in range(iteration):
     abs_dist = np.abs(beta_cloud - beta_opt)
@@ -135,6 +135,8 @@ for iter in range(iteration):
     beta_opt -= step_size * total_grad
     loss = 0.5 * np.sum(dif ** 2)
     print(f"loss = {loss}")
+    if tensorboard and iter % tensorboard_freq == 0:
+        update_tensorboard(writer, I_opt, loss, mean_dist, max_dist, iter)
 
     # if iter % tensorboard_freq == 0:
     #     update_tensorboard(writer, loss, iter)
