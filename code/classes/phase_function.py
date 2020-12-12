@@ -15,6 +15,8 @@ class UniformPhaseFunction(object):
         phi = p2 * 2 * np.pi
         direction = theta_phi_to_direction(theta, phi)
         return direction
+    def __str__(self):
+        return "Uniform"
 
 class HGPhaseFunction(object):
     def __init__(self, g):
@@ -46,3 +48,6 @@ class HGPhaseFunction(object):
             new_direction[1] = (sin_theta * (old_direction[1] * z_cos_phi + old_direction[0] * sin_phi) / denom) + old_direction[1] * cos_theta
             new_direction[2] = old_direction[2] * cos_theta - denom * sin_theta * cos_phi
         return new_direction
+
+    def __str__(self):
+        return f"HG(g={self.g})"

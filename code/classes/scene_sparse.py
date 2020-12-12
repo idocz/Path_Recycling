@@ -193,3 +193,17 @@ class SceneSparse(object):
         else:
             return I_total / Np
 
+    def __str__(self):
+        text = ""
+        text += "Grid:  \n"
+        text += str(self.volume.grid) + "  \n"
+        text += f"Sun Diretion: theta={self.sun_angles[0]}, phi={self.sun_angles[1]}  \n\n"
+        text += f"{self.N_cams} Cameras:" +"  \n"
+        for i, cam in enumerate(self.cameras):
+            text += f"camera {i}: {str(cam)}  \n"
+        text += "  \n"
+        text += "Phase_function:  \n"
+        text += str(self.phase_function) +"  \n\n"
+        return text
+
+

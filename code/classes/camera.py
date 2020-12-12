@@ -4,7 +4,9 @@ from utils import euler_to_rotmat
 class Camera(object):
     def __init__(self, t, euler_angles, focal_length, sensor_size, pixels):
         self.t = t
-
+        self.euler_angles = euler_angles
+        self.focal_length = focal_length
+        self.sensor_size = sensor_size
         self.R = euler_to_rotmat(euler_angles)
         self.pixels = pixels
         s = pixels / sensor_size
@@ -31,6 +33,10 @@ class Camera(object):
         points_2d = np.floor(points_2d).astype("int")
 
         return points_2d
+
+    def __str__(self):
+        return f"t={self.t}, euler={self.euler_angles}, focal_length={self.focal_length}," \
+                    f" sensor_size={self.sensor_size}, pixels_size={self.pixels}"
 
 
 

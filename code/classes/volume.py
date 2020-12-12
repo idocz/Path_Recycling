@@ -9,7 +9,10 @@ class Volume(object):
         self.betas = beta_cloud + beta_air
         self.w0_cloud = w0_cloud
         self.w0_air = w0_air
+        self.cloud_mask = np.ones(beta_cloud.shape, dtype=np.bool)
 
+    def set_mask(self, mask):
+        self.cloud_mask = mask
 
     def set_beta_cloud(self, beta_cloud):
         self.beta_cloud = beta_cloud

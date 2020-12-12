@@ -6,7 +6,7 @@ import multiprocessing as mp
 class Scene(object):
     def __init__(self, volume: Volume, cameras, sun_angles, phase_function):
         self.volume = volume
-        self.sun_angles = sun_angles * (np.pi / 180)
+        self.sun_angles = sun_angles
         self.sun_direction = theta_phi_to_direction(*sun_angles)
         self.cameras = cameras
         self.phase_function = phase_function
@@ -75,9 +75,9 @@ class Scene(object):
             for k in range(self.N_cams):
                 cam = self.cameras[k]
                 pixel = cam.project_point(current_point)
-                if (pixel == -1).any():
-                    print("bug")
-                    continue
+                # if (pixel == -1).any():
+                #     print("bug")
+                #     continue
                 cam_direction = cam.t - current_point
                 distance_to_camera = np.linalg.norm(cam_direction)
                 cam_direction /= distance_to_camera

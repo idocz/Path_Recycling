@@ -86,3 +86,8 @@ class Grid(object):
         t = np.min(ts)
         res = point + t*direction
         return res
+
+    def __str__(self):
+        text = f"grid_shape={self.shape}  \n"
+        text += f"bounding_box[KM]: x_lim={self.bbox[0]}, y_lim={self.bbox[1]}, z_lim={self.bbox[2]}"
+        return text

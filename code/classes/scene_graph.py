@@ -164,3 +164,4 @@ class SceneGraph(object):
 
     def render_differentiable(self, paths):
         pass
+

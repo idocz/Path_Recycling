@@ -1,6 +1,5 @@
 from classes.scene import *
-from classes.scene_graph import *
-from classes.scene_sparse import *
+from classes.scene_numba import *
 from classes.camera import *
 from classes.visual import *
 from classes.phase_function import HGPhaseFunction, UniformPhaseFunction
@@ -42,7 +41,7 @@ w0_cloud = 0.8
 grid = Grid(bbox, beta_cloud.shape)
 volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
 beta_gt = np.copy(beta_cloud)
-phase_function = HGPhaseFunction(g=0.5)
+g = 0.5
 # phase_function = (UniformPhaseFunction)
 #######################
 # Cameras declaration #
@@ -80,10 +79,10 @@ for cam_ind in range(N_cams):
     euler_angles = np.array((180, theta, 0))
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
-scene = Scene(volume, cameras, sun_angles, phase_function)
+# scene = Scene(volume, cameras, sun_angles, phase_function)
 
-scene_sparse = SceneSparse(volume, cameras, sun_angles, phase_function)
-visual = Visual_wrapper(scene)
+scene_numba = SceneNumba(volume, cameras, sun_angles, g)
+visual = Visual_wrapper(scene_numba)
 
 plot_3D = False
 if plot_3D:
@@ -94,12 +93,13 @@ if plot_3D:
 
 
 Np = int(1e5)
-Np_gt = int(1e5)
+Np_gt = int(1e6)
 Ns = 15
 iteration = 5000
 resample_freq = 10
 step_size = 1e10
-I_gt = scene.render(Np_gt, Ns)
+paths = scene_numba.build_paths_list(Np_gt, Ns)
+I_gt = scene_numba.render(paths)
 # paths = scene_sparse.build_paths_list(Np*10, Ns)
 # I_gt = scene_sparse.render(paths, False)
 max_val = np.max(I_gt, axis=(1,2))
@@ -119,7 +119,7 @@ tensorboard_freq = 1
 
 
 if tensorboard:
-    scene_descr = str(scene_sparse)
+    scene_descr = str(scene_numba)
     scene_descr += f"Simualtion Parameters:  \nNp_gt={Np_gt:.2E}  \nNp={Np:.2E}  \nNs={Ns}  \niterations={iteration}  \n" \
                     f"step_size={step_size:.2E} \nresample_freq={resample_freq}  \ntensorboard_freq={tensorboard_freq}"
     tb = TensorBoardWrapper(I_gt, beta_gt, scene_descr)
@@ -131,7 +131,7 @@ for iter in range(iteration):
     rel_dist = np.linalg.norm(beta_opt - beta_cloud)/np.linalg.norm(beta_cloud)
     print(f"mean_dist = {mean_dist}, max_dist={max_dist}, rel_dist={rel_dist}")
     if iter > 100:
-        Np = int(1e5)
+        Np = int(1e6)
         resample_freq = 30
     beta_opt[beta_opt<0] = 0
     volume.set_beta_cloud(beta_opt)
@@ -142,9 +142,9 @@ for iter in range(iteration):
             print(f"iter {iter}")
             # print(beta_opt)
             print()
-        paths = scene_sparse.build_paths_list(Np, Ns)
+        paths = scene_numba.build_paths_list(Np, Ns)
 
-    I_opt, total_grad = scene_sparse.render(paths, differentiable=True)
+    I_opt, total_grad = scene_numba.render(paths, differentiable=True)
     dif = (I_opt - I_gt).reshape(1,1,1, N_cams, pixels[0], pixels[1])
 
     total_grad *= dif
