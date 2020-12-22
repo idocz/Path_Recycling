@@ -1,103 +1,12 @@
-from classes.grid import *
-from classes.volume import *
-from classes.sparse_path import SparsePath
-from utils import  theta_phi_to_direction
-from tqdm import tqdm
+from numba import cuda
+import numpy as np
 import math
-from numba import njit
-
-class SceneNumba(object):
-    def __init__(self, volume: Volume, cameras, sun_angles, g):
-        self.volume = volume
-        self.sun_angles = sun_angles
-        self.sun_direction = theta_phi_to_direction(*sun_angles)
-        self.cameras = cameras
-        self.g = g
-        self.N_cams = len(cameras)
-        self.N_pixels = cameras[0].pixels
-        self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
-        for k in range(self.N_cams):
-            self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
-
-
-    def build_paths_list(self, Np, Ns, workers=1):
-        paths = []
-        betas = self.volume.betas
-        bbox = self.volume.grid.bbox
-        bbox_size = self.volume.grid.bbox_size
-        voxel_size = self.volume.grid.voxel_size
-        sun_direction = self.sun_direction
-        N_cams = self.N_cams
-        pixels_shape = self.cameras[0].pixels
-        ts = np.array([cam.t for cam in self.cameras])
-        Ps = np.array([cam.P for cam in self.cameras])
-        is_in_medium = self.is_camera_in_medium
-        g = self.g
-        if workers == 1:
-            for _ in tqdm(range(Np)):
-                path = generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams, pixels_shape, ts, Ps, is_in_medium, g)
-                paths.append(path)
-        else:
-            pass
-
-        print(f"none: {len([path for path in paths if path is None])/Np}")
-        return paths
-
-
-
-    def render(self, paths, differentiable=False):
-        # east declerations
-        Np = len(paths)
-        N_cams = len(self.cameras)
-        pixels_shape = self.cameras[0].pixels
-        betas = self.volume.betas
-        beta_air = self.volume.beta_air
-        w0_cloud = self.volume.w0_cloud
-        w0_air = self.volume.w0_air
-        I_total = np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=np.float64)
-        if differentiable:
-            shape = self.volume.grid.shape
-            total_grad = np.zeros((shape[0],shape[1],shape[2],N_cams,pixels_shape[0],pixels_shape[1]), dtype=np.float64)
-        for path in tqdm(paths):
-            if path is None:
-                continue
-            else:
-                res = render_path(path, betas, beta_air, w0_cloud, w0_air)
-                camera_pixels = path[-1]
-                update_image(I_total, res, camera_pixels)
-
-                if differentiable:
-                    update_gradient(total_grad, path, res, betas, beta_air, w0_cloud, w0_air)
-
-        if differentiable:
-            return I_total/Np, total_grad/Np
-        else:
-            return I_total / Np
-
-    def __str__(self):
-        text = ""
-        text += "Grid:  \n"
-        text += str(self.volume.grid) + "  \n"
-        text += f"Sun Diretion: theta={self.sun_angles[0]}, phi={self.sun_angles[1]}  \n\n"
-        text += f"{self.N_cams} Cameras:" +"  \n"
-        for i, cam in enumerate(self.cameras):
-            text += f"camera {i}: {str(cam)}  \n"
-        text += "  \n"
-        text += "Phase_function:  \n"
-        text += str(self.g) +"  \n\n"
-        return text
-
-
-
-
-##########################################################
-####   Numba Function   ##################################
-##########################################################
-
+from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32
 
 #### SCENE FUNCTIONS ####
-@njit()
-def generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams, pixels_shape, ts, Ps, is_in_medium, g):
+@cuda.jit()
+def generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams, pixels_shape, ts, Ps, is_in_medium, g,
+                  scatter_points, scatter_voxels, camera_pixels, camera_ISs):
     grid_shape = betas.shape
     # path list
     ISs = np.zeros(Ns, dtype=np.float64)
@@ -107,9 +16,9 @@ def generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams,
 
     # helpful list
     voxels =  [np.array([x,x,x], dtype=np.int32) for x in range(0)]
-    cam_vec = [np.int(x) for x in range(0)]
-    seg_vec = [np.int(x) for x in range(0)]
-    lengths = [np.float(x) for x in range(0)]
+    cam_vec = [np.uint8(x) for x in range(0)]
+    seg_vec = [np.uint8(x) for x in range(0)]
+    lengths = [np.float32(x) for x in range(0)]
 
     direction =np.copy(sun_direction)
     # sample entering point
@@ -190,72 +99,7 @@ def generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams,
     length_inds = np.hstack((voxels, cam_vec, seg_vec))
     return length_inds, lengths, ISs_mat, scatter_tensor, camera_pixels
 
-@njit()
-def render_path(path, betas, beta_air, w0_cloud, w0_air):
-    length_inds, lengths, ISs_mat, scatter_tensor, camera_pixels = path
-    N_seg = scatter_tensor.shape[1]
-    N_cams = camera_pixels.shape[1]
-    optical_length = np.zeros((N_cams, N_seg), dtype=np.float64)
 
-    for row_ind in range(lengths.shape[0]):
-        i, j, k, cam_ind, seg = length_inds[row_ind]
-        L = lengths[row_ind]
-        if cam_ind == -1:
-            for cam_j in range(N_cams):
-                for seg_j in range(N_seg - seg):
-                    optical_length[cam_j,seg+seg_j] += betas[i,j,k] * L
-        else:
-            optical_length[cam_ind, seg] += betas[i, j, k] * L
-
-    res = np.exp(-optical_length) * ISs_mat
-    si = scatter_tensor
-    prod = 1
-    for seg in range(N_seg):
-        prod *= (w0_cloud * (betas[si[0,seg], si[1,seg], si[2,seg]] - beta_air) + w0_air * beta_air)
-        for cam_j in range(N_cams):
-            res[cam_j,seg] *= prod
-        if prod == 0:
-            print("does not make sense")
-            print(si[:, seg])
-
-    return res
-
-@njit()
-def update_image(I_total, res, camera_pixels):
-    for cam in range(I_total.shape[0]):
-        for seg in range(res.shape[1]):
-            pixel = camera_pixels[:, cam, seg]
-            if (pixel != -1).all():
-                I_total[cam, pixel[0], pixel[1]] += res[cam, seg]
-@njit()
-def update_gradient(total_grad, path, res, betas, beta_air, w0_cloud, w0_air):
-    length_inds, lengths, ISs_mat, scatter_tensor, camera_pixels = path
-    N_seg = scatter_tensor.shape[1]
-    N_cams = camera_pixels.shape[1]
-    for row_ind in range(lengths.shape[0]):
-        i, j, k, cam_ind, seg = length_inds[row_ind]
-        L = lengths[row_ind]
-        if cam_ind == -1:
-            pixel = camera_pixels[:,:, seg:]
-            for pj in range(pixel.shape[2]):
-                for cam_j in range(N_cams):
-                    total_grad[i,j,k,cam_j,pixel[0,cam_j,pj],pixel[1,cam_j,pj]] -= L * res[cam_j, seg + pj]
-        else:
-            pixel = camera_pixels[:, cam_ind, seg]
-            total_grad[i, j, k, cam_ind, pixel[0], pixel[1]] -= L * res[cam_ind, seg]
-
-    si = scatter_tensor
-
-    for seg in range(N_seg):
-        beta_scatter = w0_cloud*(betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air
-        if beta_scatter == 0:
-            print("bug!!!")
-            continue
-        pixel = camera_pixels[:, :, seg:]
-        for pj in range(pixel.shape[2]):
-            for cam_ind in range(N_cams):
-                total_grad[si[0,seg], si[1,seg], si[2, seg], cam_ind, pixel[0,cam_ind,pj], pixel[1,cam_ind,pj]] += \
-                    (w0_cloud/beta_scatter) * res[cam_ind, seg + pj]
 
 
 
@@ -371,14 +215,12 @@ def voxel_traversal_algorithm_save(start_point, current_voxel, direction, tau_ra
     return current_point, current_voxel, in_medium, seg_voxels, seg_lengths, seg_size, beta
 
 
-@njit()
-def local_estimation_save(source_point, source_voxel, camera_direction, dest, betas, voxel_size):
+@cuda.jit(device=True)
+def local_estimation_save(current_voxel, current_point, camera_direction, dest, betas, voxel_size):
     grid_shape = betas.shape
-    current_voxel = np.copy(source_voxel)
-    current_point = np.copy(source_point)
     seg_voxels = []
     seg_lengths = []
-    distance = np.linalg.norm(source_point - dest)
+    distance = np.linalg.norm(current_voxel - dest)
     current_distance = 0.0
     tau = 0.0
     while True:
@@ -407,30 +249,31 @@ def local_estimation_save(source_point, source_voxel, camera_direction, dest, be
 
 
 #### CAMERA FUNCTIONS ####
-@njit()
-def project_point(point, P, pixels_shape):
-    point = point.reshape(3,1)
-    points_hom = np.vstack((point, np.ones((1, 1))))
-    points_2d_h = P @ points_hom
-    points_2d = points_2d_h[:2] / points_2d_h[2]
-    points_2d = points_2d.reshape(-1)
-    condition = (points_2d >= 0) * (points_2d <= pixels_shape)
-    points_2d[np.logical_not(condition)] = -1
-    points_2d = np.floor(points_2d).astype(np.int32)
-    return points_2d
+@cuda.jit(device=True)
+def project_point(x, P, pixels_shape, res):
+    z = x[0]*P[2,0] + x[1]*P[2,1] + x[2]*P[2,2] + P[2,3]
+    x = (x[0]*P[0,0] + x[1]*P[0,1] + x[2]*P[0,2] + P[0,3]) / z
+    y = (x[0]*P[1,0] + x[1]*P[1,1] + x[2]*P[1,2] + P[1,3]) / z
+    if x < 0 or x > pixels_shape[0]:
+        x = 255
+    if y < 0 or y > pixels_shape[1]:
+        y = -1
+    res[0] = np.uint8(x)
+    res[1] = np.uint8(y)
+    return res
 
 
 #### PHASE FUNCTION FUNCTIONS ####
-@njit()
+@cuda.jit(device=True)
 def pdf(cos_theta, g):
     theta_pdf = 0.5*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
     phi_pdf = 1 / (2*np.pi)
     return theta_pdf * phi_pdf
 
-@njit()
-def sample_direction(old_direction, g):
-    new_direction = np.empty(3)
-    p1, p2 = np.random.rand(2)
+@cuda.jit(device=True)
+def sample_direction(old_direction, g, new_direction, rng_states, tid):
+    p1 = xoroshiro128p_uniform_float32(rng_states, tid)
+    p2 = xoroshiro128p_uniform_float32(rng_states, tid)
     cos_theta = (1 / (2 * g)) * (1 + g**2 - ((1 - g**2)/(1 - g + 2*g*p1))**2)
     phi = p2 * 2 * np.pi
     sin_theta = np.sqrt(1 - cos_theta**2)
@@ -452,16 +295,16 @@ def sample_direction(old_direction, g):
 
 
 #### UTILS FUNCTIONS ###
-@njit()
-def vertical_concat(arrays):
-    res = np.empty((len(arrays),arrays[0].shape[0]), dtype=np.int32)
+@cuda.jit()
+def vertical_concat(arrays, res):
+    # res = np.empty((len(arrays),arrays[0].shape[0]), dtype=np.int32)
     for i in range(len(arrays)):
         res[i,:] = arrays[i]
     return res
 
-@njit()
-def horizontal_concat(arrays):
-    res = np.empty((arrays[0].shape[0], len(arrays)))
+@cuda.jit()
+def horizontal_concat(arrays, res):
+    # res = np.empty((arrays[0].shape[0], len(arrays)))
     for i in range(len(arrays)):
         res[i] = arrays[i]
     return res

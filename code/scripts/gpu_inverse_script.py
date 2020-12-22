@@ -2,7 +2,7 @@ import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 from classes.scene import *
-from classes.scene_numba import *
+from classes.scene_gpu import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from classes.tensorboard_wrapper import TensorBoardWrapper
 import pickle
 from classes.checkpoint_wrapper import CheckpointWrapper
+from time import time
 ###################
 # Grid parameters #
 ###################
@@ -69,22 +70,15 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 # scene = Scene(volume, cameras, sun_angles, phase_function)
 
-scene_numba = SceneNumba(volume, cameras, sun_angles, g)
+scene_gpu = SceneGPU(volume, cameras, sun_angles, g)
 
-visual = Visual_wrapper(scene_numba)
-
-plot_3D = False
-if plot_3D:
-    visual.plot_cloud()
-    visual.create_grid()
-    visual.plot_cameras()
-    plt.show()
+visual = Visual_wrapper(scene_gpu)
 
 # Simulation parameters
 Np_gt = int(1e6)
 iter_phase = [500, 2000, 3000, np.inf]
 Nps = [int(1e5), int(1e6), int(1e6), int(1e6)]
-resample_freqs = [10, 20, 30, 30]
+resample_freqs = [10, 30, 30, 30]
 step_sizes = [1e10, 1e11, 5e11, 1e12]
 
 phase = 0
@@ -98,13 +92,15 @@ tensorboard = True
 tensorboard_freq = 5
 beta_max = 160
 
-load_gt = False
+load_gt = True
 if load_gt:
-    checkpoint_id = "1212-1535-56"
+    checkpoint_id = "1612-0025-00"
     I_gt = np.load(join("checkpoints",checkpoint_id,"data","gt.npz"))["images"]
+    cuda_paths = None
+    print("I_gt has been loaded")
 else:
-    paths = scene_numba.build_paths_list(Np_gt, Ns)
-    I_gt = scene_numba.render(paths)
+    cuda_paths = scene_gpu.build_paths_list(Np_gt, Ns)
+    I_gt, _ = scene_gpu.render(cuda_paths)
 
 
 max_val = np.max(I_gt, axis=(1,2))
@@ -118,11 +114,11 @@ volume.set_mask(cloud_mask)
 
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
-    cp_wrapper = CheckpointWrapper(scene_numba, Np_gt, Nps, Ns, resample_freqs, step_sizes, iter_phase, iterations,
+    cp_wrapper = CheckpointWrapper(scene_gpu, Np_gt, Nps, Ns, resample_freqs, step_sizes, iter_phase, iterations,
                             tensorboard_freq, tb.train_id)
     tb.add_scene_text(str(cp_wrapper))
-    pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
-    print("Checkpoint wrapper has been saved")
+    # pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
+    # print("Checkpoint wrapper has been saved")
 
 # Initialization
 beta_init = np.zeros_like(beta_cloud, dtype=np.float64)
@@ -131,14 +127,20 @@ volume.set_beta_cloud(beta_init)
 beta_opt = np.copy(beta_init)
 last_beta = beta_opt
 
-
+min_rel = 2
+grad_norm = None
 for iter in range(iterations):
     print(f"iter {iter}")
     abs_dist = np.abs(beta_cloud[cloud_mask] - beta_opt[cloud_mask])
     mean_dist = np.mean(abs_dist)
     max_dist = np.max(abs_dist)
     rel_dist = np.linalg.norm(beta_opt - beta_cloud)/np.linalg.norm(beta_cloud)
+
     print(f"mean_dist = {mean_dist}, max_dist={max_dist}, rel_dist={rel_dist}")
+    if rel_dist < min_rel:
+        min_rel = rel_dist
+        last_beta = np.copy(beta_opt)
+
     if iter > iter_phase[phase]:
         phase += 1
         print(f"ENTERING PHASE {phase}")
@@ -150,12 +152,14 @@ for iter in range(iterations):
 
     if iter % resample_freq == 0:
         print("RESAMPLING PATHS ")
-        del(paths)
-        paths = scene_numba.build_paths_list(Np, Ns)
+        del(cuda_paths)
+        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
 
     # differentiable forward model
-    I_opt, total_grad = scene_numba.render(paths, differentiable=True)
-
+    start = time()
+    I_opt, total_grad = scene_gpu.render(cuda_paths, I_gt)
+    end = time()
+    print(f"rendering took: {end-start}")
 
     if np.isnan(np.linalg.norm(I_opt)):
         print("INF image NORM")
@@ -163,29 +167,27 @@ for iter in range(iterations):
         volume.set_beta_cloud(beta_opt)
         tb.writer.add_text("log", f"error {iter}: img_norm is nan. last_grad_norm={grad_norm}  \n")
         print("RESAMPLING PATHS ")
-        del (paths)
-        paths = scene_numba.build_paths_list(Np, Ns)
+        del (cuda_paths)
+        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
         continue
+
     elif np.isnan(np.linalg.norm(total_grad)):
         print("INF grad NORM")
         beta_opt = last_beta
         volume.set_beta_cloud(beta_opt)
         tb.writer.add_text("log",f"error {iter}: grad_norm is nan. last_grad_norm={grad_norm}  \n")
         print("RESAMPLING PATHS ")
-        del (paths)
-        paths = scene_numba.build_paths_list(Np, Ns)
+        del (cuda_paths)
+        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
         continue
 
     dif = (I_opt - I_gt).reshape(1,1,1, N_cams, pixels[0], pixels[1])
 
     # gradient calculation
-    total_grad *= dif
-    total_grad = np.sum(total_grad, axis=(3,4,5)) / N_cams
     total_grad *= cloud_mask
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta
-    last_beta = np.copy(beta_opt)
     beta_opt -= step_size * total_grad
 
     #thresholding beta
