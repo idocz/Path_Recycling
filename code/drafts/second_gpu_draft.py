@@ -60,7 +60,9 @@ def render_cuda(all_lengths_inds, all_lengths, all_ISs_mat, all_scatter_tensor,\
         prod = 1
         for seg in range(N_seg):
             prod *= (w0_cloud * (betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air)
+
             for cam_j in range(N_cams):
+                print(ISs_mat[cam_j, seg] )
                 path_contrib[cam_j, seg] = ISs_mat[cam_j, seg] * math.exp(-path_contrib[cam_j, seg]) * prod
                 pixel = camera_pixels[:, cam_j, seg]
                 cuda.atomic.add(I_total, (cam_j,pixel[0], pixel[1]), path_contrib[cam_j, seg])
