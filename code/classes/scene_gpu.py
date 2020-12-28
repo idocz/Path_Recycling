@@ -180,7 +180,7 @@ class SceneGPU(object):
 
 
 
-    def render(self, cuda_paths, I_gt):
+    def render(self, cuda_paths, I_gt=None):
         # east declerations
         Np = cuda_paths.Np
         N_cams = len(self.cameras)
@@ -204,8 +204,9 @@ class SceneGPU(object):
         self.render_cuda[blockspergrid, threadsperblock](*args, self.dbetas, beta_air, w0_cloud, w0_air, self.dI_total)
         I_total = self.dI_total.copy_to_host()
         I_total /= Np
+        if I_gt is None:
+            return I_total
         I_dif = (I_total - I_gt).astype(np.float32)
-
         self.dI_total.copy_to_device(I_dif)
         self.render_differentiable_cuda[blockspergrid, threadsperblock](*args, self.dbetas, beta_air, w0_cloud, w0_air,
                                                                         self.dI_total, self.dtotal_grad)
