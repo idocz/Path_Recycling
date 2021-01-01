@@ -56,7 +56,7 @@ class Visual_wrapper(object):
         for i in range(N_cams):
             ax = plt.subplot(N_ax, N_ax, i + 1)
             ax.set_title(f"camera {i}")
-            ax.imshow(I_total[i].T, cmap="gray", vmin=0, vmax=max_val[i])
+            ax.imshow(I_total[i].T, cmap="gray")#, vmin=0, vmax=max_val[i])
         plt.suptitle(title)
 
 

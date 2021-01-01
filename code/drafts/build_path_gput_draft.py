@@ -2,40 +2,37 @@ from numba import cuda
 import numpy as np
 import math
 from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32
-
 #### SCENE FUNCTIONS ####
+
+cuda.select_device(0)
+
 
 @cuda.jit()
 def render_cuda(all_lengths_inds, all_lengths, all_ISs_mat, all_scatter_tensor, \
                 all_camera_pixels, scatter_sizes, voxel_inds, betas, beta_air, w0_cloud, w0_air, I_total):
     tid = cuda.grid(1)
     if tid < voxel_inds.shape[0] - 1:
-    # if tid == 0:
+        # if tid == 0:
         # reading thread indices
         scatter_start = tid * Ns
-        scatter_end = tid * (Ns + 1)
+        scatter_end = (tid + 1) * Ns
         voxel_start = voxel_inds[tid]
         voxel_end = voxel_inds[tid + 1]
         # reading thread data
         length_inds = all_lengths_inds[voxel_start:voxel_end]
         lengths = all_lengths[voxel_start:voxel_end]
         ISs_mat = all_ISs_mat[:, scatter_start:scatter_end]
-        scatter_tensor = all_scatter_tensor[:, scatter_start:scatter_end]
+        si = all_scatter_tensor[:, scatter_start:scatter_end] # scatter_voxels
         camera_pixels = all_camera_pixels[:, :, scatter_start:scatter_end]
 
         # rendering
         N_seg = scatter_sizes[tid]
-        # print("N_seg",N_seg)
-        # print("voxels",lengths.shape[0])
         path_contrib = cuda.local.array(shape=(N_cams, Ns), dtype=np.float32)
-        # optical_lengths = optical_lengths[:,:N_seg]
-
         for row_ind in range(lengths.shape[0]):
 
             i, j, k, cam_ind, seg = length_inds[row_ind]
             if i == 255:
                 break
-            # print(i, j, k, cam_ind, seg)
             L = lengths[row_ind]
             if cam_ind == 255:
                 for cam_j in range(N_cams):
@@ -43,14 +40,11 @@ def render_cuda(all_lengths_inds, all_lengths, all_ISs_mat, all_scatter_tensor, 
                     for seg_j in range(N_seg - seg):
                         path_contrib[cam_j, seg + seg_j] += betas[i, j, k] * L
             else:
-
                 path_contrib[cam_ind, seg] += betas[i, j, k] * L
 
-        si = scatter_tensor
         prod = 1
         for seg in range(N_seg):
             prod *= (w0_cloud * (betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air)
-            # print(betas[si[0, seg], si[1, seg], si[2, seg]])
             for cam_j in range(N_cams):
                 pc = ISs_mat[cam_j, seg] * math.exp(-path_contrib[cam_j, seg]) * prod
                 pixel = camera_pixels[:, cam_j, seg]
@@ -63,7 +57,6 @@ def calculate_paths_matrix(Np, Ns, betas, bbox, bbox_size, voxel_size, N_cams, t
     tid = cuda.grid(1)
     if tid < Np and scatter_sizes[tid] != 0:
         N_seg = scatter_sizes[tid]
-        # print(N_seg," hey")
         scatter_ind = tid * Ns
         voxel_ind = voxel_inds[tid]
         grid_shape = betas.shape
@@ -82,18 +75,14 @@ def calculate_paths_matrix(Np, Ns, betas, bbox, bbox_size, voxel_size, N_cams, t
         get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
         for seg in range(N_seg):
             seg_ind = seg + scatter_ind
-            # print(seg_ind, "seg_inds")
             assign_3d(next_point, scatter_points[:, seg_ind])
-            # print2_3d(current_point, next_point)
             ###########################################################
             ############## voxel_fixed traversal_algorithm_save #############
             current_length = 0
             distance = distance_and_direction(current_point, next_point, direction)
             while True:
-
                 length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
                 current_length += length
-
                 # update row
                 voxels_mat[voxel_ind, 0] = current_voxel[0] # voxels
                 voxels_mat[voxel_ind, 1] = current_voxel[1] # voxels
@@ -102,7 +91,6 @@ def calculate_paths_matrix(Np, Ns, betas, bbox, bbox_size, voxel_size, N_cams, t
                 voxels_mat[voxel_ind, 4] = seg # segment
                 lengths[voxel_ind] = length
                 voxel_ind += 1
-
 
                 if current_length >= distance - 1e-6:
                     step_back = current_length - distance
@@ -113,11 +101,8 @@ def calculate_paths_matrix(Np, Ns, betas, bbox, bbox_size, voxel_size, N_cams, t
                     break
 
                 assign_3d(current_voxel, next_voxel)
-            # if current_point[0] != next_point[0] or current_point[1] != next_point[1] or current_point[2] != next_point[2]:
-            #     print2_3d(current_point, next_point)
             ######################## voxel_fixed_traversal_algorithm_save ###################
             ###########################################################################
-
 
             for k in range(N_cams):
                 pixel = camera_pixels[:,k,seg_ind]
@@ -125,7 +110,6 @@ def calculate_paths_matrix(Np, Ns, betas, bbox, bbox_size, voxel_size, N_cams, t
                     continue
                 else:
                     assign_3d(camera_voxel, current_voxel)
-                    # print_3d(camera_voxel)
                     assign_3d(camera_point, current_point)
                     distance_to_camera = distance_and_direction(camera_point, ts[k], cam_direction)
                     if is_in_medium[k]:
@@ -153,12 +137,11 @@ def calculate_paths_matrix(Np, Ns, betas, bbox, bbox_size, voxel_size, N_cams, t
                         if current_length >= distance_to_camera - 1e-6:
                             # print("end", camera_voxel[0], camera_voxel[1], camera_voxel[2], current_length)
                             step_back = current_length - distance_to_camera
-                            lengths[voxel_ind-1] =- step_back
+                            lengths[voxel_ind-1] -= step_back
                             camera_point[0] = camera_point[0] - step_back * cam_direction[0]
                             camera_point[1] = camera_point[1] - step_back * cam_direction[1]
                             camera_point[2] = camera_point[2] - step_back * cam_direction[2]
                             break
-
                         assign_3d(camera_voxel, next_voxel)
                     ######################## local estimation save ###################
                     ###########################################################################
@@ -196,11 +179,10 @@ def generate_paths(Np, Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_
         starting_points[1, tid] = current_point[1]
         starting_points[2, tid] = current_point[2]
         get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
-        # print(current_voxel[0], current_voxel[1], current_voxel[2], current_point[0], current_point[1],
-        #       current_point[2])
         total_voxels_size = 0
-        # print_3d(current_point)
+        IS = 1
         for seg in range(Ns):
+            temp_voxels_count = 0
             seg_ind = seg + start_ind
             p = xoroshiro128p_uniform_float32(rng_states, tid)
             tau_rand = -math.log(1 - p)
@@ -209,17 +191,15 @@ def generate_paths(Np, Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_
             current_tau = 0.0
             beta = 0
             while True:
-                # print_3d(current_voxel)
                 if  current_voxel[0] >= grid_shape[0] or current_voxel[1] == 255 or current_voxel[1] >= grid_shape[1] \
                         or current_voxel[2] >= grid_shape[2]:
 
                     in_medium = False
                     break
-                # print2_3d(current_point, current_voxel)
                 beta = betas[current_voxel[0], current_voxel[1], current_voxel[2]]
                 length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
                 current_tau += length * beta
-                total_voxels_size += 1
+                temp_voxels_count += 1
 
                 if current_tau >= tau_rand:
                     step_back = (current_tau - tau_rand) / beta
@@ -228,14 +208,13 @@ def generate_paths(Np, Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_
                     current_point[2] = current_point[2] - step_back * direction[2]
                     in_medium = True
                     break
-                # print2_3d(current_voxel, next_voxel)
                 assign_3d(current_voxel, next_voxel)
 
             ######################## voxel_traversal_algorithm_save ###################
             ###########################################################################
             if in_medium == False:
                 break
-
+            total_voxels_size += temp_voxels_count
             # keeping track of scatter points
             scatter_points[0,seg_ind] = current_point[0]
             scatter_points[1,seg_ind] = current_point[1]
@@ -244,7 +223,7 @@ def generate_paths(Np, Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_
             scatter_voxels[1,seg_ind] = current_voxel[1]
             scatter_voxels[2,seg_ind] = current_voxel[2]
             # Scatter IS in main trajectory
-            IS = 1 / (beta * (1 - p))
+            IS *= 1 / (beta * (1 - p))
 
             # calculating ISs_mat and total_voxels_size
 
@@ -270,12 +249,10 @@ def generate_paths(Np, Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_
             sample_direction(direction, g, new_direction, rng_states, tid)
             assign_3d(direction, new_direction)
 
+
         N_seg = seg  + int(in_medium)
         scatter_sizes[tid] = N_seg
         voxel_sizes[tid] = total_voxels_size
-        # cuda.atomic.add(voxel_sizes, (tid,), total_voxels_size)
-
-
 
 
 
@@ -297,8 +274,6 @@ def get_voxel_of_point(point, grid_shape, bbox, bbox_size, res):
         res[2] = grid_shape[2] - 1
     else:
         res[2] = int(((point[2] - bbox[2, 0]) / bbox_size[2]) * grid_shape[2])
-
-
 
 
 
@@ -327,9 +302,9 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
     assign_3d(next_voxel, current_voxel)
     if t_min == t_x:
         next_voxel[0] += inc_x
-    if t_min == t_y:
+    elif t_min == t_y:
         next_voxel[1] += inc_y
-    if t_min == t_z:
+    elif t_min == t_z:
         next_voxel[2] += inc_z
     current_point[0] = current_point[0] + t_min*direction[0]
     current_point[1] = current_point[1] + t_min*direction[1]
@@ -337,8 +312,6 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
     # if t_min < 0:
     #     print("bug:",t_min)
     return abs(t_min)
-
-
 
 
 @cuda.jit(device=True)
@@ -386,7 +359,7 @@ def estimate_voxels_size(voxel_a, voxel_b):
     else:
         res += voxel_b[2] - voxel_a[2]
 
-    return res
+    return res + 1
 
 
 #### CAMERA FUNCTIONS ####
@@ -398,7 +371,7 @@ def project_point(point, P, pixels_shape, res):
     if x < 0 or x > pixels_shape[0]:
         x = 255
     if y < 0 or y > pixels_shape[1]:
-        y = -1
+        y = 255
     res[0] = np.uint8(x)
     res[1] = np.uint8(y)
     return res
@@ -518,19 +491,38 @@ from utils import *
 from classes.path import *
 import math
 from time import time
-checkpoint_id = "1612-1307-25_iter2755"
-load_iter = 3950
+from classes.camera import *
+checkpoint_id = "2212-1250-03"
 beta_gt = loadmat(join("data", "rico.mat"))["beta"]
 cp = pickle.load(open(join("checkpoints",checkpoint_id,"data",f"checkpoint_loader"), "rb" ))
 print("Loading the following Scence:")
 print(cp)
-scene = cp.scene
+scene = cp.recreate_scene()
 scene.volume.set_beta_cloud(beta_gt)
 
 Ns = 15
+bbox = scene.volume.grid.bbox
 N_cams = 5
-pixels = [55,55]
 
+focal_length = 60e-3
+sensor_size = np.array((40e-3, 40e-3))
+ps = 128
+pixels = np.array((ps, ps))
+
+N_cams = 5
+cameras = []
+volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
+R = 1.5 * 1.04
+for cam_ind in range(N_cams):
+    phi = 0
+    theta = (-(N_cams // 2) + cam_ind) * 40
+    theta_rad = theta * (np.pi / 180)
+    t = R * theta_phi_to_direction(theta_rad, phi) + volume_center
+    euler_angles = np.array((180, theta, 0))
+    camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
+    cameras.append(camera)
+
+scene.cameras = cameras
 beta_air = scene.volume.beta_air
 w0_cloud = scene.volume.w0_cloud
 w0_air = scene.volume.w0_air
@@ -541,7 +533,7 @@ Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in scene.cameras], axis=0)
 sun_direction = scene.sun_direction
 sun_direction[np.abs(sun_direction)<1e-6] = 0
 print(sun_direction)
-Np = int(1e4)
+Np = int(7e6)
 # inputs
 dbetas = cuda.to_device(scene.volume.betas)
 dbbox = cuda.to_device(scene.volume.grid.bbox)
@@ -552,108 +544,124 @@ dpixels_shape = cuda.to_device(scene.cameras[0].pixels)
 dts = cuda.to_device(ts)
 dPs = cuda.to_device(Ps)
 dis_in_medium = cuda.to_device(scene.is_camera_in_medium)
-# outputs
-dstarting_points = cuda.to_device(np.zeros((3, Np), dtype=np.float32))
-dscatter_points = cuda.to_device(np.zeros((3,Ns*Np), dtype=np.float32))
-dscatter_voxels = cuda.to_device(np.zeros((3,Ns*Np), dtype=np.uint8))
-dcamera_pixels = cuda.to_device(np.zeros((2,N_cams,Ns*Np), dtype=np.uint8))
-dISs_mat = cuda.to_device(np.zeros((N_cams,Ns*Np), dtype=np.float32))
-dscatter_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint8))
-dvoxel_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint32))
 
-# cuda parameters
-threadsperblock = 256
-blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
-# seed = np.random.randint(1, int(1e10))
-seed = 12
-rng_states = create_xoroshiro128p_states(threadsperblock * blockspergrid, seed=seed)
+for i in range(1):
+    start = time()
+    # outputs
+    dstarting_points = cuda.to_device(np.zeros((3, Np), dtype=np.float32))
+    dscatter_points = cuda.to_device(np.zeros((3,Ns*Np), dtype=np.float32))
+    dscatter_voxels = cuda.to_device(np.zeros((3,Ns*Np), dtype=np.uint8))
+    dcamera_pixels = cuda.to_device(np.zeros((2,N_cams,Ns*Np), dtype=np.uint8))
+    dISs_mat = cuda.to_device(np.zeros((N_cams,Ns*Np), dtype=np.float32))
+    dscatter_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint8))
+    dvoxel_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint32))
 
-start = time()
-# generating paths
-generate_paths[blockspergrid, threadsperblock](Np, Ns, dbetas, dbbox, dbbox_size, dvoxel_size, dsun_direction, N_cams,
-                                              dpixels_shape, dts, dPs, dis_in_medium, g, dscatter_voxels, dstarting_points,
-                                             dscatter_points, dcamera_pixels, dISs_mat, dscatter_sizes, dvoxel_sizes,
-                                               rng_states)
+    # cuda parameters
+    threadsperblock = 256
+    blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
+    seed = np.random.randint(1, int(1e10))
+    # seed = 12
+    rng_states = create_xoroshiro128p_states(threadsperblock * blockspergrid, seed=seed)
 
-
-
-cuda.synchronize()
-end = time()
-print(end-start)
-
-scatter_points = dscatter_points.copy_to_host()
-camera_pixels = dcamera_pixels.copy_to_host()
-ISs_mat = dISs_mat.copy_to_host()
-scatter_sizes = dscatter_sizes.copy_to_host()
-voxel_sizes = dvoxel_sizes.copy_to_host()
-voxel_inds = np.concatenate([np.array([0]), voxel_sizes])
-voxel_inds = np.cumsum(voxel_inds)
-print(voxel_inds[-5:])
-print(voxel_inds[:5])
-total_num_of_voxels = np.sum(voxel_sizes)
+    start = time()
+    # generating paths
+    generate_paths[blockspergrid, threadsperblock](Np, Ns, dbetas, dbbox, dbbox_size, dvoxel_size, dsun_direction, N_cams,
+                                                  dpixels_shape, dts, dPs, dis_in_medium, g, dscatter_voxels, dstarting_points,
+                                                 dscatter_points, dcamera_pixels, dISs_mat, dscatter_sizes, dvoxel_sizes,
+                                                   rng_states)
 
 
-dvoxel_inds = cuda.to_device(voxel_inds)
-dvoxels_mat = cuda.to_device(np.ones((total_num_of_voxels,5), dtype=np.uint8)*255)
-dlengths = cuda.to_device(np.zeros(total_num_of_voxels, dtype=np.float32))
-print("calculate_paths_matrix")
-calculate_paths_matrix[blockspergrid, threadsperblock](Np, Ns, dbetas, dbbox, dbbox_size, dvoxel_size, N_cams, ts,
-                                                      dis_in_medium, dstarting_points, dscatter_points,dscatter_sizes, dvoxel_inds,
-                                                       dcamera_pixels, dvoxels_mat, dlengths)
 
-cuda.synchronize()
-voxels_mat = dvoxels_mat.copy_to_host()
-lengths = dlengths.copy_to_host()
+    cuda.synchronize()
+    end = time()
+    print(end-start)
+
+    scatter_points = dscatter_points.copy_to_host()
+    camera_pixels = dcamera_pixels.copy_to_host()
+    ISs_mat = dISs_mat.copy_to_host()
+    scatter_sizes = dscatter_sizes.copy_to_host()
+    voxel_sizes = dvoxel_sizes.copy_to_host()
+    voxel_inds = np.concatenate([np.array([0]), voxel_sizes])
+    voxel_inds = np.cumsum(voxel_inds)
+    print(voxel_inds[-5:])
+    print(voxel_inds[:5])
+    total_num_of_voxels = np.sum(voxel_sizes)
 
 
-dI_total = cuda.to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=np.float32))
+    dvoxel_inds = cuda.to_device(voxel_inds)
+    dvoxels_mat = cuda.to_device(np.ones((total_num_of_voxels,5), dtype=np.uint8)*255)
+    dlengths = cuda.to_device(np.zeros(total_num_of_voxels, dtype=np.float32))
+    print("calculate_paths_matrix")
+    calculate_paths_matrix[blockspergrid, threadsperblock](Np, Ns, dbetas, dbbox, dbbox_size, dvoxel_size, N_cams, ts,
+                                                          dis_in_medium, dstarting_points, dscatter_points,dscatter_sizes, dvoxel_inds,
+                                                           dcamera_pixels, dvoxels_mat, dlengths)
 
-print("render_cuda")
-render_cuda[blockspergrid, threadsperblock](dvoxels_mat, dlengths, dISs_mat, dscatter_voxels,\
-               dcamera_pixels, dscatter_sizes, dvoxel_inds, dbetas, beta_air, w0_cloud, w0_air, dI_total)
+    cuda.synchronize()
+    voxels_mat = dvoxels_mat.copy_to_host()
+    lengths = dlengths.copy_to_host()
+    end = time()
+    print(f"{i} took: {end-start} ")
+
+
+    dI_total = cuda.to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=np.float32))
+
+    print("render_cuda")
+    render_cuda[blockspergrid, threadsperblock](dvoxels_mat, dlengths, dISs_mat, dscatter_voxels,\
+                   dcamera_pixels, dscatter_sizes, dvoxel_inds, dbetas, beta_air, w0_cloud, w0_air, dI_total)
 
 
 
 cuda.synchronize()
 I_total = dI_total.copy_to_host()
 I_total /= Np
-print(I_total.max())
-plt.imshow(I_total[0], cmap="gray")
+plt.imshow(I_total[1], cmap="gray")
+plt.show()
+
+paths = scene.build_paths_list(Np, Ns)
+I_total_cpu = scene.render(paths)
+I_gt = np.load(join("checkpoints", "2212-1250-03", "data", "gt.npz"))["images"]
+print(f"max:{I_total.max()}, {I_gt.max()}")
+abs_im = np.abs(I_total - I_gt)
+
+
+print("I_gt vs I_total")
+
+# plt.imshow(abs_im[0], cmap="gray")
+# plt.show()
+
+res = abs_im.mean() / np.abs(I_gt).mean()
+print(res.mean())
+print(res.max())
+print(res.min())
+
+
+print("I_gt vs I_total_cpu")
+abs_im = np.abs(I_total_cpu - I_gt)
+
+# plt.imshow(abs_im[0], cmap="gray")
+# plt.show()
+
+
+res = abs_im.mean() / np.abs(I_gt).mean()
+print(res.mean())
+print(res.max())
+print(res.min())
+
+
+paths = scene.build_paths_list(Np, Ns)
+I_total_cpu2 = scene.render(paths)
+
+
+print("I_total_cpu vs I_total_cpu2")
+abs_im = np.abs(I_total_cpu - I_total_cpu2)
+
+
+
+plt.imshow(abs_im[0], cmap="gray")
 plt.show()
 
 
-# print("outputs")
-# print(voxels_mat[:,5:22])
-# print(lengths.max())
-
-# print(scatter_points[:,:15])
-# print(scatter_sizes[0])
-exit(0)
-# # outputs
-# dscatter_points = cuda.to_device(np.zeros((3,(Ns+1)*Np), dtype=np.float32))
-# dcamera_pixels = cuda.to_device(np.zeros((2,N_cams,Ns*Np), dtype=np.uint8))
-# dISs_mat = cuda.to_device(np.zeros((N_cams,Ns*Np), dtype=np.float32))
-# dscatter_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint8))
-# dvoxel_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint8))
-#
-# start = time()
-# generate_paths[blockspergrid, threadsperblock](Np, Ns, dbetas, dbbox, dbbox_size, dvoxel_size, dsun_direction, N_cams,
-#                                               dpixels_shape, dts, dPs, dis_in_medium, g, dscatter_points, dcamera_pixels,
-#                                               dISs_mat, dscatter_sizes, dvoxel_sizes, rng_states)
-#
-# cuda.synchronize()
-# end = time()
-# print(f"rendering took: {end-start}")
-
-
-# paths = scene.build_paths_list(Np, Ns)
-# scatter_sizes_cpu = [path[2].shape[1] for path in paths if path is not None]
-#
-# plt.figure()
-# plt.hist(scatter_sizes[scatter_sizes!=0], color="red")
-# plt.title("gpu")
-# plt.figure()
-# plt.hist(scatter_sizes_cpu)
-# plt.title("cpu")
-#
-# plt.show()
+res = abs_im.mean() / np.abs(I_total_cpu2).mean()
+print(res.mean())
+print(res.max())
+print(res.min())

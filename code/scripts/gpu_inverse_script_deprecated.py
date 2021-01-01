@@ -2,7 +2,7 @@ import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 from classes.scene import *
-from classes.scene_gpu import *
+from classes.scene_gpu_deprecated import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
@@ -32,8 +32,7 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-beta_cloud *= (127/beta_cloud.max())
+beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
 
 
 print(beta_cloud)
@@ -55,7 +54,7 @@ g = 0.5
 
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 128
+ps = 55
 pixels = np.array((ps, ps))
 
 N_cams = 5
@@ -77,11 +76,11 @@ scene_gpu = SceneGPU(volume, cameras, sun_angles, g)
 visual = Visual_wrapper(scene_gpu)
 
 # Simulation parameters
-Np_gt = int(5e6)
+Np_gt = int(1e5)
 iter_phase = [500, 2000, 3000, np.inf]
-Nps = [int(1e6), int(2e6), int(3e6), int(5e6)]
-resample_freqs = [10, 30, 30, 50]
-step_sizes = [1e11, 1e12, 5e12, 1e13]
+Nps = [int(1e5), int(1e6), int(1e6), int(1e6)]
+resample_freqs = [10, 30, 30, 30]
+step_sizes = [1e10, 1e11, 5e11, 1e12]
 
 phase = 0
 Np = Nps[phase]
@@ -89,12 +88,12 @@ resample_freq = resample_freqs[phase]
 step_size = step_sizes[phase]
 Ns = 15
 iterations = 10000000
-to_mask = True
+
 tensorboard = True
 tensorboard_freq = 5
 beta_max = 160
 
-load_gt = False
+load_gt = True
 if load_gt:
     checkpoint_id = "2212-1250-03"
     I_gt = np.load(join("checkpoints",checkpoint_id,"data","gt.npz"))["images"]
@@ -102,7 +101,7 @@ if load_gt:
     print("I_gt has been loaded")
 else:
     cuda_paths = scene_gpu.build_paths_list(Np_gt, Ns)
-    I_gt = scene_gpu.render(cuda_paths, Np_gt)
+    I_gt = scene_gpu.render(cuda_paths)
 
 
 max_val = np.max(I_gt, axis=(1,2))
@@ -159,7 +158,7 @@ for iter in range(iterations):
 
     # differentiable forward model
     start = time()
-    I_opt, total_grad = scene_gpu.render(cuda_paths, Np, I_gt)
+    I_opt, total_grad = scene_gpu.render(cuda_paths, I_gt)
     end = time()
     print(f"rendering took: {end-start}")
 
@@ -186,8 +185,7 @@ for iter in range(iterations):
     dif = (I_opt - I_gt).reshape(1,1,1, N_cams, pixels[0], pixels[1])
 
     # gradient calculation
-    if to_mask:
-        total_grad *= cloud_mask
+    total_grad *= cloud_mask
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta

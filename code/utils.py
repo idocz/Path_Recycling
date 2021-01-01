@@ -156,12 +156,10 @@ def downsample_3D(beta_cloud, new_shape):
     factor = np.array(new_shape) / np.array(beta_cloud.shape)
     return zoom(beta_cloud, factor)
 
-def cloud_loader(file_name, beta_max):
-    beta_cloud = loadmat(join("data", file_name))["beta"]
-    beta_cloud = remove_zero_planes(beta_cloud)
+def cloud_preproccess(beta_cloud, beta_max):
+    # beta_cloud = remove_zero_planes(beta_cloud)
     # beta_cloud = resize_to_cubic_shape(beta_cloud)
-    beta_cloud = downsample_3D(beta_cloud, (16, 16, 16))
+    # beta_cloud = downsample_3D(beta_cloud, (16, 16, 16))
     beta_cloud[beta_cloud<=0] = 0
-    beta_cloud = (beta_cloud - beta_cloud.min())/(beta_cloud.max()-beta_cloud.min())
-    beta_cloud *= 5
+    beta_cloud *= beta_max / beta_cloud.max()
     return beta_cloud
