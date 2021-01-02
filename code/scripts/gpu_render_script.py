@@ -13,6 +13,7 @@ from scipy.io import loadmat
 from os.path import join
 from numba import cuda
 from utils import *
+from cuda_utils import *
 cuda.select_device(0)
 
 ###################
@@ -24,7 +25,7 @@ edge_y = 0.74
 edge_z = 1.04
 bbox = np.array([[0, edge_x],
                  [0, edge_y],
-                 [0, edge_z]])
+                 [0, edge_z]], dtype=float_precis)
 
 ########################
 # Atmosphere parameters#
@@ -40,6 +41,7 @@ beta_air = 0.1
 
 beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
 cloud_preproccess(beta_cloud, 120)
+beta_cloud = beta_cloud.astype(float_reg)
 print(beta_cloud.shape)
 w0_air = 0.8
 w0_cloud = 0.7
@@ -74,11 +76,12 @@ for cam_ind in range(N_cams):
 Np = int(1e6)
 Ns = 15
 
+volume.set_mask(beta_cloud>0)
 scene = Scene(volume, cameras, sun_angles, phase_function)
 scene_numba = SceneNumba(volume, cameras, sun_angles, g)
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g, Ns)
 
-
+scene_gpu.init_cuda_param(256, Np, seed=None)
 
 gpu_render = True
 numba_render = False
@@ -100,21 +103,19 @@ if gpu_render:
     I_total, _ = scene_gpu.render(cuda_paths, 1000, I_total)
     print("finished compliations")
     del(cuda_paths)
-    start = time()
-    cuda_paths = scene_gpu.build_paths_list(Np, Ns)
-    end = time()
-    print(f"building paths took: {end - start}")
-    I_total = scene_gpu.render(cuda_paths, Np)
-    I_total, _ = scene_gpu.render(cuda_paths, Np, I_total)
-    start = time()
-    I_total, _ = scene_gpu.render(cuda_paths, Np, I_total)
-    print(f" rendering took: {time() - start}")
-    start = time()
-    I_total, _ = scene_gpu.render(cuda_paths, Np, I_total)
-    print(f" rendering took: {time() - start}")
-    max_val = np.max(I_total, axis=(1, 2))
-    # print(I_total)
-    # del(cuda_paths)
+    for i in range(30):
+        start = time()
+        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
+        end = time()
+        print(f"building paths took: {end - start}")
+
+        start = time()
+        I_total = scene_gpu.render(cuda_paths, Np)
+        I_total, grad = scene_gpu.render(cuda_paths, Np, I_total)
+        print(f" rendering took: {time() - start}")
+        print(f"grad_norm:{np.linalg.norm(grad)}")
+        del(cuda_paths)
+
     visual.plot_images(I_total, max_val, f"GPU: maximum scattering={Ns}")
     plt.show()
 

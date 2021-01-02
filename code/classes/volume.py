@@ -14,7 +14,7 @@ class Volume(object):
         self.cloud_mask = mask
 
     def set_beta_cloud(self, beta_cloud):
-        self.beta_cloud = np.copy(beta_cloud)
+        self.beta_cloud = beta_cloud
         self.betas = self.beta_cloud + self.beta_air
 
     def voxel_traversal_algorithm(self, start_point, current_voxel, direction, tau_rand):

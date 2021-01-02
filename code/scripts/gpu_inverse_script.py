@@ -6,6 +6,7 @@ from classes.scene_gpu import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
+from cuda_utils import *
 import matplotlib.pyplot as plt
 from classes.tensorboard_wrapper import TensorBoardWrapper
 import pickle
@@ -32,8 +33,9 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-beta_cloud *= (127/beta_cloud.max())
+beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+beta_cloud = beta_cloud.astype(float_reg)
+# beta_cloud *= (127/beta_cloud.max())
 
 
 print(beta_cloud)
@@ -55,10 +57,10 @@ g = 0.5
 
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 128
+ps = 55
 pixels = np.array((ps, ps))
 
-N_cams = 5
+N_cams = 9
 cameras = []
 volume_center = (bbox[:,1] - bbox[:,0])/2
 R = 1.5 * edge_z
@@ -72,16 +74,14 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 # scene = Scene(volume, cameras, sun_angles, phase_function)
 
-scene_gpu = SceneGPU(volume, cameras, sun_angles, g)
 
-visual = Visual_wrapper(scene_gpu)
 
 # Simulation parameters
 Np_gt = int(5e6)
-iter_phase = [500, 2000, 3000, np.inf]
-Nps = [int(1e6), int(2e6), int(3e6), int(5e6)]
-resample_freqs = [10, 30, 30, 50]
-step_sizes = [1e11, 1e12, 5e12, 1e13]
+iter_phase = [500, 2000, 3000, 10000, np.inf]
+Nps = [int(1e5), int(1e6), int(1e6), int(1e6), int(5e6)]
+resample_freqs = [10, 30, 30, 30, 30]
+step_sizes = [1e10, 1e11, 5e11, 1e12, 1e13]
 
 phase = 0
 Np = Nps[phase]
@@ -91,8 +91,18 @@ Ns = 15
 iterations = 10000000
 to_mask = True
 tensorboard = True
-tensorboard_freq = 5
+tensorboard_freq = 15
 beta_max = 160
+
+threadsperblock = 256
+seed = None
+# Cloud mask (GT for now)
+cloud_mask = beta_cloud > 0
+volume.set_mask(cloud_mask)
+
+scene_gpu = SceneGPU(volume, cameras, sun_angles, g, Ns)
+
+visual = Visual_wrapper(scene_gpu)
 
 load_gt = False
 if load_gt:
@@ -101,18 +111,19 @@ if load_gt:
     cuda_paths = None
     print("I_gt has been loaded")
 else:
+    scene_gpu.init_cuda_param(threadsperblock, Np_gt, seed)
     cuda_paths = scene_gpu.build_paths_list(Np_gt, Ns)
     I_gt = scene_gpu.render(cuda_paths, Np_gt)
+    del(cuda_paths)
+    cuda_paths = None
 
-
+scene_gpu.init_cuda_param(threadsperblock, Np, seed)
 max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, max_val, "GT")
 plt.show()
 
 
-# Cloud mask (GT for now)
-cloud_mask = beta_cloud > 0
-volume.set_mask(cloud_mask)
+
 
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
@@ -123,7 +134,7 @@ if tensorboard:
     print("Checkpoint wrapper has been saved")
 
 # Initialization
-beta_init = np.zeros_like(beta_cloud, dtype=np.float64)
+beta_init = np.zeros_like(beta_cloud)
 volume.set_beta_cloud(beta_init)
 # beta_init[cloud_mask] = np.mean(beta_cloud[cloud_mask])
 beta_opt = np.copy(beta_init)
@@ -132,7 +143,7 @@ last_beta = beta_opt
 min_rel = 2
 grad_norm = None
 for iter in range(iterations):
-    print(f"iter {iter}")
+    print(f"\niter {iter}")
     abs_dist = np.abs(beta_cloud[cloud_mask] - beta_opt[cloud_mask])
     mean_dist = np.mean(abs_dist)
     max_dist = np.max(abs_dist)
@@ -149,45 +160,48 @@ for iter in range(iterations):
         Np = Nps[phase]
         resample_freq = resample_freqs[phase]
         step_size = step_sizes[phase]
+        scene_gpu.init_cuda_param(threadsperblock, Np, seed)
 
 
 
     if iter % resample_freq == 0:
         print("RESAMPLING PATHS ")
+        start = time()
         del(cuda_paths)
         cuda_paths = scene_gpu.build_paths_list(Np, Ns)
-
+        end = time()
+        print(f"resampling took: {end - start}")
     # differentiable forward model
     start = time()
     I_opt, total_grad = scene_gpu.render(cuda_paths, Np, I_gt)
     end = time()
     print(f"rendering took: {end-start}")
+    #
+    # if np.isnan(np.linalg.norm(I_opt)):
+    #     print("INF image NORM")
+    #     beta_opt = last_beta
+    #     volume.set_beta_cloud(beta_opt)
+    #     tb.writer.add_text("log", f"error {iter}: img_norm is nan. last_grad_norm={grad_norm}  \n")
+    #     print("RESAMPLING PATHS ")
+    #     del (cuda_paths)
+    #     cuda_paths = scene_gpu.build_paths_list(Np, Ns)
+    #     continue
 
-    if np.isnan(np.linalg.norm(I_opt)):
-        print("INF image NORM")
-        beta_opt = last_beta
-        volume.set_beta_cloud(beta_opt)
-        tb.writer.add_text("log", f"error {iter}: img_norm is nan. last_grad_norm={grad_norm}  \n")
-        print("RESAMPLING PATHS ")
-        del (cuda_paths)
-        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
-        continue
-
-    elif np.isnan(np.linalg.norm(total_grad)):
-        print("INF grad NORM")
-        beta_opt = last_beta
-        volume.set_beta_cloud(beta_opt)
-        tb.writer.add_text("log",f"error {iter}: grad_norm is nan. last_grad_norm={grad_norm}  \n")
-        print("RESAMPLING PATHS ")
-        del (cuda_paths)
-        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
-        continue
+    # elif np.isnan(np.linalg.norm(total_grad)):
+    #     print("INF grad NORM")
+    #     beta_opt = last_beta
+    #     volume.set_beta_cloud(beta_opt)
+    #     tb.writer.add_text("log",f"error {iter}: grad_norm is nan. last_grad_norm={grad_norm}  \n")
+    #     print("RESAMPLING PATHS ")
+    #     del (cuda_paths)
+    #     cuda_paths = scene_gpu.build_paths_list(Np, Ns)
+    #     continue
 
     dif = (I_opt - I_gt).reshape(1,1,1, N_cams, pixels[0], pixels[1])
 
     # gradient calculation
-    if to_mask:
-        total_grad *= cloud_mask
+    # if to_mask:
+    #     total_grad *= cloud_mask
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta

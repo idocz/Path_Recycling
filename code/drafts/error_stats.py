@@ -2,8 +2,8 @@ import numpy as np
 from os.path import join
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-checkpoint_id = "2212-1250-03"
-iter = 22405
+checkpoint_id = "0101-2125-41"
+iter = 30000
 dir_to_save = join("data","vol3d","betas.mat")
 
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))
