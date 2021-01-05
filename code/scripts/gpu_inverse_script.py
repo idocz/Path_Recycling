@@ -99,11 +99,10 @@ beta_max = 160
 win_size = 100
 # grads_window = np.zeros((win_size, *beta_cloud.shape), dtype=float_reg)
 
-threadsperblock = 256
 seed = None
 # Cloud mask (GT for now)
 cloud_mask = beta_cloud > 0
-volume.set_mask(cloud_mask)
+# volume.set_mask(cloud_mask)
 
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
@@ -116,17 +115,17 @@ if load_gt:
     cuda_paths = None
     print("I_gt has been loaded")
 else:
-    scene_gpu.init_cuda_param(threadsperblock, Np_gt, seed)
-    cuda_paths = scene_gpu.build_paths_list(Np_gt, Ns)
-    I_gt = scene_gpu.render(cuda_paths, Np_gt)
+    scene_gpu.init_cuda_param(Np_gt, seed)
+    cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np_gt, Ns)
+    print(Np_nonan)
+    I_gt = scene_gpu.render(cuda_paths, Np_gt, Np_nonan)
     del(cuda_paths)
     cuda_paths = None
-
-scene_gpu.init_cuda_param(threadsperblock, Np, seed)
 max_val = np.max(I_gt, axis=(1,2))
-# visual.plot_images(I_gt, max_val, "GT")
-# plt.show()
+visual.plot_images(I_gt, max_val, "GT")
+plt.show()
 
+scene_gpu.init_cuda_param(Np, seed)
 alpha = 0.9
 beta1 = 0.9
 beta2 = 0.999
@@ -168,7 +167,7 @@ for iter in range(iterations):
         if non_min_couter >= win_size:
             if Np <= Np_gt and iter > start_iter:
                 Np = int(Np * 1.5)
-                scene_gpu.init_cuda_param(threadsperblock, Np, seed)
+                scene_gpu.init_cuda_param(Np, seed)
                 resample_freq = 30#int(resample_freq * 1.5)
             if Np >= Np_gt:
                 Np = Np_gt
@@ -176,13 +175,12 @@ for iter in range(iterations):
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)
-        cuda_paths = scene_gpu.build_paths_list(Np, Ns)
+        cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np, Ns)
         end = time()
         print(f"resampling took: {end - start}")
     # differentiable forward model
     start = time()
-    I_opt, total_grad = scene_gpu.render(cuda_paths, Np, I_gt)
-    total_grad *= cloud_mask
+    I_opt, total_grad = scene_gpu.render(cuda_paths, Np, Np_nonan, I_gt)
     end = time()
     print(f"rendering took: {end-start}")
 
@@ -193,7 +191,6 @@ for iter in range(iterations):
     # updating beta
     optimizer.step(total_grad)
     beta_opt[beta_opt >= beta_max] = beta_mean
-    volume.beta_cloud[cloud_mask] = beta_mean
     # loss calculation
     loss = 0.5 * np.sum(dif ** 2)
     if loss < min_loss:
