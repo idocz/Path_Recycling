@@ -12,6 +12,7 @@ from classes.tensorboard_wrapper import TensorBoardWrapper
 import pickle
 from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
+from classes.optimizer import *
 cuda.select_device(0)
 ###################
 # Grid parameters #
@@ -43,12 +44,13 @@ print(beta_cloud)
 beta_air = 0.1
 w0_air = 1.0
 w0_cloud = 0.8
+g_cloud = 0.5
+g_air = 0.5
 
 # Declerations
 grid = Grid(bbox, beta_cloud.shape)
 volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
 beta_gt = np.copy(beta_cloud)
-g = 0.5
 # phase_function = (UniformPhaseFunction)
 #######################
 # Cameras declaration #
@@ -77,11 +79,12 @@ for cam_ind in range(N_cams):
 
 
 # Simulation parameters
-Np_gt = int(5e6)
-iter_phase = [500, 2000, 3000, 10000, np.inf]
-Nps = [int(1e5), int(1e6), int(1e6), int(1e6), int(5e6)]
-resample_freqs = [10, 30, 30, 30, 30]
-step_sizes = [1e10, 1e11, 5e11, 1e12, 1e13]
+Np_gt = int(1e6)
+iter_phase = [500, np.inf]#500, 2000, 3000, 4000, 5000, np.inf]
+Nps = [int(1e5), int(1e5)]#, int(1e5), int(1e6), int(1e6), int(2e6), int(5e6)]
+resample_freqs = [30, 30]#, 30, 30, 30, 30, 30]
+# step_sizes = [1e10, 1e11, 5e11, 5e11, 1e12, 5e11]
+step_sizes = [1e9, 1e9]#, 1e9, 1e9, 1e9, 1e9, 1e9]
 
 phase = 0
 Np = Nps[phase]
@@ -93,6 +96,8 @@ to_mask = True
 tensorboard = True
 tensorboard_freq = 15
 beta_max = 160
+win_size = 100
+# grads_window = np.zeros((win_size, *beta_cloud.shape), dtype=float_reg)
 
 threadsperblock = 256
 seed = None
@@ -100,7 +105,7 @@ seed = None
 cloud_mask = beta_cloud > 0
 volume.set_mask(cloud_mask)
 
-scene_gpu = SceneGPU(volume, cameras, sun_angles, g, Ns)
+scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
 visual = Visual_wrapper(scene_gpu)
 
@@ -119,15 +124,18 @@ else:
 
 scene_gpu.init_cuda_param(threadsperblock, Np, seed)
 max_val = np.max(I_gt, axis=(1,2))
-visual.plot_images(I_gt, max_val, "GT")
-plt.show()
+# visual.plot_images(I_gt, max_val, "GT")
+# plt.show()
 
-
-
-
+alpha = 0.9
+beta1 = 0.9
+beta2 = 0.999
+start_iter = 500
+# optimizer = MomentumSGD(volume,step_size, alpha)
+optimizer = ADAM(volume,step_size, beta1, beta2, start_iter)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
-    cp_wrapper = CheckpointWrapper(scene_gpu, Np_gt, Nps, Ns, resample_freqs, step_sizes, iter_phase, iterations,
+    cp_wrapper = CheckpointWrapper(scene_gpu, optimizer, Np_gt, Nps, Ns, resample_freqs, step_sizes, iter_phase, iterations,
                             tensorboard_freq, tb.train_id)
     tb.add_scene_text(str(cp_wrapper))
     pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
@@ -135,36 +143,36 @@ if tensorboard:
 
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
+beta_mean = np.mean(beta_cloud[cloud_mask])
+beta_init[cloud_mask] = beta_mean
 volume.set_beta_cloud(beta_init)
-# beta_init[cloud_mask] = np.mean(beta_cloud[cloud_mask])
-beta_opt = np.copy(beta_init)
-last_beta = beta_opt
+beta_opt = volume.beta_cloud
 
-min_rel = 2
-grad_norm = None
+# grad_norm = None
+cool_down = 0
+non_min_couter = 0
+next_phase = False
+min_loss = 1
 for iter in range(iterations):
     print(f"\niter {iter}")
     abs_dist = np.abs(beta_cloud[cloud_mask] - beta_opt[cloud_mask])
     mean_dist = np.mean(abs_dist)
     max_dist = np.max(abs_dist)
-    rel_dist = np.linalg.norm(beta_opt - beta_cloud)/np.linalg.norm(beta_cloud)
+    rel_dist2 = np.linalg.norm(beta_opt - beta_cloud)/np.linalg.norm(beta_cloud)
+    rel_dist1 = relative_distance(beta_cloud, beta_opt)
 
-    print(f"mean_dist = {mean_dist}, max_dist={max_dist}, rel_dist={rel_dist}")
-    if rel_dist < min_rel:
-        min_rel = rel_dist
-        last_beta = np.copy(beta_opt)
-
-    if iter > iter_phase[phase]:
-        phase += 1
-        print(f"ENTERING PHASE {phase}")
-        Np = Nps[phase]
-        resample_freq = resample_freqs[phase]
-        step_size = step_sizes[phase]
-        scene_gpu.init_cuda_param(threadsperblock, Np, seed)
-
+    print(f"mean_dist = {mean_dist}, max_dist={max_dist}, rel_dist1={rel_dist1}, rel_dist2={rel_dist2}, Np={Np:.2e}, counter={non_min_couter}")
 
 
     if iter % resample_freq == 0:
+        if non_min_couter >= win_size:
+            if Np <= Np_gt and iter > start_iter:
+                Np = int(Np * 1.5)
+                scene_gpu.init_cuda_param(threadsperblock, Np, seed)
+                resample_freq = 30#int(resample_freq * 1.5)
+            if Np >= Np_gt:
+                Np = Np_gt
+
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)
@@ -174,51 +182,30 @@ for iter in range(iterations):
     # differentiable forward model
     start = time()
     I_opt, total_grad = scene_gpu.render(cuda_paths, Np, I_gt)
+    total_grad *= cloud_mask
     end = time()
     print(f"rendering took: {end-start}")
-    #
-    # if np.isnan(np.linalg.norm(I_opt)):
-    #     print("INF image NORM")
-    #     beta_opt = last_beta
-    #     volume.set_beta_cloud(beta_opt)
-    #     tb.writer.add_text("log", f"error {iter}: img_norm is nan. last_grad_norm={grad_norm}  \n")
-    #     print("RESAMPLING PATHS ")
-    #     del (cuda_paths)
-    #     cuda_paths = scene_gpu.build_paths_list(Np, Ns)
-    #     continue
 
-    # elif np.isnan(np.linalg.norm(total_grad)):
-    #     print("INF grad NORM")
-    #     beta_opt = last_beta
-    #     volume.set_beta_cloud(beta_opt)
-    #     tb.writer.add_text("log",f"error {iter}: grad_norm is nan. last_grad_norm={grad_norm}  \n")
-    #     print("RESAMPLING PATHS ")
-    #     del (cuda_paths)
-    #     cuda_paths = scene_gpu.build_paths_list(Np, Ns)
-    #     continue
 
     dif = (I_opt - I_gt).reshape(1,1,1, N_cams, pixels[0], pixels[1])
-
-    # gradient calculation
-    # if to_mask:
-    #     total_grad *= cloud_mask
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta
-    beta_opt -= step_size * total_grad
-
-    #thresholding beta
-    beta_opt[beta_opt<0] = 0
-    beta_opt[beta_opt>beta_max] = beta_max
-    volume.set_beta_cloud(beta_opt)
-
+    optimizer.step(total_grad)
+    beta_opt[beta_opt >= beta_max] = beta_mean
+    volume.beta_cloud[cloud_mask] = beta_mean
     # loss calculation
     loss = 0.5 * np.sum(dif ** 2)
-    print(f"loss = {loss}, grad_norm={grad_norm}")
+    if loss < min_loss:
+        min_loss = loss
+        non_min_couter = 0
+    else:
+        non_min_couter += 1
+    print(f"loss = {loss}, grad_norm={grad_norm}, beta={np.mean(beta_opt)}")
 
     # Writing scalar and images to tensorboard
     if tensorboard and iter % tensorboard_freq == 0:
-        tb.update(beta_opt, I_opt, loss, mean_dist, max_dist, rel_dist, grad_norm, iter)
+        tb.update(beta_opt, I_opt, loss, mean_dist, max_dist, rel_dist1, rel_dist2, grad_norm, iter)
 
 
 

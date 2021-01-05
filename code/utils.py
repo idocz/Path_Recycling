@@ -163,3 +163,6 @@ def cloud_preproccess(beta_cloud, beta_max):
     beta_cloud[beta_cloud<=0] = 0
     beta_cloud *= beta_max / beta_cloud.max()
     return beta_cloud
+
+def relative_distance(A, B):
+    return np.sum(np.abs(A-B)) / np.sum(np.abs(A))

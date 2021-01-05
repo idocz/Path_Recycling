@@ -3,7 +3,6 @@ import math
 import numpy as np
 from numba.cuda.random import xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
 
-sample_uniform = xoroshiro128p_uniform_float32
 float_eff = np.float32
 float_reg = np.float32
 float_precis = np.float64
@@ -160,13 +159,8 @@ def sample_direction(old_direction, g, new_direction, rng_states, tid):
         new_direction[1] = (sin_theta * (old_direction[1] * z_cos_phi + old_direction[0] * sin_phi) / denom) + old_direction[1] * cos_theta
         new_direction[2] = old_direction[2] * cos_theta - denom * sin_theta * cos_phi
 
-    # if abs(new_direction[0]) < 1e-6:
-    #     new_direction[0] = 0
-    # if abs(new_direction[1]) < 1e-6:
-    #     new_direction[1] = 0
-    # if abs(new_direction[2]) < 1e-6:
-    #     new_direction[2] = 0
-    return new_direction
+
+    return cos_theta
 
 
 

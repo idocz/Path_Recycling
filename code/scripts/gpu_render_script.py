@@ -20,12 +20,14 @@ cuda.select_device(0)
 # Grid parameters #
 ###################
 # bounding box
-edge_x = 0.64
-edge_y = 0.74
-edge_z = 1.04
-bbox = np.array([[0, edge_x],
-                 [0, edge_y],
-                 [0, edge_z]], dtype=float_precis)
+# edge_x = 0.64
+# edge_y = 0.74
+# edge_z = 1.04
+
+x_size = 0.02
+y_size = 0.02
+z_size = 0.04
+
 
 ########################
 # Atmosphere parameters#
@@ -39,8 +41,19 @@ sun_angles = np.array([180, 0]) * (np.pi/180)
 # construct betas
 beta_air = 0.1
 
-beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-cloud_preproccess(beta_cloud, 120)
+# beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
+beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
+beta_cloud *= 0.3
+edge_x = x_size * beta_cloud.shape[0]
+edge_y = y_size * beta_cloud.shape[1]
+edge_z = z_size * beta_cloud.shape[2]
+print(edge_x, edge_y, edge_z)
+bbox = np.array([[0, edge_x],
+                 [0, edge_y],
+                 [0, edge_z]], dtype=float_precis)
+
+
+# cloud_preproccess(beta_cloud, 120)
 beta_cloud = beta_cloud.astype(float_reg)
 print(beta_cloud.shape)
 w0_air = 0.8
@@ -50,19 +63,21 @@ grid = Grid(bbox, beta_cloud.shape)
 volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
 # phase_function = UniformPhaseFunction()
 g = 0.5
+g_cloud = 0.5
+g_air = 0.5
 phase_function = HGPhaseFunction(g)
 #######################
 # Cameras declaration #
 #######################
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 128
+ps = 150
 pixels = np.array((ps, ps))
 
-N_cams = 9
+N_cams = 5
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
-R = 1.5 * edge_z
+R = 1.8 * edge_z
 for cam_ind in range(N_cams):
     phi = 0
     theta = (-(N_cams // 2) + cam_ind) * 40
@@ -72,14 +87,14 @@ for cam_ind in range(N_cams):
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
 
-# cameras = [cameras[4], cameras[8]]
-Np = int(1e6)
-Ns = 15
+# cameras = [cameras[1]]
+Np = int(4e6)
+Ns = 10
 
 volume.set_mask(beta_cloud>0)
 scene = Scene(volume, cameras, sun_angles, phase_function)
 scene_numba = SceneNumba(volume, cameras, sun_angles, g)
-scene_gpu = SceneGPU(volume, cameras, sun_angles, g, Ns)
+scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
 scene_gpu.init_cuda_param(256, Np, seed=None)
 
@@ -89,7 +104,7 @@ basic_render = False
 
 visual = Visual_wrapper(scene)
 
-fake_cloud = beta_cloud #* (2/3)
+fake_cloud = beta_cloud * 1.0
 # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
 max_val = None
@@ -97,18 +112,20 @@ if gpu_render:
     print("####### gpu renderer ########")
     print("generating paths")
 
-    volume.set_beta_cloud(fake_cloud)
+
     cuda_paths = scene_gpu.build_paths_list(1000, Ns)
+
     I_total = scene_gpu.render(cuda_paths, 1000)
     I_total, _ = scene_gpu.render(cuda_paths, 1000, I_total)
     print("finished compliations")
     del(cuda_paths)
-    for i in range(30):
+    for i in range(1):
         start = time()
+        volume.set_beta_cloud(fake_cloud)
         cuda_paths = scene_gpu.build_paths_list(Np, Ns)
         end = time()
         print(f"building paths took: {end - start}")
-
+        volume.set_beta_cloud(beta_cloud)
         start = time()
         I_total = scene_gpu.render(cuda_paths, Np)
         I_total, grad = scene_gpu.render(cuda_paths, Np, I_total)
