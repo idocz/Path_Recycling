@@ -63,10 +63,7 @@ class SceneGPU(object):
                     row_ind = voxel_start + ind
                     i, j, k, cam_ind, seg = voxels_mat[row_ind]
                     if i == 255:
-                    #     if ind != voxels_size -1:
-                    #         print(i, j, k, cam_ind, seg)
-                    #     else:
-                    #         print("but last")
+                        print(i, j, k, cam_ind, seg)
                         break
                     L = lengths[row_ind]
                     beta = beta_cloud[i, j, k] + beta_air
@@ -115,7 +112,7 @@ class SceneGPU(object):
                     row_ind = voxel_start + ind
                     i, j, k, cam_ind, seg = voxels_mat[row_ind]
                     if i == 255:
-                        # print("bug:", i)
+                        print("bug:", i)
                         break
 
                     L = lengths[row_ind]
@@ -217,12 +214,17 @@ class SceneGPU(object):
                     # print_3d(next_point)
                     assign_3d(next_point, scatter_points[:, seg, tid])
                     get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
-
-
+                    distance = distance_and_direction(current_point, next_point, direction)
+                    if seg > 0:
+                        cos_theta = dot_3d(cam_direction, direction)
+                        scatter_angles[seg_ind-1] = cos_theta
+                        cloud_prob = (beta - beta_air) / beta
+                        air_prob = 1 - cloud_prob
+                        IS *= (cloud_prob * pdf(cos_theta, g_cloud) + air_prob * pdf(cos_theta,
+                                                                                     g_air)) ** -1  # angle pdf
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
 
-                    distance = distance_and_direction(current_point, next_point, direction)
                     path_size = estimate_voxels_size(dest_voxel, current_voxel)
                     reach_dest = False
                     counter = 0
@@ -303,7 +305,7 @@ class SceneGPU(object):
                                     length = travel_to_voxels_border(camera_point, camera_voxel, cam_direction,
                                                                      voxel_size, next_voxel)
                                     # update row
-                                if not is_voxel_valid(camera_voxel, grid_shape):
+                                if not is_voxel_valid(current_voxel, grid_shape):
                                     print("buggggg: cam", camera_voxel[0],camera_voxel[1], camera_voxel[2])
                                 voxels_mat[voxel_ind, 0] = camera_voxel[0]  # voxels
                                 voxels_mat[voxel_ind, 1] = camera_voxel[1]  # voxels
@@ -322,7 +324,7 @@ class SceneGPU(object):
                             if counter != path_size:
                                 print("path_size camera bug:", counter, path_size)
 
-
+                    assign_3d(cam_direction, direction) #using cam direction as temp direction
                 # if total_counter != voxels_size:
                 #     print("total_counter bug",total_counter,voxels_size)
                 # else:
