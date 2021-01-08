@@ -41,7 +41,7 @@ beta_cloud = beta_cloud.astype(float_reg)
 
 print(beta_cloud)
 
-beta_air = 0.1
+beta_air = 0.01
 w0_air = 1.0
 w0_cloud = 0.8
 g_cloud = 0.5
@@ -82,7 +82,7 @@ for cam_ind in range(N_cams):
 Np_gt = int(1e6)
 iter_phase = [500, np.inf]#500, 2000, 3000, 4000, 5000, np.inf]
 Nps = [int(1e5), int(1e5)]#, int(1e5), int(1e6), int(1e6), int(2e6), int(5e6)]
-resample_freqs = [30, 30]#, 30, 30, 30, 30, 30]
+resample_freqs = [10, 30]#, 30, 30, 30, 30, 30]
 # step_sizes = [1e10, 1e11, 5e11, 5e11, 1e12, 5e11]
 step_sizes = [1e9, 1e9]#, 1e9, 1e9, 1e9, 1e9, 1e9]
 
@@ -96,13 +96,14 @@ to_mask = True
 tensorboard = True
 tensorboard_freq = 15
 beta_max = 160
-win_size = 100
+win_size = 300
 # grads_window = np.zeros((win_size, *beta_cloud.shape), dtype=float_reg)
 
 seed = None
 # Cloud mask (GT for now)
 cloud_mask = beta_cloud > 0
-# volume.set_mask(cloud_mask)
+# cloud_mask = beta_cloud >= 0
+volume.set_mask(cloud_mask)
 
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
@@ -148,7 +149,6 @@ volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud
 
 # grad_norm = None
-cool_down = 0
 non_min_couter = 0
 next_phase = False
 min_loss = 1
@@ -168,10 +168,9 @@ for iter in range(iterations):
             if Np <= Np_gt and iter > start_iter:
                 Np = int(Np * 1.5)
                 scene_gpu.init_cuda_param(Np, seed)
-                resample_freq = 30#int(resample_freq * 1.5)
+                resample_freq = 30
             if Np >= Np_gt:
                 Np = Np_gt
-
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)

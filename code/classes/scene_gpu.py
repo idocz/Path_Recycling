@@ -144,7 +144,7 @@ class SceneGPU(object):
                         print("bug:",i)
                     row_ind = ind + voxel_start
                     i, j, k, cam_ind, seg = voxels_mat[row_ind]
-                    if not cloud_mask[i,j,k]:
+                    if not cloud_mask[i,j,k]:# or beta_cloud[i,j,k] < 1e-3:
                         continue
                     L = lengths[row_ind]
                     seg_ind = seg + scatter_start
@@ -153,6 +153,8 @@ class SceneGPU(object):
                             for cam_j in range(N_cams):
                                 pixel = camera_pixels[:, cam_j, seg_ind + pj]
                                 grad_contrib = -L * path_contrib[cam_j, seg + pj] * I_dif[cam_j, pixel[0], pixel[1]]
+                                # if beta_cloud[i,j,k] < 0.5:
+                                #     print(grad_contrib, path_contrib[cam_j, seg + pj])
                                 cuda.atomic.add(total_grad, (i, j, k), grad_contrib)
 
                     else:
@@ -237,7 +239,7 @@ class SceneGPU(object):
                         if not reach_dest:
                             assign_3d(current_voxel, next_voxel)
                     if counter != path_size:
-                        print(counter, path_size)
+                        print("path_size bug:",counter, path_size)
 
 
                     ######################## voxel_fixed_traversal_algorithm_save ###################
@@ -450,11 +452,31 @@ class SceneGPU(object):
              dscatter_voxels, dstarting_points, dscatter_points, dcamera_pixels, dISs_mat, dangles_mat, dscatter_angles,
              dscatter_sizes, dvoxel_sizes, self.rng_states)
 
+
         cuda.synchronize()
         voxel_sizes = dvoxel_sizes.copy_to_host()
         scatter_sizes = dscatter_sizes.copy_to_host()
-        del(dvoxel_sizes)
-        del(dscatter_sizes)
+        # starting_points = dstarting_points.copy_to_host()
+        # scatter_points = dscatter_points.copy_to_host().reshape(3,Ns,Np)
+        # scatter_voxels = dscatter_voxels.copy_to_host().reshape(3,Ns,Np)
+        # camera_pixels = dcamera_pixels.copy_to_host().reshape(2, self.N_cams, Ns, Np)
+        # ISs_mat = dISs_mat.copy_to_host().reshape(self.N_cams, Ns, Np)
+        # angles_mat = dangles_mat.copy_to_host().reshape(self.N_cams, Ns, Np)
+        # scatter_angles = dscatter_angles.copy_to_host().reshape(Ns,Np)
+        #
+        #
+        # del (dvoxel_sizes)
+        # del (dscatter_sizes)
+        # del(dstarting_points)
+        # del(dscatter_points)
+        # del(dscatter_voxels)
+        # del(dcamera_pixels)
+        # del(dISs_mat)
+        # del(dangles_mat)
+        # del(dscatter_angles)
+        # rewriting
+        # starting_points = starting_points[scatter_sizes!=0]
+
 
         Np_nonan = int(np.sum(scatter_sizes!=0))
         self.init_cuda_param(Np_nonan)
@@ -471,8 +493,12 @@ class SceneGPU(object):
         not_none = Np_nonan / Np
         print(f"not none paths={not_none}")
         total_num_of_voxels = np.sum(voxel_sizes)
-        GB = (total_num_of_voxels * 5 + total_num_of_voxels * 4) / 1e9
-        print(f"voxels dataset weights: {GB: .2f} GB")
+        voxels_GB = (total_num_of_voxels * 5 + total_num_of_voxels * eff_size) / 1e9
+        scatters_GB = (3*(Ns+1)*Np*precis_size + 3*Ns*Np + 2*self.N_cams*Ns*Np + 2*self.N_cams*Ns*Np*reg_size
+                      +Ns*Np*reg_size + Np*5)/1e9
+        print(f"voxels dataset weights: {voxels_GB: .2f} GB")
+        print(f"scatters dataset weights: {scatters_GB: .2f} GB")
+        print(f"total dataset weights: {voxels_GB+scatters_GB: .2f} GB")
 
         dscatter_sizes = cuda.to_device(new_scatter_sizes)
         dvoxel_inds = cuda.to_device(voxel_inds)
@@ -520,7 +546,6 @@ class SceneGPU(object):
         cuda.synchronize()
         I_total = self.dI_total.copy_to_host()
         I_total /= Np
-        print(np.linalg.norm(I_total))
         if I_gt is None:
             return I_total
 

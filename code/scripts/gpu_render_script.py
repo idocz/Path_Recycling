@@ -42,8 +42,8 @@ sun_angles = np.array([180, 0]) * (np.pi/180)
 beta_air = 0.1
 
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
-beta_cloud *= 0.3
+beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+# beta_cloud *= 0.3
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
 edge_z = z_size * beta_cloud.shape[2]
@@ -71,10 +71,10 @@ phase_function = HGPhaseFunction(g)
 #######################
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 150
+ps = 128
 pixels = np.array((ps, ps))
 
-N_cams = 5
+N_cams = 9
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
 R = 1.8 * edge_z
@@ -88,7 +88,7 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[1]]
-Np = int(4e6)
+Np = int(5e6)
 Ns = 10
 
 volume.set_mask(beta_cloud>0)
@@ -96,7 +96,7 @@ scene = Scene(volume, cameras, sun_angles, phase_function)
 scene_numba = SceneNumba(volume, cameras, sun_angles, g)
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
-scene_gpu.init_cuda_param(256, Np, seed=None)
+scene_gpu.init_cuda_param(Np, seed=None)
 
 gpu_render = True
 numba_render = False
