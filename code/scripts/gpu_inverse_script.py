@@ -79,7 +79,7 @@ for cam_ind in range(N_cams):
 
 
 # Simulation parameters
-Np_gt = int(1e6)
+Np_gt = int(1e7)
 iter_phase = [500, np.inf]#500, 2000, 3000, 4000, 5000, np.inf]
 Nps = [int(1e5), int(1e5)]#, int(1e5), int(1e6), int(1e6), int(2e6), int(5e6)]
 resample_freqs = [10, 30]#, 30, 30, 30, 30, 30]

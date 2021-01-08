@@ -42,8 +42,9 @@ sun_angles = np.array([180, 0]) * (np.pi/180)
 beta_air = 0.1
 
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
-# beta_cloud *= 0.3
+# beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
+beta_cloud *= 0.2
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
 edge_z = z_size * beta_cloud.shape[2]
@@ -74,7 +75,7 @@ sensor_size = np.array((40e-3, 40e-3))
 ps = 128
 pixels = np.array((ps, ps))
 
-N_cams = 9
+N_cams = 1
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
 R = 1.8 * edge_z
@@ -88,7 +89,7 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[1]]
-Np = int(5e6)
+Np = int(1e7)
 Ns = 10
 
 volume.set_mask(beta_cloud>0)
@@ -114,9 +115,9 @@ if gpu_render:
 
 
     cuda_paths, Np_nonan = scene_gpu.build_paths_list(1000, Ns)
-
+    # exit()
     I_total = scene_gpu.render(cuda_paths, 1000, Np_nonan)
-    I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, I_total)
+    # I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, I_total)
     print("finished compliations")
     del(cuda_paths)
     for i in range(1):
@@ -130,12 +131,12 @@ if gpu_render:
         I_total = scene_gpu.render(cuda_paths, Np, Np_nonan)
         I_total, grad = scene_gpu.render(cuda_paths, Np, Np_nonan, I_total)
         print(f" rendering took: {time() - start}")
-        print(f"grad_norm:{np.linalg.norm(grad)}")
+        # print(f"grad_norm:{np.linalg.norm(grad)}")
         del(cuda_paths)
 
     visual.plot_images(I_total, max_val, f"GPU: maximum scattering={Ns}")
     plt.show()
-
+exit()
 if numba_render:
     print("####### numba renderer ########")
     print("generating paths")
