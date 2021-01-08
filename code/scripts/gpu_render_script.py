@@ -42,8 +42,8 @@ sun_angles = np.array([180, 0]) * (np.pi/180)
 beta_air = 0.1
 
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
-# beta_cloud *= 0.3
+beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
+beta_cloud *= 0.1
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
 edge_z = z_size * beta_cloud.shape[2]
@@ -74,7 +74,7 @@ sensor_size = np.array((40e-3, 40e-3))
 ps = 128
 pixels = np.array((ps, ps))
 
-N_cams = 9
+N_cams = 1
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
 R = 1.8 * edge_z
@@ -88,7 +88,7 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[1]]
-Np = int(5e6)
+Np = int(1e7)
 Ns = 10
 
 volume.set_mask(beta_cloud>0)
