@@ -238,8 +238,8 @@ class SceneGPU(object):
                         current_length += length
                         if not reach_dest:
                             assign_3d(current_voxel, next_voxel)
-                    if counter != path_size:
-                        print("path_size bug:",counter, path_size)
+                    # if counter != path_size:
+                    #     print("path_size bug:",counter, path_size)
 
 
                     ######################## voxel_fixed_traversal_algorithm_save ###################
