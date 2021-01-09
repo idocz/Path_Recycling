@@ -9,6 +9,7 @@ from numba import njit
 from numba import cuda
 from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
 from cuda_utils import *
+from time import time
 threadsperblock = 256
 
 
@@ -474,7 +475,7 @@ class SceneGPU(object):
         del(dscatter_sizes)
         del(dstarting_points)
         del(dscatter_points)
-        print(((scatter_sizes!=0) == (voxel_sizes!=0)).all())
+        start = time()
         active_paths = scatter_sizes != 0
         voxel_sizes = voxel_sizes[active_paths]
         scatter_sizes = scatter_sizes[active_paths]
@@ -488,7 +489,7 @@ class SceneGPU(object):
         voxel_inds = np.cumsum(voxel_inds)
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
         scatter_inds = np.cumsum(scatter_inds)
-
+        print("middle took:",time()-start)
         Np_nonan = int(np.sum(active_paths))
         self.init_cuda_param(Np_nonan)
         threadsperblock = self.threadsperblock
