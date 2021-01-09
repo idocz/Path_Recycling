@@ -96,7 +96,7 @@ scene = Scene(volume, cameras, sun_angles, phase_function)
 scene_numba = SceneNumba(volume, cameras, sun_angles, g)
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
-scene_gpu.init_cuda_param(Np, seed=None)
+scene_gpu.init_cuda_param(Np, init=True)
 
 gpu_render = True
 numba_render = False
