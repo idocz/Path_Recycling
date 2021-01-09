@@ -15,7 +15,7 @@ from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
-
+print("main branch")
 ###################
 # Grid parameters #
 ###################
