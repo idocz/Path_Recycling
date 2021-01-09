@@ -15,6 +15,7 @@ from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
+print("scatter_eff branch")
 
 ###################
 # Grid parameters #
@@ -117,7 +118,7 @@ if gpu_render:
     cuda_paths, Np_nonan = scene_gpu.build_paths_list(1000, Ns)
     # exit()
     I_total = scene_gpu.render(cuda_paths, 1000, Np_nonan)
-    # I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, I_total)
+    I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, I_total)
     print("finished compliations")
     del(cuda_paths)
     for i in range(1):
