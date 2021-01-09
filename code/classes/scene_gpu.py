@@ -467,6 +467,7 @@ class SceneGPU(object):
         cuda.synchronize()
 
 
+        start = time()
         voxel_sizes = dvoxel_sizes.copy_to_host()
         scatter_sizes = dscatter_sizes.copy_to_host()
         starting_points = dstarting_points.copy_to_host()
@@ -475,7 +476,6 @@ class SceneGPU(object):
         del(dscatter_sizes)
         del(dstarting_points)
         del(dscatter_points)
-        start = time()
         active_paths = scatter_sizes != 0
         voxel_sizes = voxel_sizes[active_paths]
         scatter_sizes = scatter_sizes[active_paths]
