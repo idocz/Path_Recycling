@@ -88,7 +88,7 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[1]]
-Np = int(1e6)
+Np = int(1e7)
 Ns = 10
 
 volume.set_mask(beta_cloud>0)

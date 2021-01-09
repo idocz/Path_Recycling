@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="65c1f617-3f96-402d-b8ea-4b4bb5ca525c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/gpu_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/gpu_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -75,6 +73,7 @@
       <workItem from="1610185672472" duration="31000" />
       <workItem from="1610185704225" duration="73000" />
       <workItem from="1610185893006" duration="33000" />
+      <workItem from="1610186687872" duration="303000" />
     </task>
     <servers />
   </component>

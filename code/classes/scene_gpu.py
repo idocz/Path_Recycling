@@ -9,6 +9,7 @@ from numba import njit
 from numba import cuda
 from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
 from cuda_utils import *
+from time import time
 threadsperblock = 256
 
 
@@ -445,7 +446,7 @@ class SceneGPU(object):
         self.init_cuda_param(Np, seed)
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
-
+        start = time()
         self.generate_paths[blockspergrid, threadsperblock]\
             (Np, Ns, self.dbeta_cloud, beta_air,  self.dbbox, self.dbbox_size, self.dvoxel_size,
             self.dsun_direction, self.N_cams, self.dpixels_shape, self.dts, self.dPs, self.dis_in_medium, g_cloud, g_air,
@@ -454,6 +455,7 @@ class SceneGPU(object):
 
 
         cuda.synchronize()
+        print("generate_paths took:",time()-start)
         voxel_sizes = dvoxel_sizes.copy_to_host()
         scatter_sizes = dscatter_sizes.copy_to_host()
         # starting_points = dstarting_points.copy_to_host()
@@ -507,12 +509,14 @@ class SceneGPU(object):
         dlengths = cuda.to_device(np.zeros(total_num_of_voxels, dtype=float_eff))
 
         # adding voxels meta
+        start = time()
         self.calculate_paths_matrix[blockspergrid, threadsperblock]\
             (Ns, self.dbeta_cloud, self.dbbox, self.dbbox_size, self.dvoxel_size, self.N_cams, self.dts,
              self.dis_in_medium, dstarting_points, dscatter_points,  dscatter_sizes, dscatter_inds, dvoxel_inds, dcamera_pixels,
              dvoxels_mat, dlengths)
 
         cuda.synchronize()
+        print("calculate_paths_matrix took:", time() - start)
         del(dscatter_points)
         del(dstarting_points)
         return( dvoxels_mat, dlengths, dISs_mat, dangles_mat, dscatter_angles, dscatter_voxels, dcamera_pixels,\
