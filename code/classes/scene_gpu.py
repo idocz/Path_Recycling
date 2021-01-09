@@ -458,13 +458,14 @@ class SceneGPU(object):
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
 
-
+        start = time()
         self.generate_paths[blockspergrid, threadsperblock]\
             (Np, Ns, self.dbeta_cloud, beta_air,  self.dbbox, self.dbbox_size, self.dvoxel_size,
             self.dsun_direction, self.N_cams, self.dpixels_shape, self.dts, self.dPs, self.dis_in_medium,
              dstarting_points, dscatter_points, dscatter_sizes, dvoxel_sizes, self.rng_states)
 
         cuda.synchronize()
+        print("generate_paths took:", time() - start)
 
 
         start = time()
@@ -489,7 +490,6 @@ class SceneGPU(object):
         voxel_inds = np.cumsum(voxel_inds)
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
         scatter_inds = np.cumsum(scatter_inds)
-        print("middle took:",time()-start)
         Np_nonan = int(np.sum(active_paths))
         self.init_cuda_param(Np_nonan)
         threadsperblock = self.threadsperblock
@@ -515,16 +515,18 @@ class SceneGPU(object):
         dvoxels_mat = cuda.to_device(np.ones((total_num_of_voxels, 5), dtype=np.uint8) * 255)
         dlengths = cuda.to_device(np.zeros(total_num_of_voxels, dtype=float_eff))
 
+        print("middle took:",time()-start)
         # adding voxels meta
+        start = time()
         self.calculate_paths_matrix[blockspergrid, threadsperblock]\
             (Ns, self.dbeta_cloud, beta_air, self.dbbox, self.dbbox_size, self.dvoxel_size, self.N_cams, self.dts,
              self.dis_in_medium, g_cloud, g_air, self.dpixels_shape, dstarting_points, dscatter_points, dscatter_inds,
              dvoxel_inds, dscatter_angles, dangles_mat, dISs_mat, dscatter_voxels, dcamera_pixels, dvoxels_mat, dlengths)
 
 
-        voxels_mat = dvoxels_mat.copy_to_host()
 
         cuda.synchronize()
+        print("calculate_paths_matrix took:", time()-start)
         del(dscatter_points)
         del(dstarting_points)
         return( dvoxels_mat, dlengths, dISs_mat, dangles_mat, dscatter_angles, dscatter_voxels, dcamera_pixels,\
