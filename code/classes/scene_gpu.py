@@ -431,14 +431,12 @@ class SceneGPU(object):
         self.calculate_paths_matrix = calculate_paths_matrix
         self.generate_paths = generate_paths
 
-    def init_cuda_param(self, Np, seed=None):
+    def init_cuda_param(self, Np, init=False):
         self.threadsperblock = threadsperblock
         self.blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
-        if seed is None:
+        if init:
             self.seed = np.random.randint(1, int(1e10))
-        else:
-            self.seed = seed
-        self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
+            self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
 
     def build_paths_list(self, Np, Ns):
         g_cloud = self.g_cloud
