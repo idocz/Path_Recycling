@@ -78,7 +78,8 @@ class RMSProp(object):
 
 
 class ADAM(object):
-    def __init__(self, volume: Volume, step_size, beta1, beta2, start_iter, eps=1e-6):
+    def __init__(self, volume: Volume, step_size, beta1, beta2, start_iter, beta_mean, max_beta, max_update,
+                 eps=1e-6):
         self.volume = volume
         self.step_size = step_size
         self.beta1 = beta1
@@ -86,22 +87,27 @@ class ADAM(object):
         self.eps = eps
         self.start_iter = start_iter
         self.iter = 0
-        self.m = np.zeros_like(volume.beta_cloud)
-        self.v = np.zeros_like(volume.beta_cloud)
+        self.max_beta = max_beta
+        self.max_update = max_update
+        self.beta_mean = beta_mean
+        self.m = np.zeros_like(volume.beta_cloud)[self.volume.cloud_mask]
+        self.v = np.zeros_like(volume.beta_cloud)[self.volume.cloud_mask]
 
     def step(self, grads):
-        self.m = self.beta1 * self.m + (1 - self.beta1) * grads
-        self.v = self.beta2 * self.v + (1 - self.beta2) * (grads**2)
         mask = self.volume.cloud_mask
+        self.m = self.beta1 * self.m + (1 - self.beta1) * grads[mask]
+        self.v = self.beta2 * self.v + (1 - self.beta2) * (grads[mask]**2)
+        m_hat = self.m / (1 - self.beta1**(self.iter+1))
         if self.iter >= self.start_iter:
-            m_hat = self.m / (1 - self.beta1**(self.iter+1))
             v_hat = self.v / (1 - self.beta2 ** (self.iter+1))
-            delta = np.zeros_like(m_hat)
-            delta[mask] = -(self.step_size * m_hat[mask]) / (np.sqrt((v_hat[mask]) + self.eps))
+            delta = -(self.step_size * m_hat) / (1e1*np.sqrt((v_hat) + self.eps))
         else:
-            delta = - self.step_size * grads
-        self.volume.beta_cloud += delta
+            delta = -(self.step_size * m_hat)
+        print("max_delta = ",np.max(delta))
+        # delta[delta>self.max_update] = self.max_update
+        self.volume.beta_cloud[mask] += delta
         self.volume.beta_cloud[self.volume.beta_cloud < 0] = 0
+        self.volume.beta_cloud[self.volume.beta_cloud > self.max_beta] = self.beta_mean
         self.iter += 1
     def restart(self):
         self.iter = 0

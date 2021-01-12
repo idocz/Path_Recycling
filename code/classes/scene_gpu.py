@@ -49,7 +49,7 @@ class SceneGPU(object):
         self.dcloud_mask = cuda.to_device(self.volume.cloud_mask)
         @cuda.jit()
         def render_cuda(voxels_mat, lengths, ISs_mat, angles_mat, scatter_angles, sv, camera_pixels, scatter_inds, voxel_inds, beta_cloud,
-                        beta_air, w0_cloud, w0_air, g_cloud, g_air, I_total): # sv for scatter_voxels
+                        beta_air, w0_cloud, w0_air, g_cloud, g_air, I_total, path_contrib): # sv for scatter_voxels
             tid = cuda.grid(1)
             if tid < voxel_inds.shape[0] - 1:
                 # reading thread indices
@@ -58,7 +58,6 @@ class SceneGPU(object):
                 voxel_start = voxel_inds[tid]
                 voxels_size = voxel_inds[tid+1] - voxel_start
                 # rendering
-                path_contrib = cuda.local.array(shape=(N_cams, Ns), dtype=float_reg)
 
                 for ind in range(voxels_size):
                     row_ind = voxel_start + ind
@@ -66,40 +65,41 @@ class SceneGPU(object):
                     if i == 255:
                         print(i, j, k, cam_ind, seg)
                         break
+                    seg_ind = scatter_start + seg
                     L = lengths[row_ind]
                     beta = beta_cloud[i, j, k] + beta_air
                     if cam_ind == 255:
                         for cam_j in range(N_cams):
                             for seg_j in range(N_seg - seg):
-                                path_contrib[cam_j, seg + seg_j] += beta * L
+                                path_contrib[cam_j, seg_ind + seg_j] += beta * L
                     else:
-                        path_contrib[cam_ind, seg] += beta * L
+                        path_contrib[cam_ind, seg_ind] += beta * L
 
                 prod = 1
                 for seg in range(N_seg):
                     seg_ind = scatter_start + seg
-                    beta = beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]]
-                    cloud_prob = beta / (beta + beta_air)
+                    beta_c = beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]]
+                    cloud_prob = beta_c / (beta_c + beta_air)
                     air_prob = 1 - cloud_prob
-                    prod *= (w0_cloud * beta + w0_air * beta_air)
+                    prod *= (w0_cloud * beta_c + w0_air * beta_air)
                     for cam_j in range(N_cams):
                         angle = angles_mat[cam_j, seg_ind]
                         angle_pdf = cloud_prob*pdf(angle, g_cloud) + air_prob*pdf(angle, g_air)
-                        pc = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg]) * angle_pdf * prod
+                        pc = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg_ind]) * angle_pdf * prod
+                        path_contrib[cam_j, seg_ind] = pc
                         pixel = camera_pixels[:, cam_j, seg_ind]
                         cuda.atomic.add(I_total, (cam_j, pixel[0], pixel[1]), pc)
                     scatter_angle = scatter_angles[seg_ind]
-                    scatter_angle_pdf = cloud_prob*pdf(scatter_angle, g_cloud) + air_prob*pdf(scatter_angle, g_air)
+                    scatter_angle_pdf = (cloud_prob*pdf(scatter_angle, g_cloud) + air_prob*pdf(scatter_angle, g_air)) #/ (beta_c + beta_air)
                     prod *= scatter_angle_pdf
 
 
         @cuda.jit()
-        def render_differentiable_cuda(voxels_mat, lengths, ISs_mat,  angles_mat, scatter_angles, sv,camera_pixels,
-                                       scatter_inds, voxel_inds, beta_cloud, beta_air, w0_cloud, w0_air, g_cloud, g_air,
-                                       I_dif, total_grad, cloud_mask):
+        def render_differentiable_cuda(voxels_mat, lengths, sv, camera_pixels,
+                                       scatter_inds, voxel_inds, beta_cloud, beta_air, w0_cloud, w0_air,
+                                       I_dif, total_grad, cloud_mask, path_contrib):
             tid = cuda.grid(1)
             if tid < voxel_inds.shape[0] - 1:
-
                 # reading thread indices
                 scatter_start = scatter_inds[tid]
                 N_seg = scatter_inds[tid+1] - scatter_start
@@ -107,62 +107,27 @@ class SceneGPU(object):
                 voxels_size = voxel_inds[tid + 1] - voxel_start
 
 
-                path_contrib = cuda.local.array(shape=(N_cams, Ns), dtype=float_reg)
-                # rendering
                 for ind in range(voxels_size):
-                    row_ind = voxel_start + ind
-                    i, j, k, cam_ind, seg = voxels_mat[row_ind]
-                    if i == 255:
-                        print("bug:", i)
-                        break
-
-                    L = lengths[row_ind]
-                    beta = beta_cloud[i,j,k] + beta_air
-                    if cam_ind == 255:
-                        for cam_j in range(N_cams):
-                            for seg_j in range(N_seg - seg):
-                                path_contrib[cam_j, seg + seg_j] += beta * L
-                    else:
-                        path_contrib[cam_ind, seg] += beta * L
-
-                prod = 1
-                for seg in range(N_seg):
-                    seg_ind = scatter_start + seg
-                    beta = beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]]
-                    cloud_prob = beta / (beta + beta_air)
-                    air_prob = 1 - cloud_prob
-                    prod *= (w0_cloud * beta + w0_air * beta_air)
-                    for cam_j in range(N_cams):
-                        angle = angles_mat[cam_j, seg_ind]
-                        angle_pdf = cloud_prob * pdf(angle, g_cloud) + air_prob * pdf(angle, g_air)
-                        path_contrib[cam_j, seg] = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg]) * angle_pdf * prod
-                    scatter_angle = scatter_angles[seg_ind]
-                    scatter_angle_pdf = cloud_prob * pdf(scatter_angle, g_cloud) + air_prob * pdf(scatter_angle, g_air)
-                    prod *= scatter_angle_pdf
-
-
-
-                for ind in range(voxels_size):
-                    if i == 255:
-                        print("bug:",i)
                     row_ind = ind + voxel_start
                     i, j, k, cam_ind, seg = voxels_mat[row_ind]
-                    if not cloud_mask[i,j,k]:# or beta_cloud[i,j,k] < 1e-3:
+                    if i == 255:
+                        print("bug:",i)
+                    if not cloud_mask[i,j,k]:
                         continue
                     L = lengths[row_ind]
                     seg_ind = seg + scatter_start
                     if cam_ind == 255:
-                        for pj in range(Ns - seg):
+                        for pj in range(N_seg - seg):
                             for cam_j in range(N_cams):
                                 pixel = camera_pixels[:, cam_j, seg_ind + pj]
-                                grad_contrib = -L * path_contrib[cam_j, seg + pj] * I_dif[cam_j, pixel[0], pixel[1]]
+                                grad_contrib = -L * path_contrib[cam_j, seg_ind + pj] * I_dif[cam_j, pixel[0], pixel[1]]
                                 # if beta_cloud[i,j,k] < 0.5:
                                 #     print(grad_contrib, path_contrib[cam_j, seg + pj])
                                 cuda.atomic.add(total_grad, (i, j, k), grad_contrib)
 
                     else:
                         pixel = camera_pixels[:, cam_ind, seg_ind]
-                        grad_contrib = -L * path_contrib[cam_ind, seg] * I_dif[cam_ind, pixel[0], pixel[1]]
+                        grad_contrib = -L * path_contrib[cam_ind, seg_ind] * I_dif[cam_ind, pixel[0], pixel[1]]
                         cuda.atomic.add(total_grad, (i, j, k), grad_contrib)
 
 
@@ -171,10 +136,10 @@ class SceneGPU(object):
                     if not cloud_mask[sv[0,seg_ind], sv[1,seg_ind], sv[2, seg_ind]]:
                         continue
                     beta_scatter = w0_cloud * beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]] + w0_air * beta_air
-                    for pj in range(Ns - seg):
+                    for pj in range(N_seg - seg):
                         for cam_ind in range(N_cams):
                             pixel = camera_pixels[:, cam_ind, seg_ind + pj]
-                            grad_contrib = (w0_cloud / beta_scatter) * path_contrib[cam_ind, seg + pj] * \
+                            grad_contrib = (w0_cloud / beta_scatter) * path_contrib[cam_ind, seg_ind + pj] * \
                                            I_dif[cam_ind, pixel[0], pixel[1]]
                             cuda.atomic.add(total_grad, (sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]), grad_contrib)
 
@@ -221,8 +186,8 @@ class SceneGPU(object):
                         scatter_angles[seg_ind-1] = cos_theta
                         cloud_prob = (beta - beta_air) / beta
                         air_prob = 1 - cloud_prob
-                        IS *= (cloud_prob * pdf(cos_theta, g_cloud) + air_prob * pdf(cos_theta,
-                                                                                     g_air)) ** -1  # angle pdf
+                        IS *= (1 / (cloud_prob * pdf(cos_theta, g_cloud) + air_prob * pdf(cos_theta,
+                                                                                     g_air)))  # angle pdf
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
 
@@ -527,6 +492,7 @@ class SceneGPU(object):
         print("calculate_paths_matrix took:", time()-start)
         del(dscatter_points)
         del(dstarting_points)
+        self.total_num_of_scatter = total_num_of_scatter
         return( dvoxels_mat, dlengths, dISs_mat, dangles_mat, dscatter_angles, dscatter_voxels, dcamera_pixels,\
                  dscatter_inds, dvoxel_inds), Np_nonan
 
@@ -547,11 +513,11 @@ class SceneGPU(object):
         blockspergrid = self.blockspergrid
         self.dbeta_cloud.copy_to_device(self.volume.beta_cloud)
         self.dI_total.copy_to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=float_reg))
-
+        dpath_contrib = cuda.to_device(np.zeros((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
 
 
         self.render_cuda[blockspergrid, threadsperblock] \
-            (*cuda_paths, self.dbeta_cloud, beta_air, w0_cloud, w0_air, g_cloud, g_air, self.dI_total)
+            (*cuda_paths, self.dbeta_cloud, beta_air, w0_cloud, w0_air, g_cloud, g_air, self.dI_total, dpath_contrib)
 
         cuda.synchronize()
         I_total = self.dI_total.copy_to_host()
@@ -564,12 +530,15 @@ class SceneGPU(object):
         I_dif = (I_total - I_gt).astype(float_reg)
         # print(f"I_dif={np.linalg.norm(I_dif)}, I_total={np.linalg.norm(I_total)}, I_gt={np.linalg.norm(I_gt)}")
         self.dI_total.copy_to_device(I_dif)
-
+        dvoxels_mat, dlengths, dISs_mat, dangles_mat, dscatter_angles, dscatter_voxels, dcamera_pixels, \
+        dscatter_inds, dvoxel_inds = cuda_paths
+        cuda_paths = dvoxels_mat, dlengths, dscatter_voxels, dcamera_pixels, dscatter_inds, dvoxel_inds
         self.render_differentiable_cuda[blockspergrid, threadsperblock] \
-            (*cuda_paths, self.dbeta_cloud, beta_air, w0_cloud, w0_air, g_cloud, g_air, self.dI_total, self.dtotal_grad,
-             self.dcloud_mask)
+            (*cuda_paths, self.dbeta_cloud, beta_air, w0_cloud, w0_air, self.dI_total, self.dtotal_grad,
+             self.dcloud_mask, dpath_contrib)
 
         cuda.synchronize()
+        del(dpath_contrib)
         total_grad = self.dtotal_grad.copy_to_host()
 
         total_grad /= (Np * N_cams)

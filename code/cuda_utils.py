@@ -4,16 +4,16 @@ import numpy as np
 from numba.cuda.random import xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
 
 float_eff = np.float32
-float_reg = np.float32
+float_reg = np.float64
 float_precis = np.float64
 eff_size = 32 / 8
 reg_size = 32 / 8
 precis_size = 32 / 8
 
 if float_eff == np.float64:
-    float_eff *= 2
+    eff_size *= 2
 if float_reg == np.float64:
-    float_reg *= 2
+    reg_size *= 2
 if float_precis == np.float64:
     sample_uniform = xoroshiro128p_uniform_float64
     precis_size *= 2
