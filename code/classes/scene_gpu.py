@@ -10,6 +10,7 @@ from numba import cuda
 from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
 from cuda_utils import *
 from time import time
+from scipy.ndimage import binary_dilation
 threadsperblock = 256
 
 
@@ -84,13 +85,13 @@ class SceneGPU(object):
                     prod *= (w0_cloud * beta_c + w0_air * beta_air)
                     for cam_j in range(N_cams):
                         angle = angles_mat[cam_j, seg_ind]
-                        angle_pdf = cloud_prob*pdf(angle, g_cloud) + air_prob*pdf(angle, g_air)
+                        angle_pdf = cloud_prob*HG_pdf(angle, g_cloud) + air_prob*HG_pdf(angle, g_air)
                         pc = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg_ind]) * angle_pdf * prod
                         path_contrib[cam_j, seg_ind] = pc
                         pixel = camera_pixels[:, cam_j, seg_ind]
                         cuda.atomic.add(I_total, (cam_j, pixel[0], pixel[1]), pc)
                     scatter_angle = scatter_angles[seg_ind]
-                    scatter_angle_pdf = (cloud_prob*pdf(scatter_angle, g_cloud) + air_prob*pdf(scatter_angle, g_air)) #/ (beta_c + beta_air)
+                    scatter_angle_pdf = (cloud_prob*HG_pdf(scatter_angle, g_cloud) + air_prob*HG_pdf(scatter_angle, g_air)) #/ (beta_c + beta_air)
                     prod *= scatter_angle_pdf
 
 
@@ -135,12 +136,13 @@ class SceneGPU(object):
                     seg_ind = seg + scatter_start
                     if not cloud_mask[sv[0,seg_ind], sv[1,seg_ind], sv[2, seg_ind]]:
                         continue
-                    beta_scatter = w0_cloud * beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]] + w0_air * beta_air
+                    scatter_contrib = 1 / ((beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]] + divide_beta_eps) + (w0_air/w0_cloud) * beta_air)
                     for pj in range(N_seg - seg):
                         for cam_ind in range(N_cams):
                             pixel = camera_pixels[:, cam_ind, seg_ind + pj]
-                            grad_contrib = (w0_cloud / beta_scatter) * path_contrib[cam_ind, seg_ind + pj] * \
-                                           I_dif[cam_ind, pixel[0], pixel[1]]
+                            grad_contrib = scatter_contrib * path_contrib[cam_ind, seg_ind + pj] * I_dif[cam_ind, pixel[0], pixel[1]]
+                            if grad_contrib >= 10:
+                                grad_contrib = 10
                             cuda.atomic.add(total_grad, (sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]), grad_contrib)
 
         @cuda.jit()
@@ -173,7 +175,7 @@ class SceneGPU(object):
 
                 beta = 1.0 # for type decleration
                 IS = 1.0
-
+                total_counter = 0
                 for seg in range(N_seg):
                     seg_ind = seg + scatter_ind
                     # next_point = scatter_points[:, seg_ind]
@@ -186,7 +188,7 @@ class SceneGPU(object):
                         scatter_angles[seg_ind-1] = cos_theta
                         cloud_prob = (beta - beta_air) / beta
                         air_prob = 1 - cloud_prob
-                        IS *= (1 / (cloud_prob * pdf(cos_theta, g_cloud) + air_prob * pdf(cos_theta,
+                        IS *= (1 / (cloud_prob * HG_pdf(cos_theta, g_cloud) + air_prob * HG_pdf(cos_theta,
                                                                                      g_air)))  # angle pdf
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
@@ -194,7 +196,7 @@ class SceneGPU(object):
                     path_size = estimate_voxels_size(dest_voxel, current_voxel)
                     reach_dest = False
                     counter = 0
-                    total_counter = 0
+
                     current_length = 0
                     tau = 0
 
@@ -260,11 +262,11 @@ class SceneGPU(object):
                             counter = 0
                             ###########################################################################
                             ######################## local estimation save ############################
-                            # for pi in range(path_size):
                             reach_dest = False
-                            while not reach_dest:
-
-                                if compare_3d(camera_voxel, dest_voxel):
+                            for pi in range(path_size):
+                            # while not reach_dest:
+                                # if compare_3d(camera_voxel, dest_voxel):
+                                if pi == path_size -1:
                                     length = calc_distance(camera_point, dest)
                                     reach_dest = True
                                 else:
@@ -291,8 +293,8 @@ class SceneGPU(object):
                                 print("path_size camera bug:", counter, path_size)
 
                     assign_3d(cam_direction, direction) #using cam direction as temp direction
-                # if total_counter != voxels_size:
-                #     print("total_counter bug",total_counter,voxels_size)
+                if total_counter != voxels_size:
+                    print("total_counter bug",total_counter,voxels_size)
                 # else:
                 #     print(total_counter, voxels_size)
 
@@ -383,7 +385,7 @@ class SceneGPU(object):
                         g = g_cloud
                     else:
                         g = g_air
-                    sample_direction(direction, g, new_direction, rng_states, tid)
+                    HG_sample_direction(direction, g, new_direction, rng_states, tid)
                     assign_3d(direction, new_direction)
 
                 # voxels and scatter sizes for this path (this is not in a loop)
@@ -543,6 +545,42 @@ class SceneGPU(object):
 
         total_grad /= (Np * N_cams)
         return I_total, total_grad
+
+    def space_curving(self, image_mask, to_print=True):
+        shape = self.volume.grid.shape
+        N_cams = image_mask.shape[0]
+        cloud_mask = np.zeros(shape, dtype=np.bool)
+        point = np.zeros(3, dtype=np.float)
+        voxel_size = self.volume.grid.voxel_size
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                for k in range(shape[2]):
+                    point[0] = voxel_size[0] * (i + 0.5)
+                    point[1] = voxel_size[1] * (j + 0.5)
+                    point[2] = voxel_size[2] * (k + 0.5)
+                    counter = 0
+                    for cam_ind in range(N_cams):
+                        pixel = self.cameras[cam_ind].project_point(point)
+                        if image_mask[cam_ind, pixel[0], pixel[1]]:
+                            counter += 1
+                    if counter >= 7:
+                        cloud_mask[i, j, k] = True
+        cloud_mask = binary_dilation(cloud_mask).astype(np)
+        if to_print:
+            beta_cloud = self.volume.beta_cloud
+            cloud_mask_real = beta_cloud > 0
+            print(f"accuracy:", np.mean(cloud_mask == cloud_mask_real))
+            print(f"fp:", np.mean((cloud_mask == 1) * (cloud_mask_real == 0)))
+            fn = (cloud_mask == 0) * (cloud_mask_real == 1)
+            print(f"fn:", np.mean(fn))
+            fn_exp = (fn * beta_cloud).reshape(-1)
+            print(f"fn_exp mean:", np.mean(fn_exp))
+            print(f"fn_exp max:", np.max(fn_exp))
+            print(f"fn_exp min:", np.min(fn_exp[fn_exp != 0]))
+            print("missed beta:", np.sum(fn_exp) / np.sum(beta_cloud))
+
+        self.volume.set_mask(cloud_mask)
+        self.dcloud_mask.copy_to_device(cloud_mask)
 
     def __str__(self):
         text = ""

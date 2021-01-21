@@ -14,16 +14,7 @@ from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
 from classes.optimizer import *
 cuda.select_device(0)
-###################
-# Grid parameters #
-###################
-# bounding box
-edge_x = 0.64
-edge_y = 0.74
-edge_z = 1.04
-bbox = np.array([[0, edge_x],
-                 [0, edge_y],
-                 [0, edge_z]])
+
 
 ########################
 # Atmosphere parameters#
@@ -35,13 +26,26 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 #####################
 # construct betas
 beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+# beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
 beta_cloud = beta_cloud.astype(float_reg)
 # beta_cloud *= (127/beta_cloud.max())
+# Grid parameters #
+# bounding box
+voxel_size_x = 0.02
+voxel_size_y = 0.02
+voxel_size_z = 0.04
+edge_x = voxel_size_x * beta_cloud.shape[0]
+edge_y = voxel_size_y * beta_cloud.shape[1]
+edge_z = voxel_size_z * beta_cloud.shape[2]
+bbox = np.array([[0, edge_x],
+                 [0, edge_y],
+                 [0, edge_z]])
 
 
-print(beta_cloud)
+print(beta_cloud.shape)
+print(bbox)
 
-beta_air = 0.1
+beta_air = 0.004
 w0_air = 1.0
 w0_cloud = 0.8
 g_cloud = 0.5
@@ -59,7 +63,7 @@ beta_gt = np.copy(beta_cloud)
 
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 55
+ps = 70
 pixels = np.array((ps, ps))
 
 N_cams = 9
@@ -74,17 +78,28 @@ for cam_ind in range(N_cams):
     euler_angles = np.array((180, theta, 0))
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
-# scene = Scene(volume, cameras, sun_angles, phase_function)
-
+# t = R * theta_phi_to_direction(0, 0) + volume_center
+# euler_angles = np.array((180, 0, 0))
+# cameras.append(Camera(t, euler_angles, focal_length, sensor_size, pixels))
+# phis = np.linspace(0, 360, N_cams-1)
+# phis_rad = phis *(np.pi/180)
+# theta = 30
+# theta_rad= theta *(np.pi/180)
+# for k in range(N_cams-1):
+#     t = R * theta_phi_to_direction(theta_rad, phis_rad[k]) + volume_center
+#     euler_angles = np.array((180, theta, phis[k]))
+#     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
+#     cameras.append(camera)
+#
+#
 
 
 # Simulation parameters
 Np_gt = int(3e6)
 
-phase = 0
 Np = int(1e5)
 resample_freq = 10
-step_size = 1e11
+step_size = 1e10
 Ns = 15
 iterations = 10000000
 to_mask = True
@@ -123,14 +138,21 @@ max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, max_val, "GT")
 plt.show()
 
+# mask_thresh = 2e-6
+# img_mask = np.zeros(I_gt.shape, dtype=np.bool)
+# img_mask[I_gt > mask_thresh] = 1
+# scene_gpu.space_curving(img_mask)
+# cloud_mask = scene_gpu.volume.cloud_mask
+
+
 scene_gpu.init_cuda_param(Np)
 alpha = 0.9
 beta1 = 0.9
 beta2 = 0.999
-start_iter = 0
-optimizer = SGD(volume,step_size)
+start_iter = 500
+# optimizer = SGD(volume,step_size)
 # optimizer = MomentumSGD(volume,step_size, alpha)
-beta_mean = np.mean(beta_cloud[cloud_mask])
+beta_mean = np.mean(beta_cloud[volume.cloud_mask])
 optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_mean, beta_max, 1)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
@@ -142,8 +164,8 @@ if tensorboard:
 
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-
-beta_init[cloud_mask] = beta_mean
+beta_init[volume.cloud_mask] = beta_mean
+# beta_init[volume.cloud_mask] = 0
 volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud
 
@@ -167,7 +189,7 @@ for iter in range(iterations):
         if non_min_couter >= win_size:
             if Np <= Np_gt and iter > start_iter:
                 Np = int(Np * 1.5)
-                scene_gpu.init_cuda_param(Np)
+                scene_gpu.init_cuda_param(Np, init=True)
                 resample_freq = 30
                 # step_size = int(1e9)
             if Np >= Np_gt:
@@ -189,11 +211,13 @@ for iter in range(iterations):
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta
-    # optimizer.step(total_grad)
-    beta_opt -= step_size*total_grad
-    beta_opt[beta_opt >= beta_max] = beta_mean
-    beta_opt[beta_opt < 0] = 0
+    # beta_opt -= step_size*total_grad
+    # beta_opt[beta_opt >= beta_max] = beta_mean
+    # beta_opt[beta_opt < 0] = 0
     # loss calculation
+    start = time()
+    optimizer.step(total_grad)
+    print("gradient step took:",time()-start)
     loss = 0.5 * np.sum(dif ** 2)
     if loss < min_loss:
         min_loss = loss

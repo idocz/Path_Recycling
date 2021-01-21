@@ -100,7 +100,7 @@ class ADAM(object):
         m_hat = self.m / (1 - self.beta1**(self.iter+1))
         if self.iter >= self.start_iter:
             v_hat = self.v / (1 - self.beta2 ** (self.iter+1))
-            delta = -(self.step_size * m_hat) / (1e1*np.sqrt((v_hat) + self.eps))
+            delta = -(self.step_size * m_hat) / (np.sqrt((v_hat) + self.eps))
         else:
             delta = -(self.step_size * m_hat)
         print("max_delta = ",np.max(delta))

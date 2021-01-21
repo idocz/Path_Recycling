@@ -9,30 +9,29 @@ class Visual_wrapper(object):
         self.scene = scene
         self.ax = None
 
-    def plot_cloud(self):
+    def plot_medium(self):
         self.fig = plt.figure()
         self.ax = plt.axes(projection='3d')
-        beta_cloud = self.scene.volume.beta_cloud
         grid = self.scene.volume.grid
-        if beta_cloud.max() != beta_cloud.min():
-            beta_norm = (beta_cloud - beta_cloud.min()) / (beta_cloud.max() - beta_cloud.min())
-        else:
-            beta_norm = 0.5 * np.ones_like(beta_cloud)
-        beta_colors = 1 - beta_norm
         # set the colors of each object
-        x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], grid.shape[0] + 1)
-        y = np.linspace(grid.bbox[1,0], grid.bbox[1,1], grid.shape[1] + 1)
+        x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], 1)
+        y = np.linspace(grid.bbox[1,0], grid.bbox[1,1],  1)
         z = np.linspace(grid.bbox[2,0], grid.bbox[2,1], grid.shape[2] + 1)
-        xx, yy, zz = np.meshgrid(x, y, z)
-        colors = cm.gray(beta_colors+0.5)
-        self.ax.voxels(xx, yy, zz, beta_cloud > self.scene.volume.beta_air, alpha=0.7, facecolors=colors, edgecolors='gray')
+        xx, yy, zz = np.meshgrid(y, x, z,)
+
+        medium = np.ones(grid.shape) * 0.5
+        colors = cm.gray(medium)
+        self.ax.voxels(0, 0, 0, medium, alpha=0.7, edgecolors='gray')
 
     def create_grid(self):
         grid = self.scene.volume.grid
+        if self.ax is None:
+            self.fig = plt.figure()
+            self.ax = plt.axes(projection='3d')
         ax = self.ax
-        ticks_x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], grid.shape[0] + 1)
-        ticks_y = np.linspace(grid.bbox[1,0], grid.bbox[1,1], grid.shape[1] + 1)
-        ticks_z = np.linspace(grid.bbox[2,0], grid.bbox[2,1], grid.shape[2] + 1)
+        ticks_x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], grid.shape[0]//3 + 1)
+        ticks_y = np.linspace(grid.bbox[1,0], grid.bbox[1,1], grid.shape[1]//3 + 1)
+        ticks_z = np.linspace(grid.bbox[2,0], grid.bbox[2,1], grid.shape[2]//3 + 1)
         ax.set_xticks(ticks_x)
         ax.set_yticks(ticks_y)
         ax.set_zticks(ticks_z)

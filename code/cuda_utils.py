@@ -9,6 +9,7 @@ float_precis = np.float64
 eff_size = 32 / 8
 reg_size = 32 / 8
 precis_size = 32 / 8
+divide_beta_eps = 3e-1
 
 if float_eff == np.float64:
     eff_size *= 2
@@ -66,15 +67,26 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
     assign_3d(next_voxel, current_voxel)
     if t_min == t_x:
         next_voxel[0] += inc_x
+        current_point[0] = (current_voxel[0] + 1 + voxel_fix_x) * voxel_size[0]
+        current_point[1] = current_point[1] + t_min * direction[1]
+        current_point[2] = current_point[2] + t_min * direction[2]
     elif t_min == t_y:
         next_voxel[1] += inc_y
+        current_point[1] = (current_voxel[1] + 1 + voxel_fix_y) * voxel_size[1]
+        current_point[0] = current_point[0] + t_min * direction[0]
+        current_point[2] = current_point[2] + t_min * direction[2]
+
+
     elif t_min == t_z:
         next_voxel[2] += inc_z
+        current_point[2] = (current_voxel[2] + 1 + voxel_fix_z) * voxel_size[2]
+        current_point[0] = current_point[0] + t_min * direction[0]
+        current_point[1] = current_point[1] + t_min * direction[1]
+
     if t_min < 0:
         print("bugg in t_min", t_min)
-    current_point[0] = current_point[0] + t_min*direction[0]
-    current_point[1] = current_point[1] + t_min*direction[1]
-    current_point[2] = current_point[2] + t_min*direction[2]
+
+
     return t_min
 
 
@@ -142,13 +154,44 @@ def project_point(point, P, pixels_shape, res):
 
 #### PHASE FUNCTION FUNCTIONS ####
 @cuda.jit(device=True)
-def pdf(cos_theta, g):
+def rayleigh_pdf(cos_theta):
+    theta_pdf = (3 * (1 + cos_theta**2))/(16*math.pi)
+    phi_pdf = 1 / (2*np.pi)
+    return theta_pdf * phi_pdf
+
+@cuda.jit(device=True)
+def rayleigh_sample_direction(old_direction, g, new_direction, rng_states, tid):
+    p1 = xoroshiro128p_uniform_float64(rng_states, tid)
+    p2 = xoroshiro128p_uniform_float64(rng_states, tid)
+    u = -(4*p1 - 2 + (4 * (2*p1-1)**2 + 1)**(1/2))**(1/3)
+    cos_theta = (u-1)/u
+    phi = p2 * 2 * math.pi
+    sin_theta = math.sqrt(1 - cos_theta**2)
+    sin_phi = math.sin(phi)
+    cos_phi = math.cos(phi)
+    if abs(old_direction[2]) > 0.99999:#|z| ~ 1
+        z_sign = sign(old_direction[2])
+        new_direction[0] = sin_theta * cos_phi
+        new_direction[1] = z_sign * sin_theta * sin_phi
+        new_direction[2] = z_sign * cos_theta
+    else:
+        denom = math.sqrt(1 - old_direction[2]**2)
+        z_cos_phi = old_direction[2] * cos_phi
+        new_direction[0] = (sin_theta * (old_direction[0] * z_cos_phi - old_direction[1] * sin_phi) / denom) + old_direction[0] * cos_theta
+        new_direction[1] = (sin_theta * (old_direction[1] * z_cos_phi + old_direction[0] * sin_phi) / denom) + old_direction[1] * cos_theta
+        new_direction[2] = old_direction[2] * cos_theta - denom * sin_theta * cos_phi
+
+
+    return cos_theta
+
+@cuda.jit(device=True)
+def HG_pdf(cos_theta, g):
     theta_pdf = 0.5*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
     phi_pdf = 1 / (2*np.pi)
     return theta_pdf * phi_pdf
 
 @cuda.jit(device=True)
-def sample_direction(old_direction, g, new_direction, rng_states, tid):
+def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
     p1 = xoroshiro128p_uniform_float64(rng_states, tid)
     p2 = xoroshiro128p_uniform_float64(rng_states, tid)
     cos_theta = (1 / (2 * g)) * (1 + g**2 - ((1 - g**2)/(1 - g + 2*g*p1))**2)
