@@ -46,8 +46,8 @@ print(beta_cloud.shape)
 print(bbox)
 
 beta_air = 0.004
-w0_air = 1.0
-w0_cloud = 0.8
+w0_air = 1.0 #0.912
+w0_cloud = 0.8 #0.9
 g_cloud = 0.5
 g_air = 0.5
 
@@ -63,7 +63,7 @@ beta_gt = np.copy(beta_cloud)
 
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 70
+ps = 55
 pixels = np.array((ps, ps))
 
 N_cams = 9
@@ -95,18 +95,18 @@ for cam_ind in range(N_cams):
 
 
 # Simulation parameters
-Np_gt = int(3e6)
+Np_gt = int(5e6)
 
 Np = int(1e5)
 resample_freq = 10
-step_size = 1e9
+step_size = 1e8
 Ns = 15
 iterations = 10000000
 to_mask = True
 tensorboard = True
 tensorboard_freq = 15
 beta_max = 160
-win_size = 300
+win_size = 150
 
 start_iter_b = 500
 # grads_window = np.zeros((win_size, *beta_cloud.shape), dtype=float_reg)
@@ -151,8 +151,8 @@ beta1 = 0.9
 beta2 = 0.999
 start_iter = 500
 # optimizer = SGD(volume,step_size)
-# optimizer = MomentumSGD(volume,step_size, alpha)
 beta_mean = np.mean(beta_cloud[volume.cloud_mask])
+# optimizer = MomentumSGD(volume,step_size, alpha, beta_mean, beta_max)
 optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_mean, beta_max, 1)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
@@ -191,7 +191,7 @@ for iter in range(iterations):
                 Np = int(Np * 1.5)
                 scene_gpu.init_cuda_param(Np, init=True)
                 resample_freq = 30
-                # step_size = int(1e9)
+                step_size *= 2
             if Np >= Np_gt:
                 Np = Np_gt
         print("RESAMPLING PATHS ")

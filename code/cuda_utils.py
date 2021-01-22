@@ -9,7 +9,7 @@ float_precis = np.float64
 eff_size = 32 / 8
 reg_size = 32 / 8
 precis_size = 32 / 8
-divide_beta_eps = 3e-1
+divide_beta_eps = 1.25e-1
 
 if float_eff == np.float64:
     eff_size *= 2
@@ -161,8 +161,8 @@ def rayleigh_pdf(cos_theta):
 
 @cuda.jit(device=True)
 def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
-    p1 = xoroshiro128p_uniform_float64(rng_states, tid)
-    p2 = xoroshiro128p_uniform_float64(rng_states, tid)
+    p1 = sample_uniform(rng_states, tid)
+    p2 = sample_uniform(rng_states, tid)
     u = -(2*(2* p1 - 1) + (4 * ((2 * p1 - 1) ** 2) + 1) ** (1/2))**(1/3)
     cos_theta = u - (1/ u)
     phi = p2 * 2 * math.pi
@@ -192,8 +192,8 @@ def HG_pdf(cos_theta, g):
 
 @cuda.jit(device=True)
 def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
-    p1 = xoroshiro128p_uniform_float64(rng_states, tid)
-    p2 = xoroshiro128p_uniform_float64(rng_states, tid)
+    p1 = sample_uniform(rng_states, tid)
+    p2 = sample_uniform(rng_states, tid)
     cos_theta = (1 / (2 * g)) * (1 + g**2 - ((1 - g**2)/(1 - g + 2*g*p1))**2)
     phi = p2 * 2 * math.pi
     sin_theta = math.sqrt(1 - cos_theta**2)
@@ -213,7 +213,6 @@ def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
 
 
     return cos_theta
-
 
 
 #### UTILS FUNCTIONS ###
@@ -250,7 +249,6 @@ def min_3d(x, y, z):
             return y
         else:
             return z
-
 
 
 @cuda.jit(device=True)

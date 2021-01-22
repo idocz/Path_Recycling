@@ -96,7 +96,7 @@ class SceneGPU(object):
 
 
         @cuda.jit()
-        def render_differentiable_cuda(voxels_mat, lengths, sv, camera_pixels,
+        def render_differentiable_cuda(voxels_mat, lengths, ISs_mat, angles_mat, scatter_angles, sv, camera_pixels,
                                        scatter_inds, voxel_inds, beta_cloud, beta_air, w0_cloud, w0_air,
                                        I_dif, total_grad, cloud_mask, path_contrib):
             tid = cuda.grid(1)
@@ -136,13 +136,24 @@ class SceneGPU(object):
                     seg_ind = seg + scatter_start
                     if not cloud_mask[sv[0,seg_ind], sv[1,seg_ind], sv[2, seg_ind]]:
                         continue
-                    scatter_contrib = 1 / ((beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]] + divide_beta_eps) + (w0_air/w0_cloud) * beta_air)
+                    beta_scatter = beta_cloud[sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]] + divide_beta_eps
+                    scatter_contrib = 1 / (beta_scatter + (w0_air/w0_cloud) * beta_air)
+                    scatter_contrib -= 1 / (beta_scatter + beta_air)
+                    le_contrib = scatter_contrib
+                    cos_theta_scatter = scatter_angles[seg_ind]
+                    scatter_contrib += 1/(beta_scatter + (rayleigh_pdf(cos_theta_scatter)/HG_pdf(cos_theta_scatter,g_cloud)) * beta_air )
                     for pj in range(N_seg - seg):
                         for cam_ind in range(N_cams):
+                            if pj == 0:  # Local estimation derivative
+                                cos_theta_le = angles_mat[cam_ind, seg_ind]
+                                seg_contrib = le_contrib + \
+                               (beta_scatter + (rayleigh_pdf(cos_theta_le) / HG_pdf(cos_theta_le, g_cloud)) * beta_air)**(-1)
+                            else:  # scatter derivative
+                                seg_contrib = scatter_contrib
+
+
                             pixel = camera_pixels[:, cam_ind, seg_ind + pj]
-                            grad_contrib = scatter_contrib * path_contrib[cam_ind, seg_ind + pj] * I_dif[cam_ind, pixel[0], pixel[1]]
-                            if grad_contrib >= 10:
-                                grad_contrib = 10
+                            grad_contrib = seg_contrib * path_contrib[cam_ind, seg_ind + pj] * I_dif[cam_ind, pixel[0], pixel[1]]
                             cuda.atomic.add(total_grad, (sv[0, seg_ind], sv[1, seg_ind], sv[2, seg_ind]), grad_contrib)
 
         @cuda.jit()
@@ -531,9 +542,6 @@ class SceneGPU(object):
         I_dif = (I_total - I_gt).astype(float_reg)
         # print(f"I_dif={np.linalg.norm(I_dif)}, I_total={np.linalg.norm(I_total)}, I_gt={np.linalg.norm(I_gt)}")
         self.dI_total.copy_to_device(I_dif)
-        dvoxels_mat, dlengths, dISs_mat, dangles_mat, dscatter_angles, dscatter_voxels, dcamera_pixels, \
-        dscatter_inds, dvoxel_inds = cuda_paths
-        cuda_paths = dvoxels_mat, dlengths, dscatter_voxels, dcamera_pixels, dscatter_inds, dvoxel_inds
         self.render_differentiable_cuda[blockspergrid, threadsperblock] \
             (*cuda_paths, self.dbeta_cloud, beta_air, w0_cloud, w0_air, self.dI_total, self.dtotal_grad,
              self.dcloud_mask, dpath_contrib)

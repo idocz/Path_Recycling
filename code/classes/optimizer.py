@@ -16,16 +16,20 @@ class SGD(object):
 
 
 class MomentumSGD(object):
-    def __init__(self, volume:Volume, step_size, alpha):
+    def __init__(self, volume:Volume, step_size, alpha, beta_mean, beta_max):
         self.volume = volume
         self.step_size = step_size
         self.alpha = alpha
-        self.delta = np.zeros_like(volume.beta_cloud)
+        self.delta = np.zeros_like(volume.beta_cloud[self.volume.cloud_mask])
+        self.beta_mean = beta_mean
+        self.beta_max = beta_max
 
     def step(self, grad):
-        self.delta = self.alpha * self.delta - (1 - self.alpha) * self.step_size * grad
-        self.volume.beta_cloud += self.delta
+        mask = self.volume.cloud_mask
+        self.delta = self.alpha * self.delta - (1 - self.alpha) * self.step_size * grad[mask]
+        self.volume.beta_cloud[mask] += self.delta
         self.volume.beta_cloud[self.volume.beta_cloud<0] = 0
+        self.volume.beta_cloud[self.volume.beta_cloud>self.beta_max] = self.beta_mean
 
     def __repr__(self):
         return f"MSGD: alpha={self.alpha:10.0e}"
@@ -95,8 +99,8 @@ class ADAM(object):
 
     def step(self, grads):
         mask = self.volume.cloud_mask
-        self.m = self.beta1 * self.m + (1 - self.beta1) * grads[mask]
         self.v = self.beta2 * self.v + (1 - self.beta2) * (grads[mask]**2)
+        self.m = self.beta1 * self.m + (1 - self.beta1) * grads[mask]
         m_hat = self.m / (1 - self.beta1**(self.iter+1))
         if self.iter >= self.start_iter:
             v_hat = self.v / (1 - self.beta2 ** (self.iter+1))
