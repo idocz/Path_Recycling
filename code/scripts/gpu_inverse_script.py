@@ -99,7 +99,7 @@ Np_gt = int(3e6)
 
 Np = int(1e5)
 resample_freq = 10
-step_size = 1e10
+step_size = 1e9
 Ns = 15
 iterations = 10000000
 to_mask = True
