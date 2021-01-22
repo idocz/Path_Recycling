@@ -160,11 +160,11 @@ def rayleigh_pdf(cos_theta):
     return theta_pdf * phi_pdf
 
 @cuda.jit(device=True)
-def rayleigh_sample_direction(old_direction, g, new_direction, rng_states, tid):
+def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
     p1 = xoroshiro128p_uniform_float64(rng_states, tid)
     p2 = xoroshiro128p_uniform_float64(rng_states, tid)
-    u = -(4*p1 - 2 + (4 * (2*p1-1)**2 + 1)**(1/2))**(1/3)
-    cos_theta = (u-1)/u
+    u = -(2*(2* p1 - 1) + (4 * ((2 * p1 - 1) ** 2) + 1) ** (1/2))**(1/3)
+    cos_theta = u - (1/ u)
     phi = p2 * 2 * math.pi
     sin_theta = math.sqrt(1 - cos_theta**2)
     sin_phi = math.sin(phi)

@@ -84,14 +84,14 @@ class SceneGPU(object):
                     air_prob = 1 - cloud_prob
                     prod *= (w0_cloud * beta_c + w0_air * beta_air)
                     for cam_j in range(N_cams):
-                        angle = angles_mat[cam_j, seg_ind]
-                        angle_pdf = cloud_prob*HG_pdf(angle, g_cloud) + air_prob*HG_pdf(angle, g_air)
+                        cos_angle = angles_mat[cam_j, seg_ind]
+                        angle_pdf = cloud_prob*HG_pdf(cos_angle, g_cloud) + air_prob*rayleigh_pdf(cos_angle)
                         pc = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg_ind]) * angle_pdf * prod
                         path_contrib[cam_j, seg_ind] = pc
                         pixel = camera_pixels[:, cam_j, seg_ind]
                         cuda.atomic.add(I_total, (cam_j, pixel[0], pixel[1]), pc)
-                    scatter_angle = scatter_angles[seg_ind]
-                    scatter_angle_pdf = (cloud_prob*HG_pdf(scatter_angle, g_cloud) + air_prob*HG_pdf(scatter_angle, g_air)) #/ (beta_c + beta_air)
+                    cos_scatter_angle = scatter_angles[seg_ind]
+                    scatter_angle_pdf = (cloud_prob*HG_pdf(cos_scatter_angle, g_cloud) + air_prob*rayleigh_pdf(cos_scatter_angle)) #/ (beta_c + beta_air)
                     prod *= scatter_angle_pdf
 
 
@@ -382,10 +382,9 @@ class SceneGPU(object):
                     cloud_prob = (beta - beta_air) / beta
                     p = sample_uniform(rng_states, tid)
                     if p <= cloud_prob:
-                        g = g_cloud
+                        HG_sample_direction(direction, g_cloud, new_direction, rng_states, tid)
                     else:
-                        g = g_air
-                    HG_sample_direction(direction, g, new_direction, rng_states, tid)
+                        rayleigh_sample_direction(direction, new_direction, rng_states, tid)
                     assign_3d(direction, new_direction)
 
                 # voxels and scatter sizes for this path (this is not in a loop)
