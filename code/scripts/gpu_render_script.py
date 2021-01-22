@@ -15,7 +15,8 @@ from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
-print("main branch")
+print("scatter_eff branch")
+
 ###################
 # Grid parameters #
 ###################
@@ -42,6 +43,7 @@ sun_angles = np.array([180, 0]) * (np.pi/180)
 beta_air = 0.1
 
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
+# beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
 beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
 beta_cloud *= 0.1
 edge_x = x_size * beta_cloud.shape[0]
@@ -96,8 +98,8 @@ scene = Scene(volume, cameras, sun_angles, phase_function)
 scene_numba = SceneNumba(volume, cameras, sun_angles, g)
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
-scene_gpu.init_cuda_param(Np, init=True)
 
+scene_gpu.init_cuda_param(Np, init=True)
 gpu_render = True
 numba_render = False
 basic_render = False
@@ -113,29 +115,29 @@ if gpu_render:
     print("generating paths")
 
 
-    cuda_paths, Np_nonan = scene_gpu.build_paths_list(1000, Ns)
-
-    I_total = scene_gpu.render(cuda_paths, 1000, Np_nonan)
-    I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, I_total)
+    cuda_paths, Np_nonan, total_scatter_num = scene_gpu.build_paths_list(1000, Ns)
+    # exit()
+    I_total = scene_gpu.render(cuda_paths, 1000, Np_nonan, total_scatter_num)
+    I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, total_scatter_num, I_total)
     print("finished compliations")
     del(cuda_paths)
     for i in range(1):
         start = time()
         volume.set_beta_cloud(fake_cloud)
-        cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np, Ns)
+        cuda_paths, Np_nonan, total_scatter_num = scene_gpu.build_paths_list(Np, Ns)
         end = time()
         print(f"building paths took: {end - start}")
         volume.set_beta_cloud(beta_cloud)
         start = time()
-        I_total = scene_gpu.render(cuda_paths, Np, Np_nonan)
-        I_total, grad = scene_gpu.render(cuda_paths, Np, Np_nonan, I_total)
+        I_total = scene_gpu.render(cuda_paths, Np, Np_nonan,total_scatter_num)
+        I_total, grad = scene_gpu.render(cuda_paths, Np, Np_nonan,total_scatter_num, I_total)
         print(f" rendering took: {time() - start}")
-        print(f"grad_norm:{np.linalg.norm(grad)}")
+        # print(f"grad_norm:{np.linalg.norm(grad)}")
         del(cuda_paths)
 
     visual.plot_images(I_total, max_val, f"GPU: maximum scattering={Ns}")
     plt.show()
-
+exit()
 if numba_render:
     print("####### numba renderer ########")
     print("generating paths")

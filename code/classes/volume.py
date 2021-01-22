@@ -146,3 +146,4 @@ class Volume(object):
         seg_voxels = np.vstack(seg_voxels)
         seg_lengths = np.array(seg_lengths)
         return local_est, seg_voxels, seg_lengths
+

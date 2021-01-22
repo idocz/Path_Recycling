@@ -93,7 +93,7 @@ scene = Scene(volume, cameras, sun_angles, phase_function)
 scene_numba = SceneNumba(volume, cameras, sun_angles, g)
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
 
-scene_gpu.init_cuda_param(256, Np, seed=None)
+scene_gpu.init_cuda_param(Np, seed=None)
 
 gpu_render = True
 numba_render = False
@@ -110,19 +110,19 @@ print("####### gpu renderer ########")
 print("generating paths")
 
 volume.set_beta_cloud(fake_cloud)
-cuda_paths = scene_gpu.build_paths_list(1000, Ns)
-I_total = scene_gpu.render(cuda_paths, 1000)
-I_total, _ = scene_gpu.render(cuda_paths, 1000, I_total)
+cuda_paths, Np_nonan = scene_gpu.build_paths_list(1000, Ns)
+I_total = scene_gpu.render(cuda_paths, 1000, Np_nonan)
+I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, I_total)
 print("finished compliations")
 del(cuda_paths)
 for i in range(1):
     start = time()
-    cuda_paths = scene_gpu.build_paths_list(Np, Ns)
+    cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np, Ns)
     end = time()
     print(f"building paths took: {end - start}")
 
     start = time()
-    I_total_gpu = scene_gpu.render(cuda_paths, Np)
+    I_total_gpu = scene_gpu.render(cuda_paths, Np, Np_nonan)
     # I_total, grad = scene_gpu.render(cuda_paths, Np, I_total)
     print(f" rendering took: {time() - start}")
     # print(f"grad_norm:{np.linalg.norm(grad)}")
