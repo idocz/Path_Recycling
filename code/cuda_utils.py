@@ -10,6 +10,8 @@ eff_size = 32 / 8
 reg_size = 32 / 8
 precis_size = 32 / 8
 divide_beta_eps = 1.25e-1
+# divide_beta_eps = 0
+b = 0.0
 
 if float_eff == np.float64:
     eff_size *= 2
@@ -155,7 +157,7 @@ def project_point(point, P, pixels_shape, res):
 #### PHASE FUNCTION FUNCTIONS ####
 @cuda.jit(device=True)
 def rayleigh_pdf(cos_theta):
-    theta_pdf = (3 * (1 + cos_theta**2))/(16*math.pi)
+    theta_pdf = (3 * (1 + cos_theta**2))/8
     phi_pdf = 1 / (2*np.pi)
     return theta_pdf * phi_pdf
 
@@ -185,6 +187,39 @@ def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
     return cos_theta
 
 @cuda.jit(device=True)
+def HG_pdf_old(cos_theta, g):
+    theta_pdf = 0.5*(b + ((1-b)*(1 - g**2))/(1 + g**2 - 2*g * cos_theta) ** 1.5)
+    phi_pdf = 1 / (2*np.pi)
+    return theta_pdf * phi_pdf
+
+@cuda.jit(device=True)
+def HG_sample_direction_old(old_direction, g, new_direction, rng_states, tid):
+    p1 = sample_uniform(rng_states, tid)
+    p2 = sample_uniform(rng_states, tid)
+    p3 = sample_uniform(rng_states, tid)
+    if p3 <= b:
+        cos_theta = 2*(p1 - 0.5)
+    else:
+        cos_theta = (1 / (2 * g)) * (1 + g**2 - ((1 - g**2)/(1 - g + 2*g*p1))**2)
+    phi = p2 * 2 * math.pi
+    sin_theta = math.sqrt(1 - cos_theta**2)
+    sin_phi = math.sin(phi)
+    cos_phi = math.cos(phi)
+    if abs(old_direction[2]) > 0.99999:#|z| ~ 1
+        z_sign = sign(old_direction[2])
+        new_direction[0] = sin_theta * cos_phi
+        new_direction[1] = z_sign * sin_theta * sin_phi
+        new_direction[2] = z_sign * cos_theta
+    else:
+        denom = math.sqrt(1 - old_direction[2]**2)
+        z_cos_phi = old_direction[2] * cos_phi
+        new_direction[0] = (sin_theta * (old_direction[0] * z_cos_phi - old_direction[1] * sin_phi) / denom) + old_direction[0] * cos_theta
+        new_direction[1] = (sin_theta * (old_direction[1] * z_cos_phi + old_direction[0] * sin_phi) / denom) + old_direction[1] * cos_theta
+        new_direction[2] = old_direction[2] * cos_theta - denom * sin_theta * cos_phi
+    return cos_theta
+
+
+@cuda.jit(device=True)
 def HG_pdf(cos_theta, g):
     theta_pdf = 0.5*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
     phi_pdf = 1 / (2*np.pi)
@@ -210,10 +245,7 @@ def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
         new_direction[0] = (sin_theta * (old_direction[0] * z_cos_phi - old_direction[1] * sin_phi) / denom) + old_direction[0] * cos_theta
         new_direction[1] = (sin_theta * (old_direction[1] * z_cos_phi + old_direction[0] * sin_phi) / denom) + old_direction[1] * cos_theta
         new_direction[2] = old_direction[2] * cos_theta - denom * sin_theta * cos_phi
-
-
     return cos_theta
-
 
 #### UTILS FUNCTIONS ###
 

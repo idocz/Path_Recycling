@@ -387,6 +387,7 @@ class SceneGPU(object):
                                 assign_3d(dest, ts[k])
                             else:
                                 get_intersection_with_borders(current_point, cam_direction, bbox, dest)
+                                get_intersection_with_borders(current_point, cam_direction, bbox, dest)
                             get_voxel_of_point(dest, grid_shape, bbox, bbox_size, camera_voxel)
                             total_voxels_size += estimate_voxels_size(current_voxel, camera_voxel)
                     # sampling new direction

@@ -13,6 +13,7 @@ import pickle
 from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
 from classes.optimizer import *
+from scipy.ndimage import zoom
 cuda.select_device(0)
 
 
@@ -46,8 +47,10 @@ print(beta_cloud.shape)
 print(bbox)
 
 beta_air = 0.004
-w0_air = 1.0 #0.912
-w0_cloud = 0.8 #0.9
+# w0_air = 1.0 #0.912
+w0_air = 0.912
+# w0_cloud = 0.8 #0.9
+w0_cloud = 0.9
 g_cloud = 0.5
 g_air = 0.5
 
@@ -70,6 +73,7 @@ N_cams = 9
 cameras = []
 volume_center = (bbox[:,1] - bbox[:,0])/2
 R = 1.5 * edge_z
+
 for cam_ind in range(N_cams):
     phi = 0
     theta = (-(N_cams//2) + cam_ind) * 40
@@ -83,7 +87,7 @@ for cam_ind in range(N_cams):
 # cameras.append(Camera(t, euler_angles, focal_length, sensor_size, pixels))
 # phis = np.linspace(0, 360, N_cams-1)
 # phis_rad = phis *(np.pi/180)
-# theta = 30
+# theta = 60
 # theta_rad= theta *(np.pi/180)
 # for k in range(N_cams-1):
 #     t = R * theta_phi_to_direction(theta_rad, phis_rad[k]) + volume_center
@@ -99,7 +103,7 @@ Np_gt = int(5e6)
 
 Np = int(1e5)
 resample_freq = 10
-step_size = 1e8
+step_size = 1e9
 Ns = 15
 iterations = 10000000
 to_mask = True
@@ -191,7 +195,7 @@ for iter in range(iterations):
                 Np = int(Np * 1.5)
                 scene_gpu.init_cuda_param(Np, init=True)
                 resample_freq = 30
-                step_size *= 2
+                # step_size *= 2
             if Np >= Np_gt:
                 Np = Np_gt
         print("RESAMPLING PATHS ")

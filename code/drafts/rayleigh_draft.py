@@ -1,22 +1,27 @@
 import numpy as np
 import math
-N = 10
-for i in range(N):
-    p1 = np.random.rand(1)[0]
-    u = -(2*(2* p1 - 1) + (4 * ((2 * p1 - 1) ** 2) + 1) ** (1/2))**(1/3)
+import matplotlib.pyplot as plt
 
-    cos_theta = u - (1/ u)
+def raylie(cos_theta):
+    theta_pdf = (3/8) * (1 + cos_theta**2)
+    return theta_pdf
 
-    temp1 = (-2*(2*p1 -1) + np.sqrt(4*(2*p1-1)**2 + 1))
-    temp2 = (-2*(2*p1 -1) - np.sqrt(4*(2*p1-1)**2 + 1))
-    res = 0
-    if temp1 < 0:
-        res += (-(-temp1)**(1/3))
-    else:
-        res += (temp1**(1/3))
-    if temp2 < 0:
-        res += (-(-temp2)**(1/3))
-    else:
-        res += (temp2**(1/3))
-    # cos_theta = (-2*(2*p1 -1) + np.sqrt(4*(2*p1-1)**2 + 1))**(1/3) + (-2*(2*p1 -1) - np.sqrt(4*(2*p1-1)**2 + 1))**(1/3)
-    print(res, cos_theta)
+N = 100000
+p = np.random.rand(N)
+U = -(2*(2* p - 1) + (4 * ((2 * p - 1) ** 2) + 1) ** (1/2))**(1/3)
+samples = U - (1/ U)
+
+# # samples = np.array(samples)
+plt.hist(samples, density=True, bins=30)
+
+x = np.linspace(-1,1,N)
+y = raylie(x)
+print(np.sum(y*(2/N)))
+
+plt.plot(x,y)
+plt.show()
+
+# thetas = np.linspace(0,2*np.pi)
+# cos_thetas = np.cos(thetas)
+# y = raylie(cos_thetas)
+print(np.sum(y*(2*np.pi/N)))
