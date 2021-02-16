@@ -26,15 +26,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="returned to main">
-      <change afterPath="$PROJECT_DIR$/classes/stages.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/drafts/UNIHG_draft.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/drafts/down_up_sample.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes/scene_basic_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/HG_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/HG_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/rayleigh_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/rayleigh_draft.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/gpu_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/gpu_inverse_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/gpu_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/gpu_render_script.py" afterDir="false" />
     </list>
@@ -73,22 +68,25 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/drafts" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/classes" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\scripts" />
-      <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\classes" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.HG_draft">
+  <component name="RunManager" selected="Python.gpu_render_script">
     <configuration name="HG_draft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/drafts" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -192,7 +190,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="inverse_lbfgs" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="gpu_render_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -205,7 +203,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/inverse_lbfgs.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/gpu_render_script.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -261,19 +259,19 @@
     <list>
       <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.inverse_lbfgs" />
       <item itemvalue="Python.space_curving_draft" />
       <item itemvalue="Python.rayleigh_draft" />
       <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.gpu_render_script" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.gpu_render_script" />
         <item itemvalue="Python.HG_draft" />
         <item itemvalue="Python.error_stats" />
         <item itemvalue="Python.rayleigh_draft" />
         <item itemvalue="Python.space_curving_draft" />
-        <item itemvalue="Python.inverse_lbfgs" />
       </list>
     </recent_temporary>
   </component>
@@ -460,10 +458,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="428" y="154" key="#SSH_Configurations/0.0.1920.1040@0.0.1920.1040" timestamp="1610529499956" />
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1613069814146">
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1613408525284">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613069814146" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613408525283" />
     <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1610123158967">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -484,38 +482,38 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1610446144339" />
-    <state width="1855" height="331" key="GridCell.Tab.0.bottom" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.0.bottom" timestamp="1613469961754">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.0.center" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961754" />
+    <state width="1855" height="331" key="GridCell.Tab.0.center" timestamp="1613469961754">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.0.left" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961754" />
+    <state width="1855" height="331" key="GridCell.Tab.0.left" timestamp="1613469961754">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.0.right" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961754" />
+    <state width="1855" height="331" key="GridCell.Tab.0.right" timestamp="1613469961754">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.1.bottom" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961754" />
+    <state width="1855" height="331" key="GridCell.Tab.1.bottom" timestamp="1613469961755">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.1.center" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961755" />
+    <state width="1855" height="331" key="GridCell.Tab.1.center" timestamp="1613469961755">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.1.left" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961755" />
+    <state width="1855" height="331" key="GridCell.Tab.1.left" timestamp="1613469961754">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
-    <state width="1855" height="331" key="GridCell.Tab.1.right" timestamp="1611262012248">
+    <state width="1855" height="331" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961754" />
+    <state width="1855" height="331" key="GridCell.Tab.1.right" timestamp="1613469961755">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1855" height="331" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1611262012248" />
+    <state width="1855" height="331" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1613469961755" />
     <state x="506" y="165" key="SettingsEditor" timestamp="1610451185815">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -551,22 +549,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>96</line>
+          <line>99</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/scripts/gpu_render_script.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>99</line>
+          <line>102</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>487</line>
+          <line>492</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -575,18 +568,13 @@
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>509</line>
-          <option name="timeStamp" value="23" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/visual.py</url>
           <line>21</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>134</line>
+          <line>137</line>
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -609,6 +597,8 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/code$rayleigh_draft.coverage" NAME="rayleigh_draft Coverage Results" MODIFIED="1611261898589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
+    <SUITE FILE_PATH="coverage/code$gpu_render_script.coverage" NAME="gpu_render_script Coverage Results" MODIFIED="1613408645983" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$space_curving_draft.coverage" NAME="space_curving_draft Coverage Results" MODIFIED="1610613269911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
   </component>

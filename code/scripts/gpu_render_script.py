@@ -33,7 +33,7 @@ z_size = 0.04
 ########################
 # Atmosphere parameters#
 ########################
-sun_angles = np.array([180, 0]) * (np.pi/180)
+sun_angles = np.array([165, 0]) * (np.pi/180)
 
 
 #####################
@@ -70,15 +70,17 @@ phase_function = HGPhaseFunction(g_cloud)
 #######################
 # Cameras declaration #
 #######################
-focal_length = 60e-3
-sensor_size = np.array((40e-3, 40e-3))
+height_factor = 2.5
+
+focal_length = 50e-3
+sensor_size = np.array((40e-3, 40e-3)) / height_factor
 ps = 55
 pixels = np.array((ps, ps))
 
-N_cams = 1
+N_cams = 9
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
-R = 1.5 * edge_z
+R = height_factor * edge_z
 for cam_ind in range(N_cams):
     phi = 0
     theta = (-(N_cams // 2) + cam_ind) * 40
@@ -88,9 +90,9 @@ for cam_ind in range(N_cams):
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
 
-# cameras = [cameras[0]]
+cameras = [cameras[5]]
 Np = int(5e7)
-Ns = 15
+Ns = 10
 
 volume.set_mask(beta_cloud>0)
 scene = Scene(volume, cameras, sun_angles, phase_function)

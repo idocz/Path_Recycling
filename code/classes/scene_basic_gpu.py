@@ -11,7 +11,6 @@ from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform
 from cuda_utils import *
 from time import time
 from scipy.ndimage import binary_dilation
-import matplotlib.pyplot as plt
 threadsperblock = 256
 
 
@@ -88,8 +87,6 @@ class SceneGPU(object):
                         cos_angle = angles_mat[cam_j, seg_ind]
                         angle_pdf = cloud_prob*HG_pdf(cos_angle, g_cloud) + air_prob*rayleigh_pdf(cos_angle)
                         pc = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg_ind]) * angle_pdf * prod
-                        # if pc > 0.2:
-                        #     pc = 0
                         path_contrib[cam_j, seg_ind] = pc
                         pixel = camera_pixels[:, cam_j, seg_ind]
                         cuda.atomic.add(I_total, (cam_j, pixel[0], pixel[1]), pc)
@@ -427,7 +424,6 @@ class SceneGPU(object):
         self.dbeta_cloud.copy_to_device(self.volume.beta_cloud)
         beta_air = self.volume.beta_air
         # outputs
-        print(f"preallocation weights: {3*(Ns+1)*Np*precis_size/1e9: .2f} GB")
         dstarting_points = cuda.to_device(np.zeros((3, Np), dtype=float_precis))
         dscatter_points = cuda.to_device(np.zeros((3, Ns, Np), dtype=float_precis))
         dscatter_sizes = cuda.to_device(np.zeros(Np, dtype=np.uint8))
@@ -471,7 +467,6 @@ class SceneGPU(object):
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
         scatter_inds = np.cumsum(scatter_inds)
         Np_nonan = int(np.sum(active_paths))
-        print(f"post allocation weights: {3 * (total_num_of_scatter+Np_nonan) * precis_size / 1e9: .2f} GB")
         self.init_cuda_param(Np_nonan)
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
@@ -540,35 +535,7 @@ class SceneGPU(object):
         cuda.synchronize()
         I_total = self.dI_total.copy_to_host()
         I_total /= Np
-
-
         if I_gt is None:
-            ## remove ##
-            # path_contrib = dpath_contrib.copy_to_host()
-            # scatter_inds = cuda_paths[-2].copy_to_host()
-            # contrib = np.zeros(Np_nonan, dtype=np.float32)
-            # scatter_hist = np.zeros(Np_nonan, dtype=np.int)
-            # for i in range(Np_nonan):
-            #     scatter_start = scatter_inds[i]
-            #     scatter_end = scatter_inds[i + 1]
-            #     contrib[i] = np.mean(path_contrib[:, scatter_start:scatter_end])
-            #     scatter_hist[i] = scatter_end - scatter_start
-            # print(f"max={contrib.max()}")
-            # print(f"min={contrib.min()}")
-            # contrib_mean = contrib.mean()
-            # contrib_std = contrib.std()
-            # print(f"mean={contrib_mean}")
-            # print(f"std={contrib_std}")
-            # print(f"number of zeros={np.mean(contrib < 1e-6)}")
-            # print(f"number of high outliers={np.mean(contrib > contrib_mean)}")
-            # print(f"number of low outliers={np.mean(contrib < contrib_mean)}")
-            #
-            # plt.hist(contrib, bins=100)
-            # plt.show()
-            # plt.hist(scatter_hist)
-            # plt.show()
-            ## remove ##
-            del (dpath_contrib)
             return I_total
 
         # differentiable part

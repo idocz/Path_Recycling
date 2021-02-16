@@ -66,7 +66,7 @@ beta_gt = np.copy(beta_cloud)
 
 focal_length = 60e-3
 sensor_size = np.array((40e-3, 40e-3))
-ps = 55
+ps = 55//3
 pixels = np.array((ps, ps))
 
 N_cams = 9
