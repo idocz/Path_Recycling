@@ -58,4 +58,19 @@ class Visual_wrapper(object):
             ax.imshow(I_total[i].T, cmap="gray")#, vmin=0, vmax=max_val[i])
         plt.suptitle(title)
 
+    def scatter_plot_comparison(self, signal1, signal2, title):
+        plt.figure()
+        X = signal1.reshape(-1)
+        Y = signal2.reshape(-1)
+        max_val = np.max([X.max(), Y.max()])
+        min_val = np.min([X.min(), Y.min()])
+        mask = X != 0
+        rel_err = np.sum(np.abs(X[mask] - Y[mask])) / np.sum(np.abs(X[mask]))
+        print(f"{title} err: {rel_err}")
+        plt.scatter(X, Y)
+        plt.plot([min_val, max_val], [min_val,max_val])
+        plt.title(title)
+        plt.show()
+
+
 

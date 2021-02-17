@@ -25,12 +25,13 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="returned to main">
-      <change afterPath="$PROJECT_DIR$/classes/scene_basic_gpu.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="commit before implementing scene_lowmem_gpu">
+      <change afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_gpu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/gpu_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/gpu_inverse_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/gpu_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/gpu_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,7 +49,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$/.." value="main" />
+        <entry key="$PROJECT_DIR$/.." value="eff_scatter" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -68,15 +69,15 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/classes" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/scripts" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\scripts" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
-      <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\scripts" />
     </key>
   </component>
   <component name="RunManager" selected="Python.gpu_render_script">
@@ -398,7 +399,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611332451029</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="commit before implementing scene_lowmem_gpu">
+      <created>1613474080813</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1613474080813</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -443,7 +451,8 @@
     <MESSAGE value="rayleigh added. need to check correctness" />
     <MESSAGE value="compare commit" />
     <MESSAGE value="returned to main" />
-    <option name="LAST_COMMIT_MESSAGE" value="returned to main" />
+    <MESSAGE value="commit before implementing scene_lowmem_gpu" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit before implementing scene_lowmem_gpu" />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
@@ -518,10 +527,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="506" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1610451185815" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1611332727879">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1613474105819">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1611332727879" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613474105819" />
     <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1613290755296">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -549,17 +558,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>99</line>
+          <line>97</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>102</line>
+          <line>100</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>492</line>
+          <line>491</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -574,7 +583,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_gpu.py</url>
-          <line>137</line>
+          <line>135</line>
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -589,8 +598,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/cuda_utils.py</url>
-          <line>192</line>
+          <line>203</line>
           <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>300</line>
+          <option name="timeStamp" value="32" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

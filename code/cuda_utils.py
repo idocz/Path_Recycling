@@ -1,4 +1,4 @@
-from numba import cuda
+from numba import cuda, njit
 import math
 import numpy as np
 from numba.cuda.random import xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
@@ -26,24 +26,24 @@ else:
 #### GRID FUNCTIONS #####
 @cuda.jit(device=True)
 def get_voxel_of_point(point, grid_shape, bbox, bbox_size, res):
-    if point[0] == bbox[0, 1]:
+    if point[0] >= bbox[0, 1]:
         res[0] = grid_shape[0] - 1
     else:
         res[0] = int(((point[0] - bbox[0, 0]) / bbox_size[0]) * grid_shape[0])
 
-    if point[1] == bbox[1, 1]:
+    if point[1] >= bbox[1, 1]:
         res[1] = grid_shape[1] - 1
     else:
         res[1] = int(((point[1] - bbox[1, 0]) / bbox_size[1]) * grid_shape[1])
 
-    if point[2] == bbox[2, 1]:
+    if point[2] >= bbox[2, 1]:
         res[2] = grid_shape[2] - 1
     else:
         res[2] = int(((point[2] - bbox[2, 0]) / bbox_size[2]) * grid_shape[2])
 
 
 @cuda.jit(device=True)
-def is_voxel_valid(voxel, grid_shape,):
+def is_voxel_valid(voxel, grid_shape):
     return not (voxel[0] >= grid_shape[0] or voxel[1] >= grid_shape[1] or voxel[2]>= grid_shape[2])
 
 
@@ -152,6 +152,17 @@ def project_point(point, P, pixels_shape, res):
     res[0] = np.uint8(x)
     res[1] = np.uint8(y)
     return res
+
+def project_point_cpu(point, P, pixels_shape):
+    z = point[0]*P[2,0] + point[1]*P[2,1] + point[2]*P[2,2] + P[2,3]
+    x = (point[0]*P[0,0] + point[1]*P[0,1] + point[2]*P[0,2] + P[0,3]) / z
+    y = (point[0]*P[1,0] + point[1]*P[1,1] + point[2]*P[1,2] + P[1,3]) / z
+    if x < 0 or x > pixels_shape[0]:
+        x = 255
+    if y < 0 or y > pixels_shape[1]:
+        y = 255
+    return np.array([x,y],dtype=np.uint8)
+
 
 
 #### PHASE FUNCTION FUNCTIONS ####

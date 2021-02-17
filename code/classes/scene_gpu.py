@@ -88,8 +88,6 @@ class SceneGPU(object):
                         cos_angle = angles_mat[cam_j, seg_ind]
                         angle_pdf = cloud_prob*HG_pdf(cos_angle, g_cloud) + air_prob*rayleigh_pdf(cos_angle)
                         pc = ISs_mat[cam_j, seg_ind] * math.exp(-path_contrib[cam_j, seg_ind]) * angle_pdf * prod
-                        # if pc > 0.2:
-                        #     pc = 0
                         path_contrib[cam_j, seg_ind] = pc
                         pixel = camera_pixels[:, cam_j, seg_ind]
                         cuda.atomic.add(I_total, (cam_j, pixel[0], pixel[1]), pc)
@@ -134,7 +132,7 @@ class SceneGPU(object):
                         grad_contrib = -L * path_contrib[cam_ind, seg_ind] * I_dif[cam_ind, pixel[0], pixel[1]]
                         cuda.atomic.add(total_grad, (i, j, k), grad_contrib)
 
-
+                #
                 for seg in range(N_seg):
                     seg_ind = seg + scatter_start
                     if not cloud_mask[sv[0,seg_ind], sv[1,seg_ind], sv[2, seg_ind]]:
@@ -202,8 +200,7 @@ class SceneGPU(object):
                         scatter_angles[seg_ind-1] = cos_theta
                         cloud_prob = (beta - beta_air) / beta
                         air_prob = 1 - cloud_prob
-                        IS *= (1 / (cloud_prob * HG_pdf(cos_theta, g_cloud) + air_prob * HG_pdf(cos_theta,
-                                                                                     g_air)))  # angle pdf
+                        IS *= (1 / (cloud_prob * HG_pdf(cos_theta, g_cloud) + air_prob * rayleigh_pdf(cos_theta)))  # angle pdf
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
 
@@ -280,6 +277,8 @@ class SceneGPU(object):
                             for pi in range(path_size):
                             # while not reach_dest:
                                 # if compare_3d(camera_voxel, dest_voxel):
+
+
                                 if pi == path_size -1:
                                     length = calc_distance(camera_point, dest)
                                     reach_dest = True
