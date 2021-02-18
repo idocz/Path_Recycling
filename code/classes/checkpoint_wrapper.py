@@ -1,5 +1,6 @@
 from utils import *
 from classes.scene_gpu import SceneGPU
+from classes.scene_lowmem_gpu import SceneLowMemGPU
 
 class CheckpointWrapper(object):
     def __init__(self, scene, optimizer, Np_gt, Np_start, Ns, resample_freq, step_size, iterations, tensorboard_freq, train_id):
@@ -11,7 +12,6 @@ class CheckpointWrapper(object):
         self.sun_direction = scene.sun_direction
         self.cameras = scene.cameras
         self.g_cloud = scene.g_cloud
-        self.g_air = scene.g_air
         self.N_cams = scene.N_cams
         self.N_pixels = scene.N_pixels
         self.is_camera_in_medium = scene.is_camera_in_medium
@@ -27,7 +27,8 @@ class CheckpointWrapper(object):
 
 
     def recreate_scene(self):
-        return SceneGPU(self.volume, self.cameras, self.sun_angles, self.g_cloud, self.g_air, self.Ns)
+        # return SceneGPU(self.volume, self.cameras, self.sun_angles, self.g_cloud, self.g_air, self.Ns)
+        return SceneLowMemGPU(self.volume, self.cameras, self.sun_angles, self.g_cloud,  self.Ns)
 
     def __str__(self):
         opti_desc = f"Simualtion Parameters:  \nNp_gt={self.Np_gt:.2e}  \nNp_start={self.Np_start}  \nNs={self.Ns}" \

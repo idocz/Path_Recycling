@@ -534,11 +534,9 @@ class SceneLowMemGPU(object):
             return I_total
 
         ##### differentiable part ####
-        print("starting differential part")
         self.dtotal_grad.copy_to_device(np.zeros_like(self.volume.beta_cloud, dtype=float_reg))
         # precalculating gradient contributions
         I_dif = (I_total - I_gt).astype(float_reg)
-        print(f"I_dif={np.linalg.norm(I_dif)}, I_total={np.linalg.norm(I_total)}, I_gt={np.linalg.norm(I_gt)}")
         self.dI_total.copy_to_device(I_dif)
         dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
         dpixel_mat = cuda_paths[-1]
