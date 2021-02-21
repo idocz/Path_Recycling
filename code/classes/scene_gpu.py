@@ -204,7 +204,7 @@ class SceneGPU(object):
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
 
-                    path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                    path_size = estimate_voxels_size(dest_voxel, current_voxel) + 1
                     reach_dest = False
                     counter = 0
 
@@ -269,7 +269,7 @@ class SceneGPU(object):
                                 get_intersection_with_borders(camera_point, cam_direction, bbox, dest)
 
                             get_voxel_of_point(dest, grid_shape, bbox, bbox_size, dest_voxel)
-                            path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                            path_size = estimate_voxels_size(dest_voxel, current_voxel) + 1
                             counter = 0
                             ###########################################################################
                             ######################## local estimation save ############################
@@ -391,7 +391,7 @@ class SceneGPU(object):
                                 get_intersection_with_borders(current_point, cam_direction, bbox, dest)
                                 get_intersection_with_borders(current_point, cam_direction, bbox, dest)
                             get_voxel_of_point(dest, grid_shape, bbox, bbox_size, camera_voxel)
-                            total_voxels_size += estimate_voxels_size(current_voxel, camera_voxel)
+                            total_voxels_size += estimate_voxels_size(current_voxel, camera_voxel)+1
                     # sampling new direction
                     cloud_prob = (beta - beta_air) / beta
                     p = sample_uniform(rng_states, tid)

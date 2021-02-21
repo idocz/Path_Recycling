@@ -47,8 +47,50 @@ def is_voxel_valid(voxel, grid_shape):
     return not (voxel[0] >= grid_shape[0] or voxel[1] >= grid_shape[1] or voxel[2]>= grid_shape[2])
 
 
+
 @cuda.jit(device=True)
 def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel):
+    inc_x = sign(direction[0])
+    inc_y = sign(direction[1])
+    inc_z = sign(direction[2])
+    t_x = 2.1
+    t_y = 2.2
+    t_z = 2.3
+    if direction[0] != 0:
+        t_x = (((current_voxel[0] + 1 + (inc_x - 1) / 2) * voxel_size[0]) - current_point[0]) / direction[0]
+    if direction[1] != 0:
+        t_y = (((current_voxel[1] + 1 + (inc_y - 1) / 2) * voxel_size[1]) - current_point[1]) / direction[1]
+    if direction[2] != 0:
+        t_z = (((current_voxel[2] + 1 + (inc_z - 1) / 2) * voxel_size[2]) - current_point[2]) / direction[2]
+
+    assign_3d(next_voxel, current_voxel)
+    if t_x <= t_y:
+        if t_x <= t_z:
+            next_voxel[0] += inc_x
+            t_min = t_x
+        else:
+            next_voxel[2] += inc_z
+            t_min = t_z
+    else:
+        if t_y <= t_z:
+            next_voxel[1] += inc_y
+            t_min = t_y
+        else:
+            next_voxel[2] += inc_z
+            t_min = t_z
+    current_point[0] = current_point[0] + t_min * direction[0]
+    current_point[1] = current_point[1] + t_min * direction[1]
+    current_point[2] = current_point[2] + t_min * direction[2]
+
+    # if t_min < 0:
+    #     print("bugg in t_min", t_min)
+
+
+    return t_min
+
+
+@cuda.jit(device=True)
+def travel_to_voxels_border_old(current_point, current_voxel, direction, voxel_size, next_voxel):
     inc_x = sign(direction[0])
     inc_y = sign(direction[1])
     inc_z = sign(direction[2])
@@ -94,9 +136,9 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
 
 @cuda.jit(device=True)
 def get_intersection_with_borders(point, direction, bbox, res):
-    t_x = 1
-    t_y = 1
-    t_z = 1
+    tx = 1
+    ty = 1
+    tz = 1
     if direction[0] > 0:
         tx = (bbox[0, 1] - point[0]) / direction[0]
     elif direction[0] < 0:
@@ -135,42 +177,26 @@ def estimate_voxels_size(voxel_a, voxel_b):
         res += voxel_a[2] - voxel_b[2]
     else:
         res += voxel_b[2] - voxel_a[2]
-
-    return res + 1
+    return res
 
 
 #### CAMERA FUNCTIONS ####
 @cuda.jit(device=True)
 def project_point(point, P, pixels_shape, res):
+    res[0] = 255
     z = point[0]*P[2,0] + point[1]*P[2,1] + point[2]*P[2,2] + P[2,3]
     x = (point[0]*P[0,0] + point[1]*P[0,1] + point[2]*P[0,2] + P[0,3]) / z
     y = (point[0]*P[1,0] + point[1]*P[1,1] + point[2]*P[1,2] + P[1,3]) / z
-    if x < 0 or x > pixels_shape[0]:
-        x = 255
-    if y < 0 or y > pixels_shape[1]:
-        y = 255
-    res[0] = np.uint8(x)
-    res[1] = np.uint8(y)
-    return res
-
-def project_point_cpu(point, P, pixels_shape):
-    z = point[0]*P[2,0] + point[1]*P[2,1] + point[2]*P[2,2] + P[2,3]
-    x = (point[0]*P[0,0] + point[1]*P[0,1] + point[2]*P[0,2] + P[0,3]) / z
-    y = (point[0]*P[1,0] + point[1]*P[1,1] + point[2]*P[1,2] + P[1,3]) / z
-    if x < 0 or x > pixels_shape[0]:
-        x = 255
-    if y < 0 or y > pixels_shape[1]:
-        y = 255
-    return np.array([x,y],dtype=np.uint8)
-
+    if x >= 0 and x <= pixels_shape[0] and y >= 0 and y <= pixels_shape[1]:
+        res[0] = np.uint8(x)
+        res[1] = np.uint8(y)
 
 
 #### PHASE FUNCTION FUNCTIONS ####
 @cuda.jit(device=True)
 def rayleigh_pdf(cos_theta):
-    theta_pdf = (3 * (1 + cos_theta**2))/8
-    phi_pdf = 1 / (2*np.pi)
-    return theta_pdf * phi_pdf
+    return ((3 * (1 + cos_theta**2))/ (16*math.pi))
+
 
 @cuda.jit(device=True)
 def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
@@ -199,7 +225,7 @@ def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
 
 @cuda.jit(device=True)
 def HG_pdf_old(cos_theta, g):
-    theta_pdf = 0.5*(b + ((1-b)*(1 - g**2))/(1 + g**2 - 2*g * cos_theta) ** 1.5)
+    theta_pdf = (1 / (4*np.pi))*(b + ((1-b)*(1 - g**2))/(1 + g**2 - 2*g * cos_theta) ** 1.5)
     phi_pdf = 1 / (2*np.pi)
     return theta_pdf * phi_pdf
 
@@ -232,9 +258,7 @@ def HG_sample_direction_old(old_direction, g, new_direction, rng_states, tid):
 
 @cuda.jit(device=True)
 def HG_pdf(cos_theta, g):
-    theta_pdf = 0.5*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
-    phi_pdf = 1 / (2*np.pi)
-    return theta_pdf * phi_pdf
+    return (1 / (4*np.pi))*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
 
 @cuda.jit(device=True)
 def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
@@ -298,6 +322,7 @@ def min_3d(x, y, z):
 def dot_3d(a,b):
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 
+
 @cuda.jit(device=True)
 def print_3d(a):
     return print(a[0],a[1],a[2])
@@ -307,10 +332,8 @@ def print2_3d(a,b):
 
 @cuda.jit(device=True)
 def is_pixel_valid(pixel):
-    if pixel[0] != 255 and pixel[1] != 255:
-        return True
-    else:
-        return False
+    return pixel[0] != 255
+
 
 @cuda.jit(device=True)
 def distance_and_direction(source, dest, direction):

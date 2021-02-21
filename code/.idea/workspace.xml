@@ -25,11 +25,13 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="scene_lowmem_gpu implementation has added. next goal: write an inverse script">
-      <change afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="inverse script has added for lowmem implementation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,7 +49,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$/.." value="eff_scatter" />
+        <entry key="$PROJECT_DIR$/.." value="lowmem" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -411,7 +413,14 @@
       <option name="project" value="LOCAL" />
       <updated>1613575629836</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="inverse script has added for lowmem implementation.">
+      <created>1613635874312</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1613635874312</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -458,7 +467,8 @@
     <MESSAGE value="returned to main" />
     <MESSAGE value="commit before implementing scene_lowmem_gpu" />
     <MESSAGE value="scene_lowmem_gpu implementation has added. next goal: write an inverse script" />
-    <option name="LAST_COMMIT_MESSAGE" value="scene_lowmem_gpu implementation has added. next goal: write an inverse script" />
+    <MESSAGE value="inverse script has added for lowmem implementation." />
+    <option name="LAST_COMMIT_MESSAGE" value="inverse script has added for lowmem implementation." />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
@@ -533,14 +543,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="506" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1610451185815" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1613575944581">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1613636802356">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613575944581" />
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1613290755296">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613636802356" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1613661831769">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613290755296" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613661831769" />
     <state x="892" y="250" width="283" height="539" key="ftp.server.browser" timestamp="1610451092639">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -603,14 +613,14 @@
           <option name="timeStamp" value="29" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/cuda_utils.py</url>
-          <line>203</line>
-          <option name="timeStamp" value="30" />
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>276</line>
+          <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>300</line>
-          <option name="timeStamp" value="32" />
+          <url>file://$PROJECT_DIR$/cuda_utils.py</url>
+          <line>92</line>
+          <option name="timeStamp" value="35" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

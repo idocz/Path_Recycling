@@ -108,6 +108,7 @@ Np_gt = int(5e7)
 
 Np = int(5e5)
 resample_freq = 10
+# step_size = 1e10
 step_size = 2e8
 Ns = 15
 iterations = 10000000
@@ -117,8 +118,6 @@ tensorboard_freq = 15
 beta_max = 160
 win_size = 150
 
-start_iter_b = 500
-# grads_window = np.zeros((win_size, *beta_cloud.shape), dtype=float_reg)
 
 seed = None
 # Cloud mask (GT for now)
@@ -159,8 +158,8 @@ beta1 = 0.9
 beta2 = 0.999
 start_iter = 500
 # optimizer = SGD(volume,step_size)
-# optimizer = MomentumSGD(volume,step_size, alpha)
 beta_mean = np.mean(beta_cloud[volume.cloud_mask])
+# optimizer = MomentumSGD(volume, step_size, alpha, beta_mean, beta_max)
 optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_mean, beta_max, 1)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
@@ -184,12 +183,10 @@ min_loss = 1
 for iter in range(iterations):
     print(f"\niter {iter}")
     abs_dist = np.abs(beta_cloud[cloud_mask] - beta_opt[cloud_mask])
-    mean_dist = np.mean(abs_dist)
     max_dist = np.max(abs_dist)
-    rel_dist2 = np.linalg.norm(beta_opt - beta_cloud)/np.linalg.norm(beta_cloud)
     rel_dist1 = relative_distance(beta_cloud, beta_opt)
 
-    print(f"mean_dist = {mean_dist}, max_dist={max_dist}, rel_dist1={rel_dist1}, rel_dist2={rel_dist2}, Np={Np:.2e}, counter={non_min_couter}")
+    print(f"rel_dist1={rel_dist1}, max_dist={max_dist}, Np={Np:.2e}, counter={non_min_couter}")
 
     # if iter == start_iter_b:
     #     optimizer.step_size = 1e9
@@ -233,11 +230,11 @@ for iter in range(iterations):
         non_min_couter = 0
     else:
         non_min_couter += 1
-    print(f"loss = {loss}, grad_norm={grad_norm}, beta={np.mean(beta_opt)}, max_grad={np.max(total_grad)}")
+    print(f"loss = {loss}, grad_norm={grad_norm}, max_grad={np.max(total_grad)}")
 
     # Writing scalar and images to tensorboard
     if tensorboard and iter % tensorboard_freq == 0:
-        tb.update(beta_opt, I_opt, loss, mean_dist, max_dist, rel_dist1, rel_dist2, grad_norm, iter)
+        tb.update(beta_opt, I_opt, loss, max_dist, rel_dist1, grad_norm, iter)
 
 
 

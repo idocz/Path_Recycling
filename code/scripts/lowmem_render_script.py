@@ -75,7 +75,7 @@ height_factor = 2.5
 
 focal_length = 50e-3
 sensor_size = np.array((40e-3, 40e-3)) / height_factor
-ps = 40
+ps = 55
 
 pixels = np.array((ps, ps))
 
@@ -93,7 +93,8 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[0]]
-Np = int(5e7)
+# Np = int(5e7)
+Np = int(5e6)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)
@@ -103,7 +104,7 @@ visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-run_gpu = False
+run_gpu = True
 fake_cloud = beta_cloud * 1
 # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
@@ -112,7 +113,6 @@ if run_lowmem_gpu:
     print("####### gpu lowmem renderer ########")
     scene_lowmem.init_cuda_param(Np, init=True)
     print("generating paths")
-
     Np_compilation = 10000
     cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
     # exit()
@@ -132,7 +132,8 @@ if run_lowmem_gpu:
         # print(f"grad_norm:{np.linalg.norm(grad)}")
         del(cuda_paths)
     visual.plot_images(I_total_lowmem, max_val, f"GPU_lowmem: maximum scattering={Ns}")
-    # plt.show()
+    if not run_gpu:
+        plt.show()
 
 if run_gpu:
     print("####### gpu renderer ########")
@@ -163,10 +164,10 @@ if run_gpu:
     # plt.show()
 
 
-    # visual.scatter_plot_comparison(I_total_lowmem, I_total1, "gpu vs gpu_lowmem")
-    # visual.scatter_plot_comparison(I_total1, I_total2, "gpu vs gpu")
-    visual.scatter_plot_comparison(grad1, grad_lowmem, "gpu vs gpu_lowmem")
-    visual.scatter_plot_comparison(grad1, grad2, "gpu vs gpu")
+    visual.scatter_plot_comparison(I_total_lowmem, I_total1, "gpu vs gpu_lowmem")
+    visual.scatter_plot_comparison(I_total1, I_total2, "gpu vs gpu")
+    visual.scatter_plot_comparison(grad1, grad_lowmem, "GRAD: gpu vs gpu_lowmem")
+    visual.scatter_plot_comparison(grad1, grad2, "GRAD:gpu vs gpu")
 
 
 
