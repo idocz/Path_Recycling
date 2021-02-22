@@ -234,7 +234,7 @@ for iter in range(iterations):
 
     # Writing scalar and images to tensorboard
     if tensorboard and iter % tensorboard_freq == 0:
-        tb.update(beta_opt, I_opt, loss, max_dist, rel_dist1, grad_norm, iter)
+        tb.update(beta_opt, I_opt, loss, max_dist, rel_dist1, iter)
 
 
 

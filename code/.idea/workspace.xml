@@ -27,6 +27,10 @@
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="inverse script has added for lowmem implementation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,13 +256,13 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.gpu_inverse_script" />
-      <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.space_curving_draft" />
-      <item itemvalue="Python.rayleigh_draft" />
-      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.down_up_sample" />
+      <item itemvalue="Python.error_stats" />
+      <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.gpu_render_script" />
+      <item itemvalue="Python.rayleigh_draft" />
+      <item itemvalue="Python.space_curving_draft" />
     </list>
     <recent_temporary>
       <list>
@@ -613,7 +617,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/cuda_utils.py</url>
-          <line>92</line>
+          <line>111</line>
           <option name="timeStamp" value="35" />
         </line-breakpoint>
       </breakpoints>
