@@ -158,9 +158,6 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
 
 @cuda.jit(device=True)
 def get_intersection_with_borders(point, direction, bbox, res):
-    tx = 1
-    ty = 1
-    tz = 1
     if direction[0] > 0:
         tx = (bbox[0, 1] - point[0]) / direction[0]
     elif direction[0] < 0:
