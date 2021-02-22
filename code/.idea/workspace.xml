@@ -25,8 +25,9 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="scene_lowmem_gpu implementation has added. next goal: write an inverse script">
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="debugging lowmem inverse">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,10 +253,10 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.HG_draft" />
       <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_inverse_script" />
+      <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_render_script" />
       <item itemvalue="Python.rayleigh_draft" />
       <item itemvalue="Python.space_curving_draft" />
@@ -407,7 +408,14 @@
       <option name="project" value="LOCAL" />
       <updated>1613575629836</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="debugging lowmem inverse">
+      <created>1614010080342</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1614010080342</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -454,7 +462,8 @@
     <MESSAGE value="returned to main" />
     <MESSAGE value="commit before implementing scene_lowmem_gpu" />
     <MESSAGE value="scene_lowmem_gpu implementation has added. next goal: write an inverse script" />
-    <option name="LAST_COMMIT_MESSAGE" value="scene_lowmem_gpu implementation has added. next goal: write an inverse script" />
+    <MESSAGE value="debugging lowmem inverse" />
+    <option name="LAST_COMMIT_MESSAGE" value="debugging lowmem inverse" />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
