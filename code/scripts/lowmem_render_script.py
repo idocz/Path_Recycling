@@ -16,7 +16,7 @@ from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
-print("scatter_eff branch")
+print("low_mem fast branch")
 
 ###################
 # Grid parameters #
@@ -154,7 +154,9 @@ if run_gpu:
     volume.set_beta_cloud(beta_cloud)
     I_total1, grad1 = scene_gpu.render(cuda_paths, Np, Np_nonan, 0)
     del(cuda_paths)
+    volume.set_beta_cloud(fake_cloud)
     cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np, Ns)
+    volume.set_beta_cloud(beta_cloud)
     start = time()
     I_total2, grad2 = scene_gpu.render(cuda_paths, Np, Np_nonan, 0)
     print(f" rendering took: {time() - start}")

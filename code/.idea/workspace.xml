@@ -27,6 +27,7 @@
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="inverse script has added for lowmem implementation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -75,7 +76,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.gpu_render_script">
+  <component name="RunManager" selected="Python.down_up_sample">
     <configuration name="HG_draft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -253,10 +254,10 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.HG_draft" />
       <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_inverse_script" />
+      <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_render_script" />
       <item itemvalue="Python.rayleigh_draft" />
       <item itemvalue="Python.space_curving_draft" />
@@ -478,10 +479,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="428" y="154" key="#SSH_Configurations/0.0.1920.1040@0.0.1920.1040" timestamp="1610529499956" />
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1613408525284">
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1613998037004">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613408525283" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613998037004" />
+    <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog" timestamp="1613997691795">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613997691795" />
     <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1610123158967">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -490,10 +495,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1920.1040@0.0.1920.1040" timestamp="1609578601261" />
-    <state x="105" y="133" width="1715" height="814" key="DiffContextDialog" timestamp="1611332687198">
+    <state x="105" y="133" width="1715" height="809" maximized="true" key="DiffContextDialog" timestamp="1614000006524">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="105" y="133" width="1715" height="814" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1611332687198" />
+    <state x="105" y="133" width="1715" height="809" maximized="true" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614000006524" />
     <state x="105" y="130" width="1715" height="817" key="DirDiffDialog" timestamp="1610457755516">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -546,6 +551,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613661831769" />
+    <state x="900" y="255" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey" timestamp="1613997693008">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="900" y="255" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey/0.0.1920.1040@0.0.1920.1040" timestamp="1613997693008" />
     <state x="892" y="250" width="283" height="539" key="ftp.server.browser" timestamp="1610451092639">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -609,7 +618,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>276</line>
+          <line>281</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
