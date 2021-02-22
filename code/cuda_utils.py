@@ -85,8 +85,8 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
         current_point[0] = current_point[0] + t_min * direction[0]
         current_point[1] = current_point[1] + t_min * direction[1]
 
-    # if t_min < 0:
-    #     print("bugg in t_min", t_min)
+    if t_min < 0:
+        print("bugg in t_min", t_min)
 
 
     return t_min
