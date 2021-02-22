@@ -27,6 +27,7 @@
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="scene_lowmem_gpu implementation has added. next goal: write an inverse script">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/rayleigh_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/rayleigh_draft.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,13 +253,13 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.gpu_inverse_script" />
-      <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.space_curving_draft" />
-      <item itemvalue="Python.rayleigh_draft" />
-      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.down_up_sample" />
+      <item itemvalue="Python.error_stats" />
+      <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.gpu_render_script" />
+      <item itemvalue="Python.rayleigh_draft" />
+      <item itemvalue="Python.space_curving_draft" />
     </list>
     <recent_temporary>
       <list>

@@ -6,13 +6,13 @@ def raylie(cos_theta):
     theta_pdf = (3/8) * (1 + cos_theta**2)
     return theta_pdf
 
-N = 100000
+N = 1000000
 p = np.random.rand(N)
 U = -(2*(2* p - 1) + (4 * ((2 * p - 1) ** 2) + 1) ** (1/2))**(1/3)
 samples = U - (1/ U)
 
 # # samples = np.array(samples)
-plt.hist(samples, density=True, bins=30)
+plt.hist(samples, density=True, bins=100)
 
 x = np.linspace(-1,1,N)
 y = raylie(x)
