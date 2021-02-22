@@ -380,7 +380,7 @@ class SceneLowMemGPU(object):
                                     cuda.atomic.add(total_grad,(camera_voxel[0], camera_voxel[1], camera_voxel[2]), grad)
                                 assign_3d(camera_voxel, next_voxel)
                             # Last Step
-                            # length = calc_distance(camera_point, next_point)
+                            # length1 = calc_distance(camera_point, next_point)
                             length = distance - current_length
                             # GRAD CALCULATION (LOCAL ESTIMATION DERIVATIVE)
                             if cloud_mask[camera_voxel[0], camera_voxel[1], camera_voxel[2]]:
@@ -474,10 +474,10 @@ class SceneLowMemGPU(object):
         print("post_generation took:", time() - start)
         self.total_num_of_scatter = total_num_of_scatter
         self.Np_nonan = Np_nonan
-        del(self.dpath_contrib)
-        del(self.dgrad_contrib)
-        self.dpath_contrib = cuda.to_device(np.zeros((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
-        self.dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
+        # del(self.dpath_contrib)
+        # del(self.dgrad_contrib)
+        # self.dpath_contrib = cuda.to_device(np.zeros((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
+        # self.dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
         return dstarting_points, dscatter_points_zipped, dscatter_inds, dpixel_mat
 
 
@@ -498,14 +498,14 @@ class SceneLowMemGPU(object):
         self.dI_total.copy_to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=float_reg))
         start = time()
 
-        self.dpath_contrib = cuda.to_device(np.zeros((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
-        self.dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
+        dpath_contrib = cuda.to_device(np.zeros((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
+        dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
 
 
         self.render_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dis_in_medium, *cuda_paths,self.dI_total,
-             self.dpath_contrib)
+             dpath_contrib)
 
         cuda.synchronize()
         I_total = self.dI_total.copy_to_host()
@@ -525,18 +525,20 @@ class SceneLowMemGPU(object):
         dscatter_inds = cuda_paths[-2]
         start = time()
         self.calc_gradient_contribution[blockspergrid, threadsperblock]\
-            (self.dpath_contrib, self.dI_total, dpixel_mat,dscatter_inds, self.dgrad_contrib)
+            (dpath_contrib, self.dI_total, dpixel_mat,dscatter_inds, dgrad_contrib)
 
         cuda.synchronize()
         print("calc_gradient_contribution took:",time()-start)
         start = time()
         self.render_differentiable_cuda[blockspergrid, threadsperblock]\
             (self.dbeta_cloud, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
-                                       N_cams, self.dts, self.dis_in_medium, *cuda_paths, self.dI_total, self.dpath_contrib,
-             self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad)
+                                       N_cams, self.dts, self.dis_in_medium, *cuda_paths, self.dI_total, dpath_contrib,
+             dgrad_contrib, self.dcloud_mask, self.dtotal_grad)
 
         cuda.synchronize()
         print("render_differentiable_cuda took:", time() - start)
+        del(dpath_contrib)
+        del(dgrad_contrib)
         total_grad = self.dtotal_grad.copy_to_host()
         total_grad /= (Np * N_cams)
         return I_total, total_grad

@@ -28,7 +28,6 @@
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="inverse script has added for lowmem implementation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +44,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$/.." value="lowmem" />
+        <entry key="$PROJECT_DIR$/.." value="lowmem_fast_ver2" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -495,10 +494,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1920.1040@0.0.1920.1040" timestamp="1609578601261" />
-    <state x="105" y="133" width="1715" height="809" maximized="true" key="DiffContextDialog" timestamp="1614000006524">
+    <state x="204" y="181" width="1715" height="809" key="DiffContextDialog" timestamp="1614005237645">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="105" y="133" width="1715" height="809" maximized="true" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614000006524" />
+    <state x="204" y="181" width="1715" height="809" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614005237645" />
     <state x="105" y="130" width="1715" height="817" key="DirDiffDialog" timestamp="1610457755516">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
