@@ -75,7 +75,7 @@ height_factor = 2.5
 
 focal_length = 50e-3
 sensor_size = np.array((40e-3, 40e-3)) / height_factor
-ps = 40
+ps = 55
 
 pixels = np.array((ps, ps))
 
@@ -93,7 +93,7 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[0]]
-Np = int(5e7)
+Np = int(5e6)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)
@@ -103,8 +103,8 @@ visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-run_gpu = False
-fake_cloud = beta_cloud * 1
+run_gpu = True
+fake_cloud = beta_cloud * 0.8
 # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
 max_val = None
@@ -153,7 +153,9 @@ if run_gpu:
     volume.set_beta_cloud(beta_cloud)
     I_total1, grad1 = scene_gpu.render(cuda_paths, Np, Np_nonan, 0)
     del(cuda_paths)
+    volume.set_beta_cloud(fake_cloud)
     cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np, Ns)
+    volume.set_beta_cloud(beta_cloud)
     start = time()
     I_total2, grad2 = scene_gpu.render(cuda_paths, Np, Np_nonan, 0)
     print(f" rendering took: {time() - start}")
@@ -163,10 +165,10 @@ if run_gpu:
     # plt.show()
 
 
-    # visual.scatter_plot_comparison(I_total_lowmem, I_total1, "gpu vs gpu_lowmem")
-    # visual.scatter_plot_comparison(I_total1, I_total2, "gpu vs gpu")
-    visual.scatter_plot_comparison(grad1, grad_lowmem, "gpu vs gpu_lowmem")
-    visual.scatter_plot_comparison(grad1, grad2, "gpu vs gpu")
+    visual.scatter_plot_comparison(I_total_lowmem, I_total1, "gpu vs gpu_lowmem")
+    visual.scatter_plot_comparison(I_total1, I_total2, "gpu vs gpu")
+    visual.scatter_plot_comparison(grad1, grad_lowmem, "GRA:gpu vs gpu_lowmem")
+    visual.scatter_plot_comparison(grad1, grad2, "GRAD:gpu vs gpu")
 
 
 
