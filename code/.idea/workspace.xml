@@ -27,7 +27,9 @@
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="inverse script has added for lowmem implementation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -253,10 +255,10 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.HG_draft" />
       <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_inverse_script" />
+      <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_render_script" />
       <item itemvalue="Python.rayleigh_draft" />
       <item itemvalue="Python.space_curving_draft" />
@@ -494,10 +496,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1920.1040@0.0.1920.1040" timestamp="1609578601261" />
-    <state x="204" y="181" width="1715" height="809" key="DiffContextDialog" timestamp="1614005237645">
+    <state x="107" y="111" width="1715" height="797" key="DiffContextDialog" timestamp="1614067393547">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="204" y="181" width="1715" height="809" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614005237645" />
+    <state x="107" y="111" width="1715" height="797" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614067393547" />
     <state x="105" y="130" width="1715" height="817" key="DirDiffDialog" timestamp="1610457755516">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -546,10 +548,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613636802356" />
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1613661831769">
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1614015475201">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613661831769" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614015475201" />
     <state x="900" y="255" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey" timestamp="1613997693008">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -617,7 +619,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>281</line>
+          <line>277</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

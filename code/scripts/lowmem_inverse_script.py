@@ -108,7 +108,6 @@ Np_gt = int(5e7)
 
 Np = int(5e5)
 resample_freq = 10
-# step_size = 1e10
 step_size = 2e8
 Ns = 15
 iterations = 10000000
