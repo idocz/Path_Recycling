@@ -191,14 +191,14 @@ class SceneLowMemGPU(object):
                     tau = 0
                     for pi in range(path_size):
                         length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
-                        beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]]
-                        beta0 = beta_zero[current_voxel[0], current_voxel[1], current_voxel[2]]
+                        beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
+                        beta0 = beta_zero[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
                         tau += (beta-beta0)*length
                         assign_3d(current_voxel, next_voxel)
                     # last step
                     length = calc_distance(current_point, next_point)
-                    beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]]
-                    beta0 = beta_zero[current_voxel[0], current_voxel[1], current_voxel[2]]
+                    beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
+                    beta0 = beta_zero[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
                     tau += (beta - beta0) * length
                     assign_3d(current_point, next_point)
                     if not compare_3d(current_voxel, dest_voxel):
