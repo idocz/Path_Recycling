@@ -2,8 +2,8 @@ import numpy as np
 from os.path import join
 import matplotlib.pyplot as plt
 from scipy.io import loadmat, savemat
-checkpoint_id = "1202-1530-49"
-iter = 2100
+checkpoint_id = "2302-1243-00"
+iter = 4500
 
 dir_to_save = join("data","vol3d","betas.mat")
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))
@@ -16,7 +16,7 @@ A = np.abs(betas_gt - betas)
 B = np.abs(betas_gt)
 print(f"relative error = {np.mean(A)/np.mean(B)}")
 
-mask = betas_gt > 0.5
+mask = betas_gt > 0
 X = betas_gt[mask].reshape(-1)
 Y = betas[mask].reshape(-1)
 N = 2000

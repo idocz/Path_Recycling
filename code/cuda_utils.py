@@ -67,11 +67,11 @@ def travel_to_voxels_border_old(current_point, current_voxel, direction, voxel_s
     if t_x <= t_y and t_x <= t_z:
         # collision with x
         next_voxel[0] += inc_x
-        current_point[0] = (current_voxel[0] + 1 + (inc_x - 1) / 2) * voxel_size[0]
-        current_point[1] = current_point[1] + t_x * direction[1]
-        current_point[2] = current_point[2] + t_x * direction[2]
-        return t_x
-        # t_min = t_x
+        # current_point[0] = (current_voxel[0] + 1 + (inc_x - 1) / 2) * voxel_size[0]
+        # current_point[1] = current_point[1] + t_x * direction[1]
+        # current_point[2] = current_point[2] + t_x * direction[2]
+        # return t_x
+        t_min = t_x
             # t_min = t_x
         # else:
         #     # collision with z
@@ -83,23 +83,23 @@ def travel_to_voxels_border_old(current_point, current_voxel, direction, voxel_s
     elif t_y <= t_z:
         # collision with y
         next_voxel[1] += inc_y
-        current_point[0] = current_point[0] + t_y * direction[0]
-        current_point[1] = (current_voxel[1] + 1 + (inc_y - 1) / 2) * voxel_size[1]
-        current_point[2] = current_point[2] + t_y * direction[2]
-        return t_y
-        # t_min = t_y
+        # current_point[0] = current_point[0] + t_y * direction[0]
+        # current_point[1] = (current_voxel[1] + 1 + (inc_y - 1) / 2) * voxel_size[1]
+        # current_point[2] = current_point[2] + t_y * direction[2]
+        # return t_y
+        t_min = t_y
     else:
         # collision with z
         next_voxel[2] += inc_z
-        current_point[0] = current_point[0] + t_z * direction[0]
-        current_point[1] = current_point[1] + t_z * direction[1]
-        current_point[2] = (current_voxel[2] + 1 + (inc_z - 1) / 2) * voxel_size[2]
-        return t_z
-        # t_min = t_z
-    # current_point[0] = current_point[0] + t_min * direction[0]
-    # current_point[1] = current_point[1] + t_min * direction[1]
-    # current_point[2] = current_point[2] + t_min * direction[2]
-    # return t_min
+        # current_point[0] = current_point[0] + t_z * direction[0]
+        # current_point[1] = current_point[1] + t_z * direction[1]
+        # current_point[2] = (current_voxel[2] + 1 + (inc_z - 1) / 2) * voxel_size[2]
+        # return t_z
+        t_min = t_z
+    current_point[0] = current_point[0] + t_min * direction[0]
+    current_point[1] = current_point[1] + t_min * direction[1]
+    current_point[2] = current_point[2] + t_min * direction[2]
+    return t_min
 
     # if t_min < 0:
     #     print("bugg in t_min", t_min)
@@ -155,9 +155,6 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
 
 @cuda.jit(device=True)
 def get_intersection_with_borders(point, direction, bbox, res):
-    t_x = 1
-    t_y = 1
-    t_z = 1
     if direction[0] > 0:
         tx = (bbox[0, 1] - point[0]) / direction[0]
     elif direction[0] < 0:
@@ -214,9 +211,7 @@ def project_point(point, P, pixels_shape, res):
 #### PHASE FUNCTION FUNCTIONS ####
 @cuda.jit(device=True)
 def rayleigh_pdf(cos_theta):
-    theta_pdf = (3 * (1 + cos_theta**2))/8
-    phi_pdf = 1 / (2*np.pi)
-    return theta_pdf * phi_pdf
+    return (3 * (1 + cos_theta**2))/(16*math.pi)
 
 @cuda.jit(device=True)
 def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
@@ -247,9 +242,7 @@ def rayleigh_sample_direction(old_direction, new_direction, rng_states, tid):
 
 @cuda.jit(device=True)
 def HG_pdf(cos_theta, g):
-    theta_pdf = 0.5*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
-    phi_pdf = 1 / (2*np.pi)
-    return theta_pdf * phi_pdf
+    return (1 / (4*np.pi))*(1 - g**2)/(1 + g**2 - 2*g * cos_theta) ** 1.5
 
 @cuda.jit(device=True)
 def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
