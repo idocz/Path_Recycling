@@ -253,10 +253,10 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.down_up_sample" />
-      <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.HG_draft" />
+      <item itemvalue="Python.down_up_sample" />
       <item itemvalue="Python.error_stats" />
+      <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.gpu_render_script" />
       <item itemvalue="Python.rayleigh_draft" />
       <item itemvalue="Python.space_curving_draft" />
