@@ -25,8 +25,10 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="lowmem inverse bug was fixed.">
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="improving travel_to_voxel_border">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
     </list>
@@ -423,7 +425,14 @@
       <option name="project" value="LOCAL" />
       <updated>1614074429947</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="improving travel_to_voxel_border">
+      <created>1614179440950</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1614179440950</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -472,7 +481,8 @@
     <MESSAGE value="scene_lowmem_gpu implementation has added. next goal: write an inverse script" />
     <MESSAGE value="inverse script has added for lowmem implementation." />
     <MESSAGE value="lowmem inverse bug was fixed." />
-    <option name="LAST_COMMIT_MESSAGE" value="lowmem inverse bug was fixed." />
+    <MESSAGE value="improving travel_to_voxel_border" />
+    <option name="LAST_COMMIT_MESSAGE" value="improving travel_to_voxel_border" />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
@@ -626,12 +636,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>272</line>
+          <line>286</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/cuda_utils.py</url>
-          <line>229</line>
+          <line>225</line>
           <option name="timeStamp" value="35" />
         </line-breakpoint>
       </breakpoints>

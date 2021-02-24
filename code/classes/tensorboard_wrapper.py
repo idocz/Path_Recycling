@@ -30,7 +30,7 @@ class TensorBoardWrapper(object):
         self.writer.add_text("scene", text)
 
 
-    def update(self, beta_opt, I_opt, loss, max_dist, rel_dist1, iter):
+    def update(self, beta_opt, I_opt, loss, max_dist, rel_dist1, Np, iter):
         if iter % (15*100) ==0:
             np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt, images=I_opt)
         I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
@@ -40,6 +40,7 @@ class TensorBoardWrapper(object):
         self.writer.add_scalar("loss", loss, global_step=iter)
         self.writer.add_scalar("max_dist", max_dist, global_step=iter)
         self.writer.add_scalar("relative_dist1", rel_dist1, global_step=iter)
+        self.writer.add_scalar("Np", Np, global_step=iter)
 
 
 
