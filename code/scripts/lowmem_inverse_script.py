@@ -105,17 +105,17 @@ for cam_ind in range(N_cams):
 
 # Simulation parameters
 Np_gt = int(5e7)
-
+Np_max = int(5e7)
 Np = int(5e5)
 resample_freq = 10
-step_size = 2e8
+step_size = 3e8
 Ns = 15
 iterations = 10000000
 to_mask = True
 tensorboard = True
 tensorboard_freq = 15
-beta_max = 160
-win_size = 150
+beta_max = beta_cloud.max()
+win_size = 100
 
 
 seed = None
@@ -187,8 +187,6 @@ for iter in range(iterations):
 
     print(f"rel_dist1={rel_dist1}, max_dist={max_dist}, Np={Np:.2e}, counter={non_min_couter}")
 
-    # if iter == start_iter_b:
-    #     optimizer.step_size = 1e9
     if iter % resample_freq == 0:
         if non_min_couter >= win_size:
             if Np <= Np_gt and iter > start_iter:
@@ -196,9 +194,9 @@ for iter in range(iterations):
                 scene_lowmem.init_cuda_param(Np, init=True)
                 resample_freq = 30
                 non_min_couter = 0
-                # step_size *= 2
-            if Np >= Np_gt:
-                Np = Np_gt
+                step_size *= 1.5
+            if Np >= Np_max:
+                Np = Np_max
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)
