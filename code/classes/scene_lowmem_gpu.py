@@ -493,8 +493,6 @@ class SceneLowMemGPU(object):
 
         self.total_num_of_scatter = total_num_of_scatter
         self.Np_nonan = Np_nonan
-        # del(self.dpath_contrib)
-        # del(self.dgrad_contrib)
         self.dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
         self.dgrad_contrib = cuda.to_device(np.empty(self.total_num_of_scatter, dtype=float_reg))
         return dstarting_points, dscatter_points_zipped, dscatter_inds, dpixel_mat
