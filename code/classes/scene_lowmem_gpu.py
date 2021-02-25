@@ -248,24 +248,23 @@ class SceneLowMemGPU(object):
                             ######################## local estimation save ############################
                             tau = 0
                             for pi in range(path_size):
-                                ##### border traversal ###
-                                # border_x = (camera_voxel[0] + (cam_direction[0] > 0)) * voxel_size[0]
-                                # border_y = (camera_voxel[1] + (cam_direction[1] > 0)) * voxel_size[1]
-                                # border_z = (camera_voxel[2] + (cam_direction[2] > 0)) * voxel_size[2]
-                                # t_x = (border_x - camera_point[0]) / cam_direction[0]
-                                # t_y = (border_y - camera_point[1]) / cam_direction[1]
-                                # t_z = (border_z - camera_point[2]) / cam_direction[2]
-                                # length, border_ind = argmin(t_x, t_y, t_z)
+                                ##### border traversal #####
+                                border_x = (camera_voxel[0] + (cam_direction[0] > 0)) * voxel_size[0]
+                                border_y = (camera_voxel[1] + (cam_direction[1] > 0)) * voxel_size[1]
+                                border_z = (camera_voxel[2] + (cam_direction[2] > 0)) * voxel_size[2]
+                                t_x = (border_x - camera_point[0]) / cam_direction[0]
+                                t_y = (border_y - camera_point[1]) / cam_direction[1]
+                                t_z = (border_z - camera_point[2]) / cam_direction[2]
+                                length, border_ind = argmin(t_x, t_y, t_z)
                                 ###############################
-                                length = travel_to_voxels_border(camera_point, camera_voxel, cam_direction,
-                                                                 voxel_size, next_voxel)
+                                # length, border, border_ind = travel_to_voxels_border_fast(camera_point, camera_voxel, cam_direction,
+                                #                                  voxel_size)
                                 beta_cam = beta_cloud[camera_voxel[0],camera_voxel[1], camera_voxel[2]] + beta_air
                                 tau += beta_cam * length
                                 # assign_3d(camera_voxel, next_voxel)
-                                # step_in_direction(camera_point, cam_direction, length)
+                                step_in_direction(camera_point, cam_direction, length)
                                 # camera_point[border_ind] = border
-                                # camera_voxel[border_ind] += sign(cam_direction[border_ind])
-                                assign_3d(camera_voxel, next_voxel)
+                                camera_voxel[border_ind] += sign(cam_direction[border_ind])
                             # Last Step
                             length = calc_distance(camera_point, next_point)
                             beta_cam = beta_cloud[camera_voxel[0], camera_voxel[1], camera_voxel[2]] + beta_air
@@ -556,7 +555,7 @@ class SceneLowMemGPU(object):
         # dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
         start = time()
         self.calc_gradient_contribution[blockspergrid, threadsperblock]\
-            (cuda_paths[1], self.dpath_contrib, self.dI_total, self.dPs, self.dpixels_shape,cuda_paths[-1], self.dgrad_contrib)
+            (cuda_paths[1], self.dpath_contrib, self.dI_total, self.dPs, self.dpixels_shape,cuda_paths[2], self.dgrad_contrib)
 
         cuda.synchronize()
         if to_print:
