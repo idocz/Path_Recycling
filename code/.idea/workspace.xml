@@ -25,9 +25,11 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="improving genrate_path">
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="commit before implementing binary-step">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +77,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.lowmem_render_script">
+  <component name="RunManager" selected="Python.scene_lowmem_gpu">
     <configuration name="HG_draft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -230,7 +232,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rayleigh_draft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="scene_lowmem_gpu" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -238,12 +240,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/drafts" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/classes" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/rayleigh_draft.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -258,16 +260,16 @@
       <item itemvalue="Python.HG_draft" />
       <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.gpu_render_script" />
-      <item itemvalue="Python.rayleigh_draft" />
       <item itemvalue="Python.lowmem_render_script" />
+      <item itemvalue="Python.scene_lowmem_gpu" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.scene_lowmem_gpu" />
         <item itemvalue="Python.lowmem_render_script" />
         <item itemvalue="Python.gpu_render_script" />
         <item itemvalue="Python.HG_draft" />
         <item itemvalue="Python.error_stats" />
-        <item itemvalue="Python.rayleigh_draft" />
       </list>
     </recent_temporary>
   </component>
@@ -288,7 +290,7 @@
       <workItem from="1611332404495" duration="3893000" />
       <workItem from="1611672979593" duration="38113000" />
       <workItem from="1613290704308" duration="3595000" />
-      <workItem from="1614240711671" duration="20000" />
+      <workItem from="1614240711671" duration="6126000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -437,7 +439,14 @@
       <option name="project" value="LOCAL" />
       <updated>1614187626174</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="commit before implementing binary-step">
+      <created>1614240759954</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1614240759954</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -488,7 +497,8 @@
     <MESSAGE value="lowmem inverse bug was fixed." />
     <MESSAGE value="improving travel_to_voxel_border" />
     <MESSAGE value="improving genrate_path" />
-    <option name="LAST_COMMIT_MESSAGE" value="improving genrate_path" />
+    <MESSAGE value="commit before implementing binary-step" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit before implementing binary-step" />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
@@ -531,38 +541,38 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1610446144339" />
-    <state width="1877" height="343" key="GridCell.Tab.0.bottom" timestamp="1614189441401">
+    <state width="1877" height="343" key="GridCell.Tab.0.bottom" timestamp="1614243416248">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614189441401" />
-    <state width="1877" height="343" key="GridCell.Tab.0.center" timestamp="1614189441400">
+    <state width="1877" height="343" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416248" />
+    <state width="1877" height="343" key="GridCell.Tab.0.center" timestamp="1614243416248">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614189441400" />
-    <state width="1877" height="343" key="GridCell.Tab.0.left" timestamp="1614189441400">
+    <state width="1877" height="343" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416248" />
+    <state width="1877" height="343" key="GridCell.Tab.0.left" timestamp="1614243416248">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614189441400" />
-    <state width="1877" height="343" key="GridCell.Tab.0.right" timestamp="1614189441400">
+    <state width="1877" height="343" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416248" />
+    <state width="1877" height="343" key="GridCell.Tab.0.right" timestamp="1614243416248">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614189441400" />
-    <state width="1877" height="343" key="GridCell.Tab.1.bottom" timestamp="1614189467646">
+    <state width="1877" height="343" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416248" />
+    <state width="1877" height="343" key="GridCell.Tab.1.bottom" timestamp="1614243416249">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614189467646" />
-    <state width="1877" height="343" key="GridCell.Tab.1.center" timestamp="1614189467646">
+    <state width="1877" height="343" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416249" />
+    <state width="1877" height="343" key="GridCell.Tab.1.center" timestamp="1614243416249">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614189467646" />
-    <state width="1877" height="343" key="GridCell.Tab.1.left" timestamp="1614189467646">
+    <state width="1877" height="343" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416249" />
+    <state width="1877" height="343" key="GridCell.Tab.1.left" timestamp="1614243416249">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614189467646" />
-    <state width="1877" height="343" key="GridCell.Tab.1.right" timestamp="1614189467646">
+    <state width="1877" height="343" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416249" />
+    <state width="1877" height="343" key="GridCell.Tab.1.right" timestamp="1614243416249">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="343" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614189467646" />
+    <state width="1877" height="343" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614243416249" />
     <state x="506" y="165" key="SettingsEditor" timestamp="1610451185815">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -571,10 +581,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1613636802356" />
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1614015475201">
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1614244752611">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614015475201" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614244752611" />
     <state x="900" y="255" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey" timestamp="1613997693008">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -642,17 +652,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>292</line>
+          <line>307</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/cuda_utils.py</url>
-          <line>225</line>
+          <line>202</line>
           <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>456</line>
+          <line>471</line>
           <option name="timeStamp" value="36" />
         </line-breakpoint>
       </breakpoints>
@@ -661,6 +671,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/code$rayleigh_draft.coverage" NAME="rayleigh_draft Coverage Results" MODIFIED="1611261898589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$gpu_render_script.coverage" NAME="gpu_render_script Coverage Results" MODIFIED="1613408645983" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$scene_lowmem_gpu.coverage" NAME="scene_lowmem_gpu Coverage Results" MODIFIED="1614243411397" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/classes" />
     <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1614189441276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />

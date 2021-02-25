@@ -49,37 +49,14 @@ def is_voxel_valid(voxel, grid_shape):
 
 @cuda.jit(device=True)
 def travel_to_voxels_border_fast(current_point, current_voxel, direction, voxel_size):
-    t_x = 20.1
-    t_y = 20.2
-    t_z = 20.3
     border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
     border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
     border_z = (current_voxel[2] + (direction[2] > 0)) * voxel_size[2]
-    if direction[0] != 0:
-        t_x = (border_x - current_point[0]) / direction[0]
-    if direction[1] != 0:
-        t_y = (border_y - current_point[1]) / direction[1]
-    if direction[2] != 0:
-        t_z = (border_z - current_point[2]) / direction[2]
-
-    if t_x <= t_y and t_x <= t_z:
-        # collision with x
-        # current_point[0] = border_x
-        # current_point[1] = current_point[1] + t_x * direction[1]
-        # current_point[2] = current_point[2] + t_x * direction[2]
-        return t_x, border_x, 0
-    elif t_y <= t_z:
-        # collision with y
-        # current_point[0] = current_point[0] + t_y * direction[0]
-        # current_point[1] = border_y
-        # current_point[2] = current_point[2] + t_y * direction[2]
-        return t_y, border_y, 1
-    else:
-        # collision with z
-        # current_point[0] = current_point[0] + t_z * direction[0]
-        # current_point[1] = current_point[1] + t_z * direction[1]
-        # current_point[2] = border_z
-        return t_z, border_z, 2
+    t_x = (border_x - current_point[0]) / direction[0]
+    t_y = (border_y - current_point[1]) / direction[1]
+    t_z = (border_z - current_point[2]) / direction[2]
+    length, border_ind = argmin(t_x, t_y, t_z)
+    return length, border_ind
 
 
 @cuda.jit(device=True)

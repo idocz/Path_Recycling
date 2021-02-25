@@ -93,9 +93,9 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[0]]
-# Np = int(5e7)
-Np = int(7e7)
-Ns = 10
+Np = int(5e7)
+# Np = int(5e6)
+Ns = 15
 
 volume.set_mask(beta_cloud>0)
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
@@ -104,8 +104,9 @@ visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-# run_gpu = True
-run_gpu = False
+run_gpu = True
+if Np >5e6:
+    run_gpu =False
 fake_cloud = beta_cloud #* 0.5
 # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
@@ -128,7 +129,7 @@ if run_lowmem_gpu:
         print(f"building paths took: {end - start}")
         volume.set_beta_cloud(beta_cloud)
         start = time()
-        I_total_lowmem, grad_lowmem = scene_lowmem.render(cuda_paths, Np, 0)
+        I_total_lowmem, grad_lowmem = scene_lowmem.render(cuda_paths, Np, 0, to_print=True)
         print(f" rendering took: {time() - start}")
         # print(f"grad_norm:{np.linalg.norm(grad)}")
         del(cuda_paths)
