@@ -21,8 +21,6 @@ class SceneLowMemGPU(object):
         self.volume = volume
         self.sun_angles = sun_angles
         self.sun_direction = theta_phi_to_direction(*sun_angles)
-        # self.sun_direction += 1e-6
-        # self.sun_direction /= np.linalg.norm(self.sun_direction)
         # self.sun_direction[np.abs(self.sun_direction) < 1e-6] = 0
         self.cameras = cameras
         self.g_cloud = g_cloud
@@ -194,26 +192,12 @@ class SceneLowMemGPU(object):
 
                     tau = 0
                     for pi in range(path_size):
-                        ##### border traversal #####
-                        # border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
-                        # border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
-                        # border_z = (current_voxel[2] + (direction[2] > 0)) * voxel_size[2]
-                        # if direction[0] == 0 or direction[1] == 0 or direction[2] == 0:
-                        #     print_3d(direction)
-                        # t_x = (border_x - current_point[0]) / direction[0]
-                        # t_y = (border_y - current_point[1]) / direction[1]
-                        # t_z = (border_z - current_point[2]) / direction[2]
-                        # length, border_ind = argmin(t_x, t_y, t_z)
-                        length = travel_to_voxels_border(current_point, current_voxel, direction,
-                                                                 voxel_size, next_voxel)
-                        ###############################
-                        # sum optical length of current voxel
+                        length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
                         beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
                         beta0 = beta_zero[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
                         tau += (beta-beta0)*length
-                        # current_voxel[border_ind] += sign(direction[border_ind])
-                        # step_in_direction(current_point, direction, length)
                         assign_3d(current_voxel, next_voxel)
+                        # current_voxel[border_ind] += sign(direction[border_ind])
                     # last step
                     length = calc_distance(current_point, next_point)
                     beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
@@ -227,7 +211,7 @@ class SceneLowMemGPU(object):
                     cloud_prob = 1 - (beta_air / beta)
                     attenuation *= cloud_prob * w0_cloud + (1-cloud_prob) * w0_air
                     for k in range(N_cams):
-                        project_point(current_point, Ps[k], pixel_shape, pixel)
+                        project_point(scatter_points[:, seg_ind], Ps[k], pixel_shape, pixel)
                         # pixel[0] = pixel_mat[0, k, seg_ind]
                         if pixel[0] != 255:
                             # pixel[1] = pixel_mat[1, k, seg_ind]
@@ -290,10 +274,10 @@ class SceneLowMemGPU(object):
                 for seg in range(N_seg):
                     seg_ind = seg + scatter_ind
                     grad_contrib[seg_ind] = 0
-                    assign_3d(current_point, scatter_points[:,seg_ind])
                     for sub_seg in range(seg, N_seg):
                         sub_seg_ind = sub_seg + scatter_ind
                         for k in range(path_contrib.shape[0]):
+                            assign_3d(current_point, scatter_points[:,sub_seg_ind])
                             project_point(current_point, Ps[k], pixel_shape, pixel)
                             # pixel[0] = pixel_mat[0,k, sub_seg_ind]
                             if pixel[0] != 255:
@@ -367,7 +351,7 @@ class SceneLowMemGPU(object):
                     le_contrib = (beta_c + (w0_air/w0_cloud) * beta_air) **(-1)
                     le_contrib -= 1 / (beta_c + beta_air)
                     for k in range(N_cams):
-                        project_point(current_point, Ps[k], pixel_shape, pixel)
+                        project_point(scatter_points[:, seg_ind], Ps[k], pixel_shape, pixel)
                         # pixel[0] = pixel_mat[0, k, seg_ind]
                         if pixel[0] != 255:
                             # pixel[1] = pixel_mat[1, k, seg_ind]
