@@ -314,6 +314,7 @@ def estimate_voxels_size(voxel_a, voxel_b):
 @cuda.jit(device=True)
 def project_point(point, P, pixels_shape, res):
     res[0] = 255
+    # res[1] = 255
     z = point[0]*P[2,0] + point[1]*P[2,1] + point[2]*P[2,2] + P[2,3]
     x = (point[0]*P[0,0] + point[1]*P[0,1] + point[2]*P[0,2] + P[0,3]) / z
     y = (point[0]*P[1,0] + point[1]*P[1,1] + point[2]*P[1,2] + P[1,3]) / z

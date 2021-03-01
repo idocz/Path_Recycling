@@ -1,7 +1,6 @@
 
 import sys
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
-sys.path.append("C:\\Users\\idocz\\Desktop\\repos\\3D_Graph_Renderer\\code")
 # from classes.scene import *
 from classes.scene_numba import *
 from classes.scene_lowmem_gpu import *
@@ -17,7 +16,7 @@ from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
-print("low_mem fast branch SHUBI THE KING")
+print("low_mem fast branch")
 
 ###################
 # Grid parameters #
@@ -105,8 +104,9 @@ visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-run_gpu = False
-# run_gpu = True
+run_gpu = True
+if Np >5e6:
+    run_gpu =False
 fake_cloud = beta_cloud #* 0.5
 # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
