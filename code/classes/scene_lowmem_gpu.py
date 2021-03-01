@@ -288,8 +288,8 @@ class SceneLowMemGPU(object):
                     for sub_seg in range(seg, N_seg):
                         sub_seg_ind = sub_seg + scatter_ind
                         for k in range(path_contrib.shape[0]):
-                            assign_3d(current_point, scatter_points[:,sub_seg_ind])
-                            project_point(current_point, Ps[k], pixel_shape, pixel)
+                            # assign_3d(current_point, scatter_points[:,sub_seg_ind])
+                            project_point(scatter_points[:,sub_seg_ind], Ps[k], pixel_shape, pixel)
                             if pixel[0] != 255:
                                 grad_contrib[seg_ind] += path_contrib[k, sub_seg_ind] * I_diff[k,pixel[0],pixel[1]]
 
@@ -427,7 +427,7 @@ class SceneLowMemGPU(object):
         self.threadsperblock = threadsperblock
         self.blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
         if init:
-            self.seed = np.random.randint(1, int(1e10))
+            self.seed = np.random.randint(1, int(1e9))
             self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
 
     def build_paths_list(self, Np, Ns, to_print=False):
