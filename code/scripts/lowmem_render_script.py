@@ -2,17 +2,12 @@
 import sys
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
-from classes.scene_numba import *
 from classes.scene_lowmem_gpu import *
 from classes.scene_gpu import *
 from classes.camera import *
 from classes.visual import *
 from time import time
-import matplotlib.pyplot as plt
 from classes.phase_function import *
-from scipy.io import loadmat
-from os.path import join
-from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
@@ -44,8 +39,8 @@ sun_angles = np.array([165, 0]) * (np.pi/180)
 beta_air = 0.004
 
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
-beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
-# beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
+# beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
 # beta_cloud *= 0.1
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
