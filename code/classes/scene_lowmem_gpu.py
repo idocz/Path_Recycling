@@ -279,7 +279,6 @@ class SceneLowMemGPU(object):
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
                 pixel = cuda.local.array(2, dtype=np.uint8)
-                current_point = cuda.local.array(3, dtype=float_precis)
                 scatter_ind = scatter_inds[tid]
                 N_seg = scatter_inds[tid + 1] - scatter_ind
                 for seg in range(N_seg):
