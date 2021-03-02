@@ -128,7 +128,7 @@ for i,Np_loop in enumerate(Nps):
     print(f"{i}: iteration took: {time() - start}")
 # print(f"grad_norm:{np.linalg.norm(grad)}")
 plt.semilogx(Nps, res)
-plt.title(f"Np={Np} Pixels={ps}, g={g_cloud}")
+plt.title(f"Np={Np} Pixels={ps}, g={g_cloud}, Ns={Ns}")
 plt.show()
 
 

@@ -11,7 +11,7 @@ reg_size = 32 / 8
 precis_size = 32 / 8
 divide_beta_eps = 1.25e-1
 # divide_beta_eps = 0
-b = 0.0
+b  = 0.0
 
 if float_eff == np.float64:
     eff_size *= 2

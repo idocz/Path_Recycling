@@ -1,5 +1,5 @@
 from classes.volume import *
-from utils import  theta_phi_to_direction
+from utils import theta_phi_to_direction
 from numba.cuda.random import create_xoroshiro128p_states
 from cuda_utils import *
 from time import time
@@ -8,7 +8,7 @@ from scipy.ndimage import binary_dilation
 threadsperblock = 256
 
 
-class SceneLowMemGPU(object):
+class SceneDDIS(object):
     def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, Ns):
         self.Ns = Ns
         self.volume = volume
@@ -135,6 +135,28 @@ class SceneLowMemGPU(object):
                     assign_3d(scatter_points_zipped[:, seg_ind], scatter_points[:,seg,tid])
                     # for k in range(N_cams):
                     #     project_point(scatter_points[:,seg,tid], Ps[k], pixel_shape, pixel_mat[:,k,seg_ind])
+
+        @cuda.jit()
+        def ddis_generation(beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, N_cams, ts, scatter_inds,
+                            scatter_points, starting_points, ddis_points):
+            tid = cuda.grid(1)
+            if tid < scatter_inds.shape[0] - 1:
+                scatter_ind = scatter_inds[tid]
+                N_seg = scatter_inds[tid+1] - scatter_ind
+                grid_shape = beta_cloud.shape
+                # local memory
+                current_voxel = cuda.local.array(3, dtype=np.uint8)
+                next_voxel = cuda.local.array(3, dtype=np.uint8)
+                starting_point = cuda.local.array(3, dtype=float_precis)
+                current_point = cuda.local.array(3, dtype=float_precis)
+                direction = cuda.local.array(3, dtype=float_precis)
+                new_direction = cuda.local.array(3, dtype=float_precis)
+
+                assign_3d(current_point, starting_point[:, tid])
+                get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
+                for seg in range(N_seg):
+                    seg_ind = seg + scatter_ind
+                    for k in N_cams:
 
 
 
@@ -419,11 +441,9 @@ class SceneLowMemGPU(object):
         self.threadsperblock = threadsperblock
         self.blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
         if init:
-            if seed is None:
-                self.seed = np.random.randint(1, int(1e9))
-            else:
-                self.seed = seed
+            self.seed = np.random.randint(1, int(1e10))
             self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
+
     def build_paths_list(self, Np, Ns, to_print=False):
         # inputs
         del(self.dpath_contrib)
@@ -440,11 +460,7 @@ class SceneLowMemGPU(object):
         dticket = cuda.to_device(np.zeros(1, dtype=np.int32))
 
         # cuda parameters
-        start = time()
         self.init_cuda_param(Np)
-        end = time()
-        if to_print:
-            print("initialize rng  took", end-start)
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
 

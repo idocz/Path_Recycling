@@ -99,7 +99,7 @@ visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-run_gpu = True
+run_gpu = False
 if Np >5e6:
     run_gpu =False
 fake_cloud = beta_cloud #* 0.5
@@ -113,21 +113,21 @@ if run_lowmem_gpu:
     Np_compilation = 10000
     cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
     # exit()
-    _, _ = scene_lowmem.render(cuda_paths, Np_compilation, 0)
+    _, _ = scene_lowmem.render(cuda_paths, 0)
     print("finished compliations")
     del(cuda_paths)
-    for i in range(1):
-        start = time()
-        volume.set_beta_cloud(fake_cloud)
-        cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
-        end = time()
-        print(f"building paths took: {end - start}")
-        volume.set_beta_cloud(beta_cloud)
-        start = time()
-        I_total_lowmem, grad_lowmem = scene_lowmem.render(cuda_paths, Np, 0, to_print=True)
-        print(f" rendering took: {time() - start}")
-        # print(f"grad_norm:{np.linalg.norm(grad)}")
-        del(cuda_paths)
+    start = time()
+    volume.set_beta_cloud(fake_cloud)
+    scene_lowmem.init_cuda_param(Np,True)
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
+    end = time()
+    print(f"building paths took: {end - start}")
+    volume.set_beta_cloud(beta_cloud)
+    start = time()
+    I_total_lowmem, grad_lowmem = scene_lowmem.render(cuda_paths, 0, to_print=True)
+    print(f" rendering took: {time() - start}")
+    # print(f"grad_norm:{np.linalg.norm(grad)}")
+    del(cuda_paths)
     visual.plot_images(I_total_lowmem, max_val, f"GPU_lowmem: maximum scattering={Ns}")
     if not run_gpu:
         plt.show()

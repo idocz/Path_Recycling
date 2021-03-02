@@ -115,8 +115,8 @@ iterations = 10000000
 to_mask = True
 tensorboard = True
 tensorboard_freq = 15
-# beta_max = beta_cloud.max()
-beta_max = 140
+beta_max = beta_cloud.max()
+# beta_max = 140
 win_size = 100
 
 
@@ -184,14 +184,13 @@ for iter in range(iterations):
 
     if iter % resample_freq == 0:
         if non_min_couter >= win_size:
-            if Np <= Np_gt and iter > start_iter:
+            if Np < Np_max and iter > start_iter:
                 Np = int(Np * 1.5)
                 scene_lowmem.init_cuda_param(Np, init=True)
                 resample_freq = 30
                 non_min_couter = 0
                 step_size *= 1.5
-            if Np >= Np_max:
-                Np = Np_max
+
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)
