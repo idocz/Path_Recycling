@@ -109,12 +109,14 @@ Np_max = int(5e7)
 Np = int(5e5)
 resample_freq = 10
 step_size = 3e8
+# Ns = 15
 Ns = 15
 iterations = 10000000
 to_mask = True
 tensorboard = True
 tensorboard_freq = 15
-beta_max = beta_cloud.max()
+# beta_max = beta_cloud.max()
+beta_max = 140
 win_size = 100
 
 
@@ -128,18 +130,11 @@ scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
 
 visual = Visual_wrapper(scene_lowmem)
 
-load_gt = False
-if load_gt:
-    checkpoint_id = "2212-1250-03"
-    I_gt = np.load(join("checkpoints",checkpoint_id,"data","gt.npz"))["images"]
-    cuda_paths = None
-    print("I_gt has been loaded")
-else:
-    scene_lowmem.init_cuda_param(Np_gt, init=True)
-    cuda_paths = scene_lowmem.build_paths_list(Np_gt, Ns)
-    I_gt = scene_lowmem.render(cuda_paths, Np_gt)
-    del(cuda_paths)
-    cuda_paths = None
+scene_lowmem.init_cuda_param(Np_gt, init=True)
+cuda_paths = scene_lowmem.build_paths_list(Np_gt, Ns)
+I_gt = scene_lowmem.render(cuda_paths)
+del(cuda_paths)
+cuda_paths = None
 max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, max_val, "GT")
 plt.show()
@@ -205,7 +200,7 @@ for iter in range(iterations):
         print(f"building path list took: {end - start}")
     # differentiable forward model
     start = time()
-    I_opt, total_grad = scene_lowmem.render(cuda_paths, Np, I_gt)
+    I_opt, total_grad = scene_lowmem.render(cuda_paths, I_gt=I_gt)
     end = time()
     print(f"rendering took: {end-start}")
 

@@ -141,7 +141,7 @@ class SceneLowMemGPU(object):
 
         @cuda.jit()
         def render_cuda(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, N_cams,
-                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,I_total, path_contrib, ):
+                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,I_total, path_contrib):
 
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
@@ -424,6 +424,9 @@ class SceneLowMemGPU(object):
 
     def build_paths_list(self, Np, Ns, to_print=False):
         # inputs
+        del(self.dpath_contrib)
+        del(self.dgrad_contrib)
+        self.Np = Np
         self.dbeta_zero.copy_to_device(self.volume.beta_cloud)
         beta_air = self.volume.beta_air
         # outputs
@@ -432,7 +435,7 @@ class SceneLowMemGPU(object):
         dstarting_points = cuda.to_device(np.empty((3, Np), dtype=float_precis))
         dscatter_points = cuda.to_device(np.empty((3, Ns, Np), dtype=float_precis))
         dscatter_sizes = cuda.to_device(np.empty(Np, dtype=np.uint8))
-        dticket = cuda.to_device(np.zeros(1, dtype=np.int32))
+        dticket = cuda.to_device(np.zeros(1, dtype=np.uint64))
 
         # cuda parameters
         self.init_cuda_param(Np)
@@ -451,7 +454,7 @@ class SceneLowMemGPU(object):
 
         start = time()
         ticket = dticket.copy_to_host()
-        Np_nonan = ticket[0]
+        Np_nonan = int(ticket[0])
         scatter_sizes = dscatter_sizes.copy_to_host()
         starting_points = dstarting_points.copy_to_host()
         del(dscatter_sizes)
@@ -502,33 +505,33 @@ class SceneLowMemGPU(object):
 
 
 
-    def render(self, cuda_paths, Np, I_gt=None, to_print=False):
+    def render(self, cuda_paths, I_gt=None, to_print=False):
         # east declerations
         Np_nonan = self.Np_nonan
         N_cams = len(self.cameras)
-        pixels_shape = self.cameras[0].pixels
+        # pixels_shape = self.cameras[0].pixels
         beta_air = self.volume.beta_air
         w0_cloud = self.volume.w0_cloud
         w0_air = self.volume.w0_air
-        g_cloud = self.g_cloud
+        # g_cloud = self.g_cloud
         self.init_cuda_param(Np_nonan)
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
         self.dbeta_cloud.copy_to_device(self.volume.beta_cloud)
-        self.dI_total.copy_to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=float_reg))
+        self.dI_total.copy_to_device(np.zeros((N_cams, *self.cameras[0].pixels), dtype=float_reg))
         start = time()
 
         # dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
 
 
         self.render_cuda[blockspergrid, threadsperblock] \
-            (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
+            (self.dbeta_cloud, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths,self.dI_total,
              self.dpath_contrib)
 
         cuda.synchronize()
         I_total = self.dI_total.copy_to_host()
-        I_total /= Np
+        I_total /= self.Np
         if to_print:
             print("render_cuda took:",time() - start)
         # return I_total
@@ -551,7 +554,7 @@ class SceneLowMemGPU(object):
             print("calc_gradient_contribution took:",time()-start)
         start = time()
         self.render_differentiable_cuda[blockspergrid, threadsperblock]\
-            (self.dbeta_cloud, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
+            (self.dbeta_cloud, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
                                        N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths, self.dI_total, self.dpath_contrib,
              self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad)
 
@@ -562,7 +565,7 @@ class SceneLowMemGPU(object):
         # del(dgrad_contrib)
         total_grad = self.dtotal_grad.copy_to_host()
 
-        total_grad /= (Np * N_cams)
+        total_grad /= (self.Np * N_cams)
         return I_total, total_grad
 
 
