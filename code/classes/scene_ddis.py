@@ -137,8 +137,8 @@ class SceneDDIS(object):
                     #     project_point(scatter_points[:,seg,tid], Ps[k], pixel_shape, pixel_mat[:,k,seg_ind])
 
         @cuda.jit()
-        def ddis_generation(beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, N_cams, ts, scatter_inds,
-                            scatter_points, starting_points, ddis_points):
+        def ddis_generation(beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, N_cams, ts, Ps, pixel_shape,
+                            scatter_inds, scatter_points, starting_points, ddis_starting_points, ddis_points, rng_states):
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
                 scatter_ind = scatter_inds[tid]
@@ -147,23 +147,67 @@ class SceneDDIS(object):
                 # local memory
                 current_voxel = cuda.local.array(3, dtype=np.uint8)
                 next_voxel = cuda.local.array(3, dtype=np.uint8)
+                pixel = cuda.local.array(2, dtype=np.uint8)
                 starting_point = cuda.local.array(3, dtype=float_precis)
                 current_point = cuda.local.array(3, dtype=float_precis)
+                next_point = cuda.local.array(3, dtype=float_precis)
                 direction = cuda.local.array(3, dtype=float_precis)
                 new_direction = cuda.local.array(3, dtype=float_precis)
 
-                assign_3d(current_point, starting_point[:, tid])
+                assign_3d(current_point, starting_points[:, tid])
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
-                for seg in range(N_seg):
+                for seg in range(-1, N_seg):
                     seg_ind = seg + scatter_ind
-                    for k in N_cams:
+                    for k in range(N_cams):
+                        project_point(current_point, Ps[k], pixel_shape, pixel)
+                        if pixel[0] != 255:
+                            p = sample_uniform(rng_states, tid)
+                            if p <= e_ddis:
+                                distance_to_camera = distance_and_direction(current_point, ts[k], direction)
+                            else:
+                                assign_3d(next_point, scatter_points[:, seg_ind])
+                                distance_and_direction(current_point, next_point, direction)
+                            HG_sample_direction(direction, g_cloud, new_direction, rng_states, tid)
+                            p = sample_uniform(rng_states, tid)
+                            tau_rand = -math.log(1 - p)
+                            ###########################################################
+                            ############## voxel_traversal_algorithm_save #############
+                            current_tau = 0.0
+                            while True:
+                                if not is_voxel_valid(current_voxel, grid_shape):
+                                    in_medium = False
+                                    break
+                                beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
+                                length = travel_to_voxels_border(current_point, current_voxel, new_direction, voxel_size,
+                                                                 next_voxel)
+                                current_tau += length * beta
+                                if current_tau >= tau_rand:
+                                    step_back = (current_tau - tau_rand) / beta
+                                    current_point[0] = current_point[0] - step_back * new_direction[0]
+                                    current_point[1] = current_point[1] - step_back * new_direction[1]
+                                    current_point[2] = current_point[2] - step_back * new_direction[2]
+                                    in_medium = True
+                                    break
+                                assign_3d(current_voxel, next_voxel)
+                            ######################## voxel_traversal_algorithm_save ###################
+                            ###########################################################################
+                            if in_medium:
+                                if seg == -1:
+                                    assign_3d(ddis_starting_points[:,k,tid], current_point)
+                                else:
+                                    assign_3d(ddis_points[:, k, seg_ind], current_point)
+
+
+
+
+
 
 
 
 
         @cuda.jit()
         def render_cuda(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, N_cams,
-                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,I_total, path_contrib):
+                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,I_total, path_contrib, rng_states):
 
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
@@ -172,14 +216,17 @@ class SceneDDIS(object):
                 grid_shape = beta_cloud.shape
                 # local memory
                 current_voxel = cuda.local.array(3, dtype=np.uint8)
-                # next_voxel = cuda.local.array(3, dtype=np.uint8)
+                next_voxel = cuda.local.array(3, dtype=np.uint8)
                 dest_voxel = cuda.local.array(3, dtype=np.uint8)
                 camera_voxel = cuda.local.array(3, dtype=np.uint8)
                 current_point = cuda.local.array(3, dtype=float_precis)
                 camera_point = cuda.local.array(3, dtype=float_precis)
                 next_point = cuda.local.array(3, dtype=np.float64)
                 direction = cuda.local.array(3, dtype=float_precis)
+                previous_direction = cuda.local.array(3, dtype=float_precis)
+                temp_direction = cuda.local.array(3, dtype=float_precis)
                 cam_direction = cuda.local.array(3, dtype=float_precis)
+                ddis_direction = cuda.local.array(3, dtype=float_precis)
 
                 # dest = cuda.local.array(3, dtype=float_precis)
                 pixel = cuda.local.array(2, dtype=np.uint8)
@@ -193,23 +240,22 @@ class SceneDDIS(object):
                 attenuation = 1.0
                 for seg in range(N_seg):
                     seg_ind = seg + scatter_ind
+
+                    # Propagating to new mother point
                     assign_3d(next_point, scatter_points[:, seg_ind])
                     get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
                     distance_and_direction(current_point, next_point, direction)
                     if seg > 0:
-                        cos_theta = dot_3d(cam_direction, direction)
+                        cos_theta = dot_3d(previous_direction, direction)
                         cloud_prob0 = (beta0 - beta_air) / beta0
                         # angle pdf
-                        IS *=  cloud_prob * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob) * rayleigh_pdf(cos_theta)
-                        IS /=  cloud_prob0 * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob0) * rayleigh_pdf(cos_theta)
+                        IS *= cloud_prob * HG_pdf(cos_theta, g_cloud) + (1 - cloud_prob) * rayleigh_pdf(cos_theta)
+                        IS /= cloud_prob0 * HG_pdf(cos_theta, g_cloud) + (1 - cloud_prob0) * rayleigh_pdf(cos_theta)
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
-
                     path_size = estimate_voxels_size(dest_voxel, current_voxel)
-
                     tau = 0
                     for pi in range(path_size):
-                        # length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
                         ##### border traversal #####
                         border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
                         border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
@@ -221,7 +267,7 @@ class SceneDDIS(object):
                         ###############################
                         beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
                         beta0 = beta_zero[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
-                        tau += (beta-beta0)*length
+                        tau += (beta - beta0) * length
                         # assign_3d(current_voxel, next_voxel)
                         current_voxel[border_ind] += sign(direction[border_ind])
                         step_in_direction(current_point, direction, length)
@@ -233,60 +279,106 @@ class SceneDDIS(object):
                     assign_3d(current_point, next_point)
                     ######################## voxel_fixed_traversal_algorithm_save ###################
                     ###########################################################################
-                    IS *= ((beta/beta0) * math.exp(-tau)) # length pdf
+                    IS *= ((beta / beta0) * math.exp(-tau))  # length pdf
                     # beta_c = beta - beta_air
                     cloud_prob = 1 - (beta_air / beta)
-                    attenuation *= cloud_prob * w0_cloud + (1-cloud_prob) * w0_air
+                    attenuation *= cloud_prob * w0_cloud + (1 - cloud_prob) * w0_air
+                    assign_3d(previous_direction, direction)  # using cam direction as temp direction
+
+                    ###################### DDIS LOCAL ESTIMATION #########################
                     for k in range(N_cams):
-                        project_point(current_point, Ps[k], pixel_shape, pixel)
-                        # pixel[0] = pixel_mat[0, k, seg_ind]
-                        if pixel[0] != 255:
-                            # pixel[1] = pixel_mat[1, k, seg_ind]
-                            assign_3d(camera_voxel, current_voxel)
-                            assign_3d(camera_point, current_point)
-                            distance_to_camera = distance_and_direction(camera_point, ts[k], cam_direction)
-                            cos_theta = dot_3d(direction, cam_direction)
-                            le_pdf = cloud_prob * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob) * rayleigh_pdf(cos_theta)
-                            pc = (1 / (distance_to_camera ** 2)) * IS * le_pdf * attenuation
-                            if is_in_medium[k]:
-                                assign_3d(next_point, ts[k])
-                            else:
-                                get_intersection_with_borders(camera_point, cam_direction, bbox, next_point)
+                        assign_3d(camera_point, current_point)
+                        assign_3d(camera_voxel, current_voxel)
+                        distance_and_direction(camera_point, ts[k], cam_direction)
+                        p = sample_uniform(rng_states, tid)
+                        if p <= e_ddis:
+                            assign_3d(temp_direction, cam_direction)
+                        else:
+                            assign_3d(temp_direction, direction)
 
-                            get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
-                            path_size = estimate_voxels_size(dest_voxel, current_voxel)
-                            ###########################################################################
-                            ######################## local estimation save ############################
-                            tau = 0
-                            for pi in range(path_size):
-                                ##### border traversal #####
-                                border_x = (camera_voxel[0] + (cam_direction[0] > 0)) * voxel_size[0]
-                                border_y = (camera_voxel[1] + (cam_direction[1] > 0)) * voxel_size[1]
-                                border_z = (camera_voxel[2] + (cam_direction[2] > 0)) * voxel_size[2]
-                                t_x = (border_x - camera_point[0]) / cam_direction[0]
-                                t_y = (border_y - camera_point[1]) / cam_direction[1]
-                                t_z = (border_z - camera_point[2]) / cam_direction[2]
-                                length, border_ind = argmin(t_x, t_y, t_z)
-                                ###############################
-                                # length, border, border_ind = travel_to_voxels_border_fast(camera_point, camera_voxel, cam_direction,
-                                #                                  voxel_size)
-                                beta_cam = beta_cloud[camera_voxel[0],camera_voxel[1], camera_voxel[2]] + beta_air
-                                tau += beta_cam * length
-                                # assign_3d(camera_voxel, next_voxel)
-                                step_in_direction(camera_point, cam_direction, length)
-                                # camera_point[border_ind] = border
-                                camera_voxel[border_ind] += sign(cam_direction[border_ind])
-                            # Last Step
-                            length = calc_distance(camera_point, next_point)
+                        p = sample_uniform(rng_states, tid)
+                        if p <= cloud_prob:
+                            HG_sample_direction(temp_direction, g_cloud, ddis_direction, rng_states, tid)
+                        else:
+                            rayleigh_sample_direction(temp_direction, ddis_direction, rng_states, tid)
+                        cos_theta_regular = dot_3d(ddis_direction, direction)
+                        cos_theta_ddis = dot_3d(ddis_direction, cam_direction)
+                        true_phase_pdf = cloud_prob*HG_pdf(cos_theta_regular, g_cloud) + (1-cloud_prob)*rayleigh_pdf(cos_theta_regular)
+                        ddis_phase_pdf = cloud_prob*HG_pdf(cos_theta_ddis, g_cloud) + (1-cloud_prob)*rayleigh_pdf(cos_theta_ddis)
+                        IS_cam = IS * (true_phase_pdf/(e_ddis*ddis_phase_pdf + (1-e_ddis)*true_phase_pdf))
+                        p = sample_uniform(rng_states, tid)
+                        tau_rand = -math.log(1 - p)
+                        ###########################################################
+                        ############## voxel_traversal_algorithm_save #############
+                        current_tau = 0.0
+                        while True:
+                            if not is_voxel_valid(camera_voxel, grid_shape):
+                                in_medium = False
+                                break
                             beta_cam = beta_cloud[camera_voxel[0], camera_voxel[1], camera_voxel[2]] + beta_air
-                            tau += beta_cam * length
-                            ######################## local estimation save ############################
-                            ###########################################################################
-                            pc *= math.exp(-tau)
-                            path_contrib[k,seg_ind] = pc
-                            cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
+                            length = travel_to_voxels_border(camera_point, camera_voxel, ddis_direction, voxel_size,
+                                                             next_voxel)
+                            current_tau += length * beta_cam
+                            if current_tau >= tau_rand:
+                                step_back = (current_tau - tau_rand) / beta_cam
+                                camera_point[0] = camera_point[0] - step_back * ddis_direction[0]
+                                camera_point[1] = camera_point[1] - step_back * ddis_direction[1]
+                                camera_point[2] = camera_point[2] - step_back * ddis_direction[2]
+                                in_medium = True
+                                break
+                            assign_3d(camera_voxel, next_voxel)
 
-                    assign_3d(cam_direction, direction) #using cam direction as temp direction
+                        if in_medium:
+
+                            project_point(camera_point, Ps[k], pixel_shape, pixel)
+                            if pixel[0] != 255:
+                                cloud_prob_cam = 1 - (beta_air / beta_cam)
+                                attenuation_cam = attenuation * (
+                                            cloud_prob_cam * w0_cloud + (1 - cloud_prob_cam) * w0_air)
+                                distance_to_camera = distance_and_direction(camera_point, ts[k], cam_direction)
+                                cos_theta = dot_3d(ddis_direction, cam_direction)
+                                le_pdf = cloud_prob_cam * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob_cam) * rayleigh_pdf(cos_theta)
+                                pc = (1 / (distance_to_camera ** 2)) * IS_cam * le_pdf * attenuation_cam
+                                if is_in_medium[k]:
+                                    assign_3d(next_point, ts[k])
+                                else:
+                                    get_intersection_with_borders(camera_point, cam_direction, bbox, next_point)
+
+                                get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
+                                path_size = estimate_voxels_size(dest_voxel, camera_voxel)
+                                ###########################################################################
+                                ######################## local estimation save ############################
+                                tau = 0
+                                for pi in range(path_size):
+                                    ##### border traversal #####
+                                    border_x = (camera_voxel[0] + (cam_direction[0] > 0)) * voxel_size[0]
+                                    border_y = (camera_voxel[1] + (cam_direction[1] > 0)) * voxel_size[1]
+                                    border_z = (camera_voxel[2] + (cam_direction[2] > 0)) * voxel_size[2]
+                                    t_x = (border_x - camera_point[0]) / cam_direction[0]
+                                    t_y = (border_y - camera_point[1]) / cam_direction[1]
+                                    t_z = (border_z - camera_point[2]) / cam_direction[2]
+                                    length, border_ind = argmin(t_x, t_y, t_z)
+                                    ###############################
+                                    # length, border, border_ind = travel_to_voxels_border_fast(camera_point, camera_voxel, cam_direction,
+                                    #                                  voxel_size)
+                                    beta_cam = beta_cloud[camera_voxel[0],camera_voxel[1], camera_voxel[2]] + beta_air
+                                    tau += beta_cam * length
+                                    # assign_3d(camera_voxel, next_voxel)
+                                    step_in_direction(camera_point, cam_direction, length)
+                                    # camera_point[border_ind] = border
+                                    camera_voxel[border_ind] += sign(cam_direction[border_ind])
+                                # Last Step
+                                length = calc_distance(camera_point, next_point)
+                                beta_cam = beta_cloud[camera_voxel[0], camera_voxel[1], camera_voxel[2]] + beta_air
+                                tau += beta_cam * length
+                                ######################## local estimation save ############################
+                                ###########################################################################
+
+                                pc *= math.exp(-tau)
+                                path_contrib[k,seg_ind] = pc
+                                cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
+                        ###################### DDIS LOCAL ESTIMATION #########################
+
 
 
         @cuda.jit()
@@ -433,6 +525,7 @@ class SceneDDIS(object):
 
         self.generate_paths = generate_paths
         self.post_generation = post_generation
+        self.ddis_generation = ddis_generation
         self.render_cuda = render_cuda
         self.calc_gradient_contribution = calc_gradient_contribution
         self.render_differentiable_cuda = render_differentiable_cuda
@@ -509,14 +602,24 @@ class SceneDDIS(object):
         cuda.synchronize()
         del(dscatter_points)
 
-
-        dstarting_points = cuda.to_device(starting_points)
-
         if to_print:
             post_alloc = 3 * (total_num_of_scatter + Np_nonan) * precis_size + 2 * self.N_cams * total_num_of_scatter + Np_nonan * 4
             post_alloc /= 1e9
             print(f"post allocation weights: {post_alloc: .2f} GB")
+            # print(f"ddis allocation weights: {(8*self.N_cams*3*(Np_nonan+total_num_of_scatter))/1e9: .2f} GB")
             print("post_generation took:", time() - start)
+
+        dstarting_points = cuda.to_device(starting_points)
+        # dddis_starting_points = cuda.to_device(np.empty((3,self.N_cams,Np_nonan),dtype=float_precis))
+        # dddis_points = cuda.to_device(np.empty((3,self.N_cams,total_num_of_scatter),dtype=float_precis))
+        # self.ddis_generation[blockspergrid, threadsperblock]\
+        #     (self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size, self.N_cams, self.dts,
+        #      self.dPs, self.dpixels_shape, dscatter_inds, dscatter_points_zipped, dstarting_points, dddis_starting_points, dddis_points,
+        #      self.rng_states)
+
+
+
+
 
 
         self.total_num_of_scatter = total_num_of_scatter
@@ -548,8 +651,9 @@ class SceneDDIS(object):
 
         self.render_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
-             self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths,self.dI_total,
-             self.dpath_contrib)
+             self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium,
+             *cuda_paths,self.dI_total,
+             self.dpath_contrib, self.rng_states )
 
         cuda.synchronize()
         I_total = self.dI_total.copy_to_host()
@@ -580,13 +684,13 @@ class SceneDDIS(object):
                                        N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths, self.dI_total, self.dpath_contrib,
              self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad)
 
+
         cuda.synchronize()
         if to_print:
             print("render_differentiable_cuda took:", time() - start)
         # del(dpath_contrib)
         # del(dgrad_contrib)
         total_grad = self.dtotal_grad.copy_to_host()
-
         total_grad /= (self.Np * N_cams)
         return I_total, total_grad
 

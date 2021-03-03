@@ -29,7 +29,7 @@ z_size = 0.04
 ########################
 # Atmosphere parameters#
 ########################
-sun_angles = np.array([165, 0]) * (np.pi/180)
+sun_angles = np.array([180, 0]) * (np.pi/180)
 
 
 #####################
@@ -89,7 +89,7 @@ for cam_ind in range(N_cams):
 
 # cameras = [cameras[0]]
 # Np = int(5e7)
-Np = int(5e6)
+Np = int(5e7)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)

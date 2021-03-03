@@ -2,8 +2,8 @@
 import sys
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
-from classes.scene_lowmem_gpu import *
 from classes.scene_ddis import *
+from classes.scene_lowmem_gpu import *
 from classes.camera import *
 from classes.visual import *
 from time import time
@@ -87,55 +87,84 @@ for cam_ind in range(N_cams):
 
 # cameras = [cameras[0]]
 Np = int(5e7)
-# Np = int(5e6)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)
-scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
-# scene_lowmem = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns)
-visual = Visual_wrapper(scene_lowmem)
+scene_ddis = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns)
+visual = Visual_wrapper(scene_ddis)
 
 fake_cloud = beta_cloud #* 0.5
 # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
+max_val = None
 
-print("####### Convergence Rate Script ########")
-scene_lowmem.init_cuda_param(Np, init=True)
-print("generating paths")
-Np_compilation = 1000
-cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
+run_lowmem = True
+
+print("####### gpu ddis renderer ########")
+scene_ddis.init_cuda_param(Np, init=True)
+print("STARTING COMPILATION")
+Np_compilation = 10000
+cuda_paths = scene_ddis.build_paths_list(Np_compilation, Ns)
 # exit()
-_, _ = scene_lowmem.render(cuda_paths, 0)
-print("finished compliations")
+_, _ = scene_ddis.render(cuda_paths, 0)
+print("FINISHED COMPILATION")
 del(cuda_paths)
-
+print("generating paths")
 start = time()
 volume.set_beta_cloud(fake_cloud)
-cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
+scene_ddis.init_cuda_param(Np)
+cuda_paths = scene_ddis.build_paths_list(Np, Ns, to_print=True)
 end = time()
 print(f"building paths took: {end - start}")
 volume.set_beta_cloud(beta_cloud)
-
-N = 100
-Nps = np.logspace(2,np.log10(Np), N)
-res = np.zeros(N, dtype=np.float64)
-for i,Np_loop in enumerate(Nps):
-    start = time()
-    # scene_lowmem.init_cuda_param(int(Np_loop),True)
-    cuda_paths = scene_lowmem.build_paths_list(int(Np_loop), Ns)
-    I_total_lowmem = scene_lowmem.render(cuda_paths, to_print=True)
-    del(cuda_paths)
-    res[i] = I_total_lowmem[0,ps//2,ps//2]
-    print(f"{i}: iteration took: {time() - start}")
+start = time()
+I_total_ddis = scene_ddis.render(cuda_paths, to_print=True)
+print(f" rendering took: {time() - start}")
 # print(f"grad_norm:{np.linalg.norm(grad)}")
-plt.semilogx(Nps, res)
-plt.title(f"Np={Np} Pixels={ps}, g={g_cloud}, Ns={Ns}")
-plt.show()
+del(cuda_paths)
+visual.plot_images(I_total_ddis, max_val, f"ddis: maximum scattering={Ns}, e_ddis={e_ddis}")
+if not run_lowmem:
+    plt.show()
 
+if run_lowmem:
+    scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
+    print("####### gpu lowmem renderer ########")
+    scene_lowmem.init_cuda_param(Np, init=True)
+    print("STARTING COMPILATION")
+    Np_compilation = 10000
+    cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
+    _, _ = scene_lowmem.render(cuda_paths, 0)
+    print("FINISHED COMPILATION")
+    del (cuda_paths)
+    print("generating paths")
+    start = time()
+    volume.set_beta_cloud(fake_cloud)
+    scene_lowmem.init_cuda_param(Np)
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns, to_print=True)
+    end = time()
+    print(f"building paths took: {end - start}")
+    volume.set_beta_cloud(beta_cloud)
+    start = time()
+    I_total_lowmem = scene_lowmem.render(cuda_paths, to_print=True)
+    print(f" rendering took: {time() - start}")
+    # print(f"grad_norm:{np.linalg.norm(grad)}")
+    del (cuda_paths)
 
+    print("generating paths")
+    start = time()
+    volume.set_beta_cloud(fake_cloud)
+    scene_lowmem.init_cuda_param(Np)
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns, to_print=True)
+    end = time()
+    print(f"building paths took: {end - start}")
+    volume.set_beta_cloud(beta_cloud)
+    start = time()
+    I_total_lowmem2 = scene_lowmem.render(cuda_paths, to_print=True)
 
-
-
+    visual.plot_images(I_total_lowmem, max_val, f"lowmem: maximum scattering={Ns}")
+    visual.scatter_plot_comparison(I_total_lowmem, I_total_ddis, "lowmem vs ddis")
+    visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
+    plt.show()
 
 
 

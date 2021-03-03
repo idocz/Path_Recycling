@@ -70,7 +70,6 @@ class Visual_wrapper(object):
         plt.scatter(X, Y)
         plt.plot([min_val, max_val], [min_val,max_val])
         plt.title(title)
-        plt.show()
 
 
 

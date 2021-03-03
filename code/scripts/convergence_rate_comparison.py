@@ -92,7 +92,7 @@ Ns = 15
 
 volume.set_mask(beta_cloud>0)
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
-# scene_lowmem = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns)
+scene_ddis = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns)
 visual = Visual_wrapper(scene_lowmem)
 
 fake_cloud = beta_cloud #* 0.5
@@ -101,6 +101,7 @@ fake_cloud = beta_cloud #* 0.5
 
 print("####### Convergence Rate Script ########")
 scene_lowmem.init_cuda_param(Np, init=True)
+scene_ddis.init_cuda_param(Np, init=True)
 print("generating paths")
 Np_compilation = 1000
 cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
@@ -119,19 +120,31 @@ volume.set_beta_cloud(beta_cloud)
 N = 100
 Nps = np.logspace(2,np.log10(Np), N)
 res = np.zeros(N, dtype=np.float64)
+res_ddis = np.zeros(N, dtype=np.float64)
 for i,Np_loop in enumerate(Nps):
     start = time()
     # scene_lowmem.init_cuda_param(int(Np_loop),True)
     cuda_paths = scene_lowmem.build_paths_list(int(Np_loop), Ns)
+    cuda_paths_ddis = scene_ddis.build_paths_list(int(Np_loop), Ns)
     I_total_lowmem = scene_lowmem.render(cuda_paths, to_print=True)
+    I_total_ddis= scene_ddis.render(cuda_paths_ddis, to_print=True)
     del(cuda_paths)
     res[i] = I_total_lowmem[0,ps//2,ps//2]
+    res_ddis[i] = I_total_ddis[0,ps//2,ps//2]
     print(f"{i}: iteration took: {time() - start}")
 # print(f"grad_norm:{np.linalg.norm(grad)}")
-plt.semilogx(Nps, res)
-plt.title(f"Np={Np} Pixels={ps}, g={g_cloud}, Ns={Ns}")
+y_max = np.max([res.max(), res_ddis.max()])
+plt.figure()
+plt.semilogx(Nps, res, label="lowmem")
+plt.semilogx(Nps, res_ddis, label="DDIS")
+plt.title(f"LOWMEM vs DDIS: Np={Np} Pixels={ps}, g={g_cloud}, Ns={Ns}")
+plt.ylim(0, y_max)
+plt.legend()
+# plt.figure()
+# plt.semilogx(Nps, res_ddis)
+# plt.title(f"DDIS: Np={Np} Pixels={ps}, g={g_cloud}, Ns={Ns}")
+# plt.ylim(0, y_max)
 plt.show()
-
 
 
 
