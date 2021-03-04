@@ -262,8 +262,8 @@ class SceneLowMemGPU(object):
                             ###########################################################################
                             pc *= math.exp(-tau)
                             path_contrib[k,seg_ind] = pc
-                            if seg != 0:
-                                cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
+                            # if seg != 0:
+                            cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
 
                     assign_3d(cam_direction, direction) #using cam direction as temp direction
 

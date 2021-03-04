@@ -86,10 +86,9 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[0]]
-Np = int(5e7)
-# Np = int(5e6)
+# Np = int(5e7) // 55**2
+Np = int(1e7)
 Ns = 15
-
 volume.set_mask(beta_cloud>0)
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
 scene_ddis = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns)
@@ -101,24 +100,11 @@ fake_cloud = beta_cloud #* 0.5
 
 print("####### Convergence Rate Script ########")
 scene_lowmem.init_cuda_param(Np, init=True)
-scene_ddis.init_cuda_param(Np, init=True)
-print("generating paths")
-Np_compilation = 1000
-cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
-# exit()
-_, _ = scene_lowmem.render(cuda_paths, 0)
-print("finished compliations")
-del(cuda_paths)
+scene_ddis.init_cuda_param(Np, init=True, seed=scene_lowmem.seed)
 
-start = time()
-volume.set_beta_cloud(fake_cloud)
-cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
-end = time()
-print(f"building paths took: {end - start}")
-volume.set_beta_cloud(beta_cloud)
 
 N = 100
-Nps = np.logspace(2,np.log10(Np), N)
+Nps = np.logspace(1,np.log10(Np), N)
 res = np.zeros(N, dtype=np.float64)
 res_ddis = np.zeros(N, dtype=np.float64)
 for i,Np_loop in enumerate(Nps):
@@ -126,6 +112,7 @@ for i,Np_loop in enumerate(Nps):
     # scene_lowmem.init_cuda_param(int(Np_loop),True)
     cuda_paths = scene_lowmem.build_paths_list(int(Np_loop), Ns)
     cuda_paths_ddis = scene_ddis.build_paths_list(int(Np_loop), Ns)
+    print(scene_lowmem.total_num_of_scatter == scene_ddis.total_num_of_scatter)
     I_total_lowmem = scene_lowmem.render(cuda_paths, to_print=True)
     I_total_ddis= scene_ddis.render(cuda_paths_ddis, to_print=True)
     del(cuda_paths)
@@ -137,7 +124,7 @@ y_max = np.max([res.max(), res_ddis.max()])
 plt.figure()
 plt.semilogx(Nps, res, label="lowmem")
 plt.semilogx(Nps, res_ddis, label="DDIS")
-plt.title(f"LOWMEM vs DDIS: Np={Np} Pixels={ps}, g={g_cloud}, Ns={Ns}")
+plt.title(f"LOWMEM vs DDIS: Np={Np:.0e} Pixels={ps}, g={g_cloud}, Ns={Ns}, e_ddis={e_ddis}")
 plt.ylim(0, y_max)
 plt.legend()
 # plt.figure()

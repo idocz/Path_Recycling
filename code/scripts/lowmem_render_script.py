@@ -40,6 +40,7 @@ beta_air = 0.004
 
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
 beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+# beta_cloud = loadmat(join("data", "gt_cloud0.mat"))["beta"]
 # beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
 # beta_cloud *= 0.1
 edge_x = x_size * beta_cloud.shape[0]
@@ -77,7 +78,7 @@ pixels = np.array((ps, ps))
 N_cams = 9
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
-R = height_factor * edge_z
+R = height_factor * edge_z *0
 for cam_ind in range(N_cams):
     phi = 0
     theta = (-(N_cams // 2) + cam_ind) * 40

@@ -54,7 +54,7 @@ bbox = np.array([[0, edge_x],
 # cloud_preproccess(beta_cloud, 120)
 beta_cloud = beta_cloud.astype(float_reg)
 print(beta_cloud.shape)
-w0_air = 0.912
+w0_air = 1
 w0_cloud = 0.9
 # Declerations
 grid = Grid(bbox, beta_cloud.shape)
@@ -100,7 +100,7 @@ max_val = None
 
 run_lowmem = True
 
-print("####### gpu ddis renderer ########")
+print("####### ddis renderer ########")
 scene_ddis.init_cuda_param(Np, init=True)
 print("STARTING COMPILATION")
 Np_compilation = 10000
@@ -113,22 +113,37 @@ print("generating paths")
 start = time()
 volume.set_beta_cloud(fake_cloud)
 scene_ddis.init_cuda_param(Np)
-cuda_paths = scene_ddis.build_paths_list(Np, Ns, to_print=True)
+cuda_paths = scene_ddis.build_paths_list(Np, Ns)#, to_print=True)
 end = time()
 print(f"building paths took: {end - start}")
 volume.set_beta_cloud(beta_cloud)
 start = time()
-I_total_ddis = scene_ddis.render(cuda_paths, to_print=True)
+I_total_ddis = scene_ddis.render(cuda_paths)#, to_print=True)
+print(f" rendering took: {time() - start}")
+# print(f"grad_norm:{np.linalg.norm(grad)}")
+del(cuda_paths)
+print("generating paths")
+start = time()
+volume.set_beta_cloud(fake_cloud)
+scene_ddis.init_cuda_param(Np)
+cuda_paths = scene_ddis.build_paths_list(Np, Ns)#, to_print=True)
+end = time()
+print(f"building paths took: {end - start}")
+volume.set_beta_cloud(beta_cloud)
+start = time()
+I_total_ddis2 = scene_ddis.render(cuda_paths)#, to_print=True)
 print(f" rendering took: {time() - start}")
 # print(f"grad_norm:{np.linalg.norm(grad)}")
 del(cuda_paths)
 visual.plot_images(I_total_ddis, max_val, f"ddis: maximum scattering={Ns}, e_ddis={e_ddis}")
-if not run_lowmem:
-    plt.show()
+plt.show()
+visual.scatter_plot_comparison(I_total_ddis, I_total_ddis2, "ddis vs ddis")
+plt.show()
 
 if run_lowmem:
+
     scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
-    print("####### gpu lowmem renderer ########")
+    print("####### lowmem renderer ########")
     scene_lowmem.init_cuda_param(Np, init=True)
     print("STARTING COMPILATION")
     Np_compilation = 10000
@@ -140,30 +155,33 @@ if run_lowmem:
     start = time()
     volume.set_beta_cloud(fake_cloud)
     scene_lowmem.init_cuda_param(Np)
-    cuda_paths = scene_lowmem.build_paths_list(Np, Ns, to_print=True)
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)#, to_print=True)
     end = time()
     print(f"building paths took: {end - start}")
     volume.set_beta_cloud(beta_cloud)
     start = time()
-    I_total_lowmem = scene_lowmem.render(cuda_paths, to_print=True)
+    I_total_lowmem = scene_lowmem.render(cuda_paths)#, to_print=True)
     print(f" rendering took: {time() - start}")
     # print(f"grad_norm:{np.linalg.norm(grad)}")
     del (cuda_paths)
+
 
     print("generating paths")
     start = time()
     volume.set_beta_cloud(fake_cloud)
     scene_lowmem.init_cuda_param(Np)
-    cuda_paths = scene_lowmem.build_paths_list(Np, Ns, to_print=True)
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)#, to_print=True)
     end = time()
     print(f"building paths took: {end - start}")
     volume.set_beta_cloud(beta_cloud)
     start = time()
-    I_total_lowmem2 = scene_lowmem.render(cuda_paths, to_print=True)
+    I_total_lowmem2 = scene_lowmem.render(cuda_paths)#, to_print=True)
 
     visual.plot_images(I_total_lowmem, max_val, f"lowmem: maximum scattering={Ns}")
-    visual.scatter_plot_comparison(I_total_lowmem, I_total_ddis, "lowmem vs ddis")
+    plt.show()
     visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
+    plt.show()
+    visual.scatter_plot_comparison(I_total_lowmem, I_total_ddis, "lowmem vs ddis")
     plt.show()
 
 

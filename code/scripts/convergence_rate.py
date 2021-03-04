@@ -68,7 +68,7 @@ height_factor = 2.5
 
 focal_length = 50e-3
 sensor_size = np.array((40e-3, 40e-3)) / height_factor
-ps = 55
+ps = 1
 
 pixels = np.array((ps, ps))
 
@@ -86,7 +86,7 @@ for cam_ind in range(N_cams):
     cameras.append(camera)
 
 # cameras = [cameras[0]]
-Np = int(5e7)
+Np = int(1e7)
 # Np = int(5e6)
 Ns = 15
 
@@ -117,7 +117,7 @@ print(f"building paths took: {end - start}")
 volume.set_beta_cloud(beta_cloud)
 
 N = 100
-Nps = np.logspace(2,np.log10(Np), N)
+Nps = np.logspace(4,np.log10(Np), N)
 res = np.zeros(N, dtype=np.float64)
 for i,Np_loop in enumerate(Nps):
     start = time()
