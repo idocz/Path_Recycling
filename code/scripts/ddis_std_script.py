@@ -87,6 +87,7 @@ for cam_ind in range(N_cams):
 
 # cameras = [cameras[0]]
 Np = int(1e5)
+Np_mean = int(1e7)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)
@@ -98,91 +99,26 @@ fake_cloud = beta_cloud #* 0.5
 
 max_val = None
 
-run_lowmem = True
+run_lowmem = False
 
 print("####### ddis renderer ########")
-scene_ddis.init_cuda_param(Np, init=True)
-print("STARTING COMPILATION")
-Np_compilation = 10000
-cuda_paths = scene_ddis.build_paths_list(Np_compilation, Ns)
-# exit()
-_, _ = scene_ddis.render(cuda_paths, 0)
-print("FINISHED COMPILATION")
+scene_ddis.init_cuda_param(Np_mean, init=True)
+# RENDERING I_MEAN
+scene_ddis.init_cuda_param(Np_mean)
+cuda_paths = scene_ddis.build_paths_list(Np_mean, Ns)#, to_print=True)
+I_mean = scene_ddis.render(cuda_paths)#, to_print=True)
 del(cuda_paths)
-print("generating paths")
-start = time()
-volume.set_beta_cloud(fake_cloud)
-scene_ddis.init_cuda_param(Np)
+# RENDERING STD
 cuda_paths = scene_ddis.build_paths_list(Np, Ns)#, to_print=True)
-end = time()
-print(f"building paths took: {end - start}")
-volume.set_beta_cloud(beta_cloud)
-start = time()
-I_total_ddis, I_std = scene_ddis.render_std(cuda_paths)#, to_print=True)
+I_total_ddis, I_std = scene_ddis.render_std(cuda_paths, I_mean)#, to_print=True)
 print("ddis var:", I_std.mean())
-print(f" rendering took: {time() - start}")
-# print(f"grad_norm:{np.linalg.norm(grad)}")
 del(cuda_paths)
-print("generating paths")
-start = time()
-volume.set_beta_cloud(fake_cloud)
-scene_ddis.init_cuda_param(Np)
-cuda_paths = scene_ddis.build_paths_list(Np, Ns)#, to_print=True)
-end = time()
-print(f"building paths took: {end - start}")
-volume.set_beta_cloud(beta_cloud)
-start = time()
-print(f" rendering took: {time() - start}")
-# print(f"grad_norm:{np.linalg.norm(grad)}")
-del(cuda_paths)
-visual.plot_images(I_total_ddis, max_val, f"ddis: Ns={Ns}, e_ddis={e_ddis}")
+# PLOTTING
+visual.plot_images(I_total_ddis, f"ddis: Ns={Ns}, e_ddis={e_ddis}")
 plt.show()
-visual.plot_images(I_std, max_val, f"ddis: Ns={Ns}, e_ddis={e_ddis} sum={I_std.sum():.2e} max={I_std.max():.2e}")
+visual.plot_images(I_std, f"ddis: Ns={Ns}, e_ddis={e_ddis} sum={I_std.sum():.2e} max={I_std.max():.2e}")
 plt.show()
 exit()
-if run_lowmem:
-
-    scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
-    print("####### lowmem renderer ########")
-    scene_lowmem.init_cuda_param(Np, init=True)
-    print("STARTING COMPILATION")
-    Np_compilation = 10000
-    cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
-    _, _ = scene_lowmem.render(cuda_paths, 0)
-    print("FINISHED COMPILATION")
-    del (cuda_paths)
-    print("generating paths")
-    start = time()
-    volume.set_beta_cloud(fake_cloud)
-    scene_lowmem.init_cuda_param(Np)
-    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)#, to_print=True)
-    end = time()
-    print(f"building paths took: {end - start}")
-    volume.set_beta_cloud(beta_cloud)
-    start = time()
-    I_total_lowmem = scene_lowmem.render(cuda_paths)#, to_print=True)
-    print(f" rendering took: {time() - start}")
-    # print(f"grad_norm:{np.linalg.norm(grad)}")
-    del (cuda_paths)
-
-
-    print("generating paths")
-    start = time()
-    volume.set_beta_cloud(fake_cloud)
-    scene_lowmem.init_cuda_param(Np)
-    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)#, to_print=True)
-    end = time()
-    print(f"building paths took: {end - start}")
-    volume.set_beta_cloud(beta_cloud)
-    start = time()
-    I_total_lowmem2 = scene_lowmem.render(cuda_paths)#, to_print=True)
-
-    visual.plot_images(I_total_lowmem, max_val, f"lowmem: maximum scattering={Ns}")
-    plt.show()
-    visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
-    plt.show()
-    visual.scatter_plot_comparison(I_total_lowmem, I_total_ddis, "lowmem vs ddis")
-    plt.show()
 
 
 

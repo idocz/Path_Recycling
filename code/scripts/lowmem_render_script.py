@@ -11,6 +11,7 @@ from classes.phase_function import *
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
+from numba.cuda.random import init_xoroshiro128p_states
 print("low_mem fast branch")
 
 ###################
@@ -29,7 +30,7 @@ z_size = 0.04
 ########################
 # Atmosphere parameters#
 ########################
-sun_angles = np.array([180, 0]) * (np.pi/180)
+sun_angles = np.array([165, 0]) * (np.pi/180)
 
 
 #####################
@@ -71,14 +72,14 @@ height_factor = 2.5
 
 focal_length = 50e-3
 sensor_size = np.array((40e-3, 40e-3)) / height_factor
-ps = 55
+ps = 40
 
 pixels = np.array((ps, ps))
 
-N_cams = 9
+N_cams = 1
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
-R = height_factor * edge_z *0
+R = height_factor * edge_z
 for cam_ind in range(N_cams):
     phi = 0
     theta = (-(N_cams // 2) + cam_ind) * 40
@@ -90,7 +91,8 @@ for cam_ind in range(N_cams):
 
 # cameras = [cameras[0]]
 # Np = int(5e7)
-Np = int(5e7)
+# Np = int(5e7)
+Np = int(5e6)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)
@@ -100,7 +102,7 @@ visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-run_gpu = False
+run_gpu = True
 if Np >5e6:
     run_gpu =False
 fake_cloud = beta_cloud #* 0.5
@@ -111,15 +113,13 @@ if run_lowmem_gpu:
     print("####### gpu lowmem renderer ########")
     scene_lowmem.init_cuda_param(Np, init=True)
     print("generating paths")
-    Np_compilation = 10000
+    Np_compilation = 1000
     cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
-    # exit()
     _, _ = scene_lowmem.render(cuda_paths, 0)
     print("finished compliations")
     del(cuda_paths)
-    start = time()
     volume.set_beta_cloud(fake_cloud)
-    scene_lowmem.init_cuda_param(Np,True)
+    start = time()
     cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
     end = time()
     print(f"building paths took: {end - start}")
@@ -129,9 +129,12 @@ if run_lowmem_gpu:
     print(f" rendering took: {time() - start}")
     # print(f"grad_norm:{np.linalg.norm(grad)}")
     del(cuda_paths)
-    visual.plot_images(I_total_lowmem, max_val, f"GPU_lowmem: maximum scattering={Ns}")
-    if not run_gpu:
-        plt.show()
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
+    I_total_lowmem, grad_lowmem2 = scene_lowmem.render(cuda_paths, 0)
+    visual.plot_images(I_total_lowmem, f"GPU_lowmem: maximum scattering={Ns}")
+    plt.show()
+    visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
+    plt.show()
 
 if run_gpu:
     print("####### gpu renderer ########")
@@ -139,9 +142,9 @@ if run_gpu:
     print("generating paths")
 
 
-    cuda_paths, Np_nonan = scene_gpu.build_paths_list(1000, Ns)
+    cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np_compilation, Ns)
     # exit()
-    I_total, _ = scene_gpu.render(cuda_paths, 1000, Np_nonan, 0)
+    I_total, _ = scene_gpu.render(cuda_paths, Np_compilation, Np_nonan, 0)
     print("finished compliations")
     del(cuda_paths)
     start = time()
@@ -160,15 +163,18 @@ if run_gpu:
     print(f" rendering took: {time() - start}")
     # print(f"grad_norm:{np.linalg.norm(grad)}")
     del(cuda_paths)
-    visual.plot_images(I_total2, max_val, f"GPU: maximum scattering={Ns}")
-    # plt.show()
+    visual.plot_images(I_total2, f"GPU: maximum scattering={Ns}")
+    plt.show()
 
 
     visual.scatter_plot_comparison(I_total_lowmem, I_total1, "gpu vs gpu_lowmem")
+    plt.show()
     visual.scatter_plot_comparison(I_total1, I_total2, "gpu vs gpu")
+    plt.show()
     visual.scatter_plot_comparison(grad1, grad_lowmem, "GRAD: gpu vs gpu_lowmem")
+    plt.show()
     visual.scatter_plot_comparison(grad1, grad2, "GRAD:gpu vs gpu")
-
+    plt.show()
 
 
 

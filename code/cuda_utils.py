@@ -3,8 +3,8 @@ import math
 import numpy as np
 from numba.cuda.random import xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
 
-float_eff = np.float64
-float_reg = np.float64
+float_eff = np.float32
+float_reg = np.float32
 float_precis = np.float64
 eff_size = 32 / 8
 reg_size = 32 / 8

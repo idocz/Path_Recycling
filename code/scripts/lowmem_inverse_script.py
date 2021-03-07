@@ -136,7 +136,7 @@ I_gt = scene_lowmem.render(cuda_paths)
 del(cuda_paths)
 cuda_paths = None
 max_val = np.max(I_gt, axis=(1,2))
-visual.plot_images(I_gt, max_val, "GT")
+visual.plot_images(I_gt, "GT")
 plt.show()
 
 # mask_thresh = 2e-6

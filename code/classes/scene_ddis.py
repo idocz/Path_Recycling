@@ -47,7 +47,10 @@ class SceneDDIS(object):
         self.dpath_contrib = None
         self.dgrad_contrib = None
 
-
+        @cuda.jit()
+        def scatter_cound(Np, Ns, beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, sun_direction, starting_points,
+                           scatter_points, scatter_sizes, rng_states, ticket):
+            pass
         @cuda.jit()
         def generate_paths(Np, Ns, beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, sun_direction, starting_points,
                            scatter_points, scatter_sizes, rng_states, ticket):
@@ -573,8 +576,8 @@ class SceneDDIS(object):
 
         @cuda.jit()
         def render_var(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, N_cams,
-                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds, first_moment, second_moment,
-                            rng_states):
+                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds, first_moment,
+                       second_moment, rng_states):
 
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
@@ -974,7 +977,7 @@ class SceneDDIS(object):
         return I_total, total_grad
 
 
-    def render_std(self, cuda_paths, to_print=False):
+    def render_std(self, cuda_paths, I_mean=None, to_print=False):
         # east declerations
         Np_nonan = self.Np_nonan
         N_cams = len(self.cameras)
@@ -994,21 +997,22 @@ class SceneDDIS(object):
         # dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
 
         # dI_scatter = cuda.to_device(np.zeros(self.Ns+1, dtype=float_precis))
-
-        cuda.synchronize()
         self.render_var[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium,
              *cuda_paths, dfirst_moment, dsecond_moment, self.rng_states)
-
-        first_moment = dfirst_moment.copy_to_host()
+        cuda.synchronize()
+        if I_mean is None:
+            first_moment = dfirst_moment.copy_to_host()
+        else:
+            first_moment = I_mean * self.Np
         second_moment = dsecond_moment.copy_to_host()
         I_var = second_moment - (1/self.Np)*first_moment**2
         I_var /= self.Np-1
         I_total = first_moment/self.Np
         if to_print:
             print("render_cuda took:", time() - start)
-        return I_total, np.sqrt(I_var)
+        return I_total, np.sqrt(np.abs(I_var))
 
     def space_curving(self, image_mask, to_print=True):
         shape = self.volume.grid.shape

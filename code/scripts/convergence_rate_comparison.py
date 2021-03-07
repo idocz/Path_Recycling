@@ -41,7 +41,7 @@ beta_air = 0.004
 # beta_cloud = loadmat(join("data", "clouds_dist.mat"))["beta"]
 beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
 # beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
-# beta_cloud *= 0.1
+beta_cloud *= 0.1
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
 edge_z = z_size * beta_cloud.shape[2]
@@ -87,11 +87,12 @@ for cam_ind in range(N_cams):
 
 # cameras = [cameras[0]]
 # Np = int(5e7) // 55**2
-Np = int(1e7)
+Np = int(5e7)
 Ns = 15
+Ns_ddis = 15
 volume.set_mask(beta_cloud>0)
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
-scene_ddis = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns)
+scene_ddis = SceneDDIS(volume, cameras, sun_angles, g_cloud, Ns_ddis)
 visual = Visual_wrapper(scene_lowmem)
 
 fake_cloud = beta_cloud #* 0.5
@@ -104,20 +105,20 @@ scene_ddis.init_cuda_param(Np, init=True, seed=scene_lowmem.seed)
 
 
 N = 100
-Nps = np.logspace(1,np.log10(Np), N)
+Nps = np.logspace(3,np.log10(Np), N)
 res = np.zeros(N, dtype=np.float64)
 res_ddis = np.zeros(N, dtype=np.float64)
 for i,Np_loop in enumerate(Nps):
     start = time()
     # scene_lowmem.init_cuda_param(int(Np_loop),True)
     cuda_paths = scene_lowmem.build_paths_list(int(Np_loop), Ns)
-    cuda_paths_ddis = scene_ddis.build_paths_list(int(Np_loop), Ns)
+    cuda_paths_ddis = scene_ddis.build_paths_list(int(Np_loop), Ns_ddis)
     print(scene_lowmem.total_num_of_scatter == scene_ddis.total_num_of_scatter)
     I_total_lowmem = scene_lowmem.render(cuda_paths, to_print=True)
     I_total_ddis= scene_ddis.render(cuda_paths_ddis, to_print=True)
     del(cuda_paths)
-    res[i] = I_total_lowmem[0,ps//2,ps//2]
-    res_ddis[i] = I_total_ddis[0,ps//2,ps//2]
+    res[i] = I_total_lowmem.mean()#[0,ps//2,ps//2]
+    res_ddis[i] = I_total_ddis.mean()#[0,ps//2,ps//2]
     print(f"{i}: iteration took: {time() - start}")
 # print(f"grad_norm:{np.linalg.norm(grad)}")
 y_max = np.max([res.max(), res_ddis.max()])

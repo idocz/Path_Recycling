@@ -19,21 +19,23 @@
     <select>
       <path>
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="BRANCH:remove_ISs" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:origin/variance_reduction" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="DDIS without seg=1 contribution added. lowmem does not consider seg =1 for now. (DONT FORGET)">
-      <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="ddis has finished. next goal: mem-eff path generating">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_ddis.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_ddis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/convergence_rate.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/convergence_rate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/convergence_rate_comparison.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/convergence_rate_comparison.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/ddis_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ddis_render_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/ddis_std_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ddis_std_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,7 +53,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$/.." value="fast_lowmem_rendering" />
+        <entry key="$PROJECT_DIR$/.." value="variance_reduction" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -83,7 +85,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ddis_render_script">
+  <component name="RunManager" selected="Python.lowmem_render_script">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -163,6 +165,25 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="ddis_std_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ddis_std_script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="down_up_sample" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -185,7 +206,26 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="lowmem_render_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="lowmem_inverse_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="lowmem_render_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -210,12 +250,9 @@
       <item itemvalue="Python.convergence_rate" />
       <item itemvalue="Python.convergence_rate_comparison" />
       <item itemvalue="Python.lowmem_render_script" />
+      <item itemvalue="Python.ddis_std_script" />
+      <item itemvalue="Python.lowmem_inverse_script" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.lowmem_render_script" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -239,7 +276,7 @@
       <workItem from="1614250202097" duration="4848000" />
       <workItem from="1614257630383" duration="2388000" />
       <workItem from="1614755895193" duration="26417000" />
-      <workItem from="1614839933421" duration="25093000" />
+      <workItem from="1614839933421" duration="50724000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -402,7 +439,14 @@
       <option name="project" value="LOCAL" />
       <updated>1614786979330</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="ddis has finished. next goal: mem-eff path generating">
+      <created>1614871251056</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1614871251056</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -419,7 +463,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="remove_ISs" />
+                        <option value="origin/variance_reduction" />
                       </list>
                     </value>
                   </entry>
@@ -455,7 +499,8 @@
     <MESSAGE value="improving genrate_path" />
     <MESSAGE value="commit before implementing binary-step" />
     <MESSAGE value="DDIS without seg=1 contribution added. lowmem does not consider seg =1 for now. (DONT FORGET)" />
-    <option name="LAST_COMMIT_MESSAGE" value="DDIS without seg=1 contribution added. lowmem does not consider seg =1 for now. (DONT FORGET)" />
+    <MESSAGE value="ddis has finished. next goal: mem-eff path generating" />
+    <option name="LAST_COMMIT_MESSAGE" value="ddis has finished. next goal: mem-eff path generating" />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
@@ -470,18 +515,18 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="428" y="154" key="#SSH_Configurations/0.0.1920.1040@0.0.1920.1040" timestamp="1610529499956" />
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1614869157680">
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1615123732968">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614869157680" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1615123732968" />
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog" timestamp="1613997691795">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613997691795" />
-    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1610123158967">
+    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1615112249158">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1610123158967" />
+    <state x="1357" y="256" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1615112249158" />
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1614785554911">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -494,58 +539,58 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="105" y="130" width="1715" height="817" key="DirDiffDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1610457755516" />
-    <state x="733" y="293" key="FileChooserDialogImpl" timestamp="1614863242846">
+    <state x="733" y="293" key="FileChooserDialogImpl" timestamp="1615106693720">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1614863242846" />
-    <state width="1877" height="360" key="GridCell.Tab.0.bottom" timestamp="1614869149935">
+    <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1615106693720" />
+    <state width="1877" height="241" key="GridCell.Tab.0.bottom" timestamp="1615127320927">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.0.center" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="241" key="GridCell.Tab.0.center" timestamp="1615127320927">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.0.left" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="241" key="GridCell.Tab.0.left" timestamp="1615127320927">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.0.right" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="241" key="GridCell.Tab.0.right" timestamp="1615127320927">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.1.bottom" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="241" key="GridCell.Tab.1.bottom" timestamp="1615127320928">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.1.center" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="241" key="GridCell.Tab.1.center" timestamp="1615127320928">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.1.left" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="241" key="GridCell.Tab.1.left" timestamp="1615127320928">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
-    <state width="1877" height="360" key="GridCell.Tab.1.right" timestamp="1614869149935">
+    <state width="1877" height="241" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="241" key="GridCell.Tab.1.right" timestamp="1615127320928">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="360" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614869149935" />
+    <state width="1877" height="241" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
     <state x="506" y="165" key="SettingsEditor" timestamp="1614844959265">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="506" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1614844959265" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1614786988851">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1614871260138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614786988851" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614871260138" />
     <state x="571" y="149" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1614765485541">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="571" y="149" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1614765485541" />
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1614244752611">
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1615126635564">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614244752611" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1615126635564" />
     <state x="900" y="255" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey" timestamp="1613997693008">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -617,7 +662,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>315</line>
+          <line>372</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -626,19 +671,29 @@
           <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>484</line>
-          <option name="timeStamp" value="36" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/scene_ddis.py</url>
-          <line>662</line>
-          <option name="timeStamp" value="38" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/ddis_render_script.py</url>
           <line>44</line>
           <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_ddis.py</url>
+          <line>1008</line>
+          <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>509</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>550</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>486</line>
+          <option name="timeStamp" value="44" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -649,7 +704,8 @@
     <SUITE FILE_PATH="coverage/code$scene_lowmem_gpu.coverage" NAME="scene_lowmem_gpu Coverage Results" MODIFIED="1614243411397" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/classes" />
     <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$ddis_render_script.coverage" NAME="ddis_render_script Coverage Results" MODIFIED="1614868993663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
-    <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1614189441276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$ddis_std_script.coverage" NAME="ddis_std_script Coverage Results" MODIFIED="1615102211432" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1615127161038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$space_curving_draft.coverage" NAME="space_curving_draft Coverage Results" MODIFIED="1610613269911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$down_up_sample.coverage" NAME="down_up_sample Coverage Results" MODIFIED="1614189388337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
