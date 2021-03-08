@@ -76,7 +76,7 @@ ps = 40
 
 pixels = np.array((ps, ps))
 
-N_cams = 1
+N_cams = 9
 cameras = []
 volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
 R = height_factor * edge_z
