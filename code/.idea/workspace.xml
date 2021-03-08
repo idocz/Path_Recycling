@@ -28,6 +28,7 @@
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="ddis has finished. next goal: mem-eff path generating">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -286,6 +287,7 @@
       <workItem from="1614839933421" duration="50724000" />
       <workItem from="1615188013190" duration="921000" />
       <workItem from="1615189225123" duration="464000" />
+      <workItem from="1615191227371" duration="4070000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -532,10 +534,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613997691795" />
-    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1615112249158">
+    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1615195035737">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="1357" y="256" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1615112249158" />
+    <state x="1357" y="256" key="#xdebugger.evaluate/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615195035737" />
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1614785554911">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -553,38 +556,46 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1615106693720" />
-    <state width="1877" height="241" key="GridCell.Tab.0.bottom" timestamp="1615127320927">
+    <state width="1877" height="241" key="GridCell.Tab.0.bottom" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="241" key="GridCell.Tab.0.center" timestamp="1615127320927">
+    <state width="1877" height="241" key="GridCell.Tab.0.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
+    <state width="1877" height="241" key="GridCell.Tab.0.center" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="241" key="GridCell.Tab.0.left" timestamp="1615127320927">
+    <state width="1877" height="241" key="GridCell.Tab.0.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
+    <state width="1877" height="241" key="GridCell.Tab.0.left" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="241" key="GridCell.Tab.0.right" timestamp="1615127320927">
+    <state width="1877" height="241" key="GridCell.Tab.0.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
+    <state width="1877" height="241" key="GridCell.Tab.0.right" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="241" key="GridCell.Tab.1.bottom" timestamp="1615127320928">
+    <state width="1877" height="241" key="GridCell.Tab.0.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
+    <state width="1877" height="241" key="GridCell.Tab.1.bottom" timestamp="1615194952766">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="241" key="GridCell.Tab.1.center" timestamp="1615127320928">
+    <state width="1877" height="241" key="GridCell.Tab.1.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952766" />
+    <state width="1877" height="241" key="GridCell.Tab.1.center" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="241" key="GridCell.Tab.1.left" timestamp="1615127320928">
+    <state width="1877" height="241" key="GridCell.Tab.1.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
+    <state width="1877" height="241" key="GridCell.Tab.1.left" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="241" key="GridCell.Tab.1.right" timestamp="1615127320928">
+    <state width="1877" height="241" key="GridCell.Tab.1.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
+    <state width="1877" height="241" key="GridCell.Tab.1.right" timestamp="1615194952765">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="241" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615194952765" />
     <state x="506" y="165" key="SettingsEditor" timestamp="1614844959265">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -680,11 +691,6 @@
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/cuda_utils.py</url>
-          <line>226</line>
-          <option name="timeStamp" value="35" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/ddis_render_script.py</url>
           <line>44</line>
           <option name="timeStamp" value="39" />
@@ -696,18 +702,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>508</line>
-          <option name="timeStamp" value="42" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>554</line>
+          <line>557</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>485</line>
-          <option name="timeStamp" value="44" />
+          <line>548</line>
+          <option name="timeStamp" value="48" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -719,7 +720,7 @@
     <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$ddis_render_script.coverage" NAME="ddis_render_script Coverage Results" MODIFIED="1614868993663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$ddis_std_script.coverage" NAME="ddis_std_script Coverage Results" MODIFIED="1615102211432" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
-    <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1615127161038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1615194936586" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$space_curving_draft.coverage" NAME="space_curving_draft Coverage Results" MODIFIED="1610613269911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$down_up_sample.coverage" NAME="down_up_sample Coverage Results" MODIFIED="1614189388337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />

@@ -111,7 +111,7 @@ fake_cloud = beta_cloud #* 0.5
 max_val = None
 if run_lowmem_gpu:
     print("####### gpu lowmem renderer ########")
-    scene_lowmem.init_cuda_param(Np, init=True)
+    # scene_lowmem.init_cuda_param(Np, init=True)
     print("generating paths")
     Np_compilation = 1000
     cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
@@ -120,7 +120,7 @@ if run_lowmem_gpu:
     del(cuda_paths)
     volume.set_beta_cloud(fake_cloud)
     start = time()
-    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
+    cuda_paths = scene_lowmem.build_paths_list(Np, Ns, to_print=True)
     end = time()
     print(f"building paths took: {end - start}")
     volume.set_beta_cloud(beta_cloud)

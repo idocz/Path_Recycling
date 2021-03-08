@@ -11,6 +11,7 @@ threadsperblock = 256
 class SceneLowMemGPU(object):
     def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, Ns):
         self.Ns = Ns
+        self.Np = 0
         self.volume = volume
         self.sun_angles = sun_angles
         self.sun_direction = theta_phi_to_direction(*sun_angles)
@@ -113,11 +114,10 @@ class SceneLowMemGPU(object):
 
                 # voxels and scatter sizes for this path (this is not in a loop)
                 N_seg = seg + int(in_medium)
-                if N_seg != 0:
-                    scatter_sizes[tid] = N_seg
+                scatter_sizes[tid] = N_seg
 
         @cuda.jit()
-        def generate_paths(Np, beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, sun_direction, scatter_inds,
+        def generate_paths(Np, Ns, beta_cloud, beta_air, g_cloud, bbox, bbox_size, voxel_size, sun_direction, scatter_inds,
                            starting_points, scatter_points, ticket, rng_states):
 
             tid = cuda.grid(1)
@@ -485,7 +485,7 @@ class SceneLowMemGPU(object):
         # inputs
         del(self.dpath_contrib)
         del(self.dgrad_contrib)
-        self.Np = Np
+
         self.dbeta_zero.copy_to_device(self.volume.beta_cloud)
         beta_air = self.volume.beta_air
         # outputs
@@ -498,7 +498,7 @@ class SceneLowMemGPU(object):
 
         # cuda parameters
         start = time()
-        self.init_cuda_param(Np)
+        self.init_cuda_param(Np, init=self.Np != Np)
         end = time()
         if to_print:
             print("initialize rng  took", end-start)
@@ -506,6 +506,7 @@ class SceneLowMemGPU(object):
         blockspergrid = self.blockspergrid
         start = time()
         rng_stats_cpu = self.rng_states.copy_to_host()
+        drng_states = cuda.to_device(rng_stats_cpu)
         self.count_scatter_sizes[blockspergrid, threadsperblock]\
             (Np, Ns, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
             self.dsun_direction, dscatter_sizes, self.rng_states)
@@ -514,7 +515,7 @@ class SceneLowMemGPU(object):
 
         cuda.synchronize()
 
-        drng_states = cuda.to_device(rng_stats_cpu)
+
         if to_print:
             print("count_scatter_sizes took:", time() - start)
 
@@ -532,7 +533,7 @@ class SceneLowMemGPU(object):
         dscatter_inds = cuda.to_device(scatter_inds)
         # dtids = cuda.to_device(tids)
         dscatter_points = cuda.to_device(np.empty((3, total_num_of_scatter), dtype=float_precis))
-        dstarting_points = cuda.to_device(np.empty((3, Np_nonan), dtype=float_precis))
+        dstarting_points = cuda.to_device(np.zeros((3, Np_nonan), dtype=float_precis))
         # self.init_cuda_param(Np_nonan)
         # threadsperblock = self.threadsperblock
         # blockspergrid = self.blockspergrid
@@ -540,11 +541,13 @@ class SceneLowMemGPU(object):
 
         dticket = cuda.to_device(np.zeros(1, dtype=np.int32))
         self.generate_paths[blockspergrid, threadsperblock] \
-            (Np, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
-            self.dsun_direction, scatter_inds, dstarting_points, dscatter_points, dticket, drng_states)
+            (Np, Ns, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
+            self.dsun_direction, dscatter_inds, dstarting_points, dscatter_points, dticket, drng_states)
         cuda.synchronize()
+
         # del(tids)
         del(dscatter_inds)
+        del(dticket)
         scatter_sizes = scatter_sizes[cond]
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
         scatter_inds = np.cumsum(scatter_inds)
@@ -559,6 +562,7 @@ class SceneLowMemGPU(object):
         self.Np_nonan = Np_nonan
         self.dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
         self.dgrad_contrib = cuda.to_device(np.empty(self.total_num_of_scatter, dtype=float_reg))
+        self.Np = Np
         return dstarting_points, dscatter_points, dscatter_inds
 
 
