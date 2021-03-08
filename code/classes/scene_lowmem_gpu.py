@@ -84,8 +84,7 @@ class SceneLowMemGPU(object):
                             in_medium = False
                             break
                         beta = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]] + beta_air
-                        length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
-                                                         next_voxel)
+                        length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
                         current_tau += length * beta
                         if current_tau >= tau_rand:
                             step_back = (current_tau - tau_rand) / beta
@@ -175,6 +174,7 @@ class SceneLowMemGPU(object):
 
                     if seg == 0:
                         ind = cuda.atomic.add(ticket, 0, 1)
+                        assign_3d(starting_points[:, ind], starting_point)
                     # keeping track of scatter points
                     scatter_points[0, seg_ind] = current_point[0]
                     scatter_points[1, seg_ind] = current_point[1]
@@ -190,8 +190,7 @@ class SceneLowMemGPU(object):
                     assign_3d(direction, new_direction)
 
                 # voxels and scatter sizes for this path (this is not in a loop)
-                if N_seg!= 0:
-                    assign_3d(starting_points[:,ind], starting_point)
+
 
 
 
@@ -211,7 +210,7 @@ class SceneLowMemGPU(object):
                 camera_voxel = cuda.local.array(3, dtype=np.uint8)
                 current_point = cuda.local.array(3, dtype=float_precis)
                 camera_point = cuda.local.array(3, dtype=float_precis)
-                next_point = cuda.local.array(3, dtype=np.float64)
+                next_point = cuda.local.array(3, dtype=float_precis)
                 direction = cuda.local.array(3, dtype=float_precis)
                 cam_direction = cuda.local.array(3, dtype=float_precis)
 
@@ -485,7 +484,6 @@ class SceneLowMemGPU(object):
         # inputs
         del(self.dpath_contrib)
         del(self.dgrad_contrib)
-
         self.dbeta_zero.copy_to_device(self.volume.beta_cloud)
         beta_air = self.volume.beta_air
         # outputs
@@ -521,12 +519,13 @@ class SceneLowMemGPU(object):
 
 
         scatter_sizes = dscatter_sizes.copy_to_host()
+        scatter_sizes_copy = np.copy(scatter_sizes)
         cond = scatter_sizes!=0
         Np_nonan = np.sum(cond)
         # scatter_sizes = scatter_sizes[cond]
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
         scatter_inds = np.cumsum(scatter_inds)
-        total_num_of_scatter = np.sum(scatter_sizes)
+        total_num_of_scatter = scatter_inds[-1]
         # tids = np.arange(Np)
         # tids = tids[cond]
 
@@ -545,11 +544,10 @@ class SceneLowMemGPU(object):
             self.dsun_direction, dscatter_inds, dstarting_points, dscatter_points, dticket, drng_states)
         cuda.synchronize()
 
-        # del(tids)
         del(dscatter_inds)
         del(dticket)
-        scatter_sizes = scatter_sizes[cond]
-        scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
+        scatter_sizes_copy = scatter_sizes_copy[cond]
+        scatter_inds = np.concatenate([np.array([0]), scatter_sizes_copy])
         scatter_inds = np.cumsum(scatter_inds)
         dscatter_inds = cuda.to_device(scatter_inds)
 
