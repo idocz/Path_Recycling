@@ -105,10 +105,10 @@ for cam_ind in range(N_cams):
 
 # Simulation parameters
 Np_gt = int(5e7)
-Np_max = int(5e7)
+Np_max = int(1e8)
 Np = int(5e5)
 resample_freq = 10
-step_size = 3e8
+step_size = 2e8
 # Ns = 15
 Ns = 15
 iterations = 10000000
@@ -130,7 +130,6 @@ scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
 
 visual = Visual_wrapper(scene_lowmem)
 
-scene_lowmem.init_cuda_param(Np_gt, init=True)
 cuda_paths = scene_lowmem.build_paths_list(Np_gt, Ns)
 I_gt = scene_lowmem.render(cuda_paths)
 del(cuda_paths)
@@ -186,11 +185,9 @@ for iter in range(iterations):
         if non_min_couter >= win_size:
             if Np < Np_max and iter > start_iter:
                 Np = int(Np * 1.5)
-                scene_lowmem.init_cuda_param(Np, init=True)
                 resample_freq = 30
                 non_min_couter = 0
                 step_size *= 1.5
-
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)

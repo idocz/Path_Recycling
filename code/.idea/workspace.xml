@@ -20,7 +20,7 @@
       <path>
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="BRANCH:variance_reduction" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:remove_ISs" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </select>
   </component>
@@ -28,7 +28,9 @@
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="ddis has finished. next goal: mem-eff path generating">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -288,6 +290,8 @@
       <workItem from="1615189225123" duration="464000" />
       <workItem from="1615191227371" duration="4070000" />
       <workItem from="1615199655502" duration="5666000" />
+      <workItem from="1615205918966" duration="5552000" />
+      <workItem from="1615212381603" duration="8613000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -474,7 +478,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="variance_reduction" />
+                        <option value="remove_ISs" />
                       </list>
                     </value>
                   </entry>
@@ -534,20 +538,20 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613997691795" />
-    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1615205468311">
+    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1615277072821">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="1357" y="256" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1615112249158" />
-    <state x="1357" y="256" key="#xdebugger.evaluate/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205468311" />
+    <state x="1357" y="256" key="#xdebugger.evaluate/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615277072821" />
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1614785554911">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1920.1040@0.0.1920.1040" timestamp="1614785554911" />
-    <state x="42" y="374" width="1715" height="475" maximized="true" key="DiffContextDialog" timestamp="1615202644105">
+    <state x="155" y="269" width="1715" height="476" maximized="true" key="DiffContextDialog" timestamp="1615272964754">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="168" y="122" width="1715" height="475" maximized="true" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614781134149" />
-    <state x="42" y="374" width="1715" height="475" maximized="true" key="DiffContextDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615202644105" />
+    <state x="155" y="269" width="1715" height="476" maximized="true" key="DiffContextDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615272964754" />
     <state x="105" y="130" width="1715" height="817" key="DirDiffDialog" timestamp="1610457755516">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -556,46 +560,46 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1615106693720" />
-    <state width="1877" height="357" key="GridCell.Tab.0.bottom" timestamp="1615205531517">
+    <state width="1877" height="357" key="GridCell.Tab.0.bottom" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="357" key="GridCell.Tab.0.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531517" />
-    <state width="1877" height="357" key="GridCell.Tab.0.center" timestamp="1615205531517">
+    <state width="1877" height="357" key="GridCell.Tab.0.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
+    <state width="1877" height="357" key="GridCell.Tab.0.center" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="357" key="GridCell.Tab.0.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531517" />
-    <state width="1877" height="357" key="GridCell.Tab.0.left" timestamp="1615205531516">
+    <state width="1877" height="357" key="GridCell.Tab.0.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
+    <state width="1877" height="357" key="GridCell.Tab.0.left" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="357" key="GridCell.Tab.0.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531516" />
-    <state width="1877" height="357" key="GridCell.Tab.0.right" timestamp="1615205531517">
+    <state width="1877" height="357" key="GridCell.Tab.0.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
+    <state width="1877" height="357" key="GridCell.Tab.0.right" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
-    <state width="1877" height="357" key="GridCell.Tab.0.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531517" />
-    <state width="1877" height="357" key="GridCell.Tab.1.bottom" timestamp="1615205531518">
+    <state width="1877" height="357" key="GridCell.Tab.0.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
+    <state width="1877" height="357" key="GridCell.Tab.1.bottom" timestamp="1615278520685">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="357" key="GridCell.Tab.1.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531518" />
-    <state width="1877" height="357" key="GridCell.Tab.1.center" timestamp="1615205531518">
+    <state width="1877" height="357" key="GridCell.Tab.1.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520685" />
+    <state width="1877" height="357" key="GridCell.Tab.1.center" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="357" key="GridCell.Tab.1.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531518" />
-    <state width="1877" height="357" key="GridCell.Tab.1.left" timestamp="1615205531517">
+    <state width="1877" height="357" key="GridCell.Tab.1.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
+    <state width="1877" height="357" key="GridCell.Tab.1.left" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="357" key="GridCell.Tab.1.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531517" />
-    <state width="1877" height="357" key="GridCell.Tab.1.right" timestamp="1615205531518">
+    <state width="1877" height="357" key="GridCell.Tab.1.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
+    <state width="1877" height="357" key="GridCell.Tab.1.right" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
-    <state width="1877" height="357" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615205531518" />
+    <state width="1877" height="357" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
     <state x="506" y="165" key="SettingsEditor" timestamp="1614844959265">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -604,10 +608,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614871260138" />
-    <state x="628" y="254" key="VcsDiffUtil.ChangesDialog" timestamp="1615202683937">
+    <state x="628" y="254" key="VcsDiffUtil.ChangesDialog" timestamp="1615273318462">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="628" y="254" key="VcsDiffUtil.ChangesDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615202683937" />
+    <state x="628" y="254" key="VcsDiffUtil.ChangesDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615273318462" />
     <state x="571" y="149" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1614765485541">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -701,9 +705,19 @@
           <option name="timeStamp" value="40" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/lowmem_render_script.py</url>
+          <line>129</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/lowmem_render_script.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>498</line>
-          <option name="timeStamp" value="49" />
+          <line>526</line>
+          <option name="timeStamp" value="59" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -722,7 +736,7 @@
     <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$ddis_render_script.coverage" NAME="ddis_render_script Coverage Results" MODIFIED="1614868993663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$ddis_std_script.coverage" NAME="ddis_std_script Coverage Results" MODIFIED="1615102211432" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
-    <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1615205112868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1615278373713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$space_curving_draft.coverage" NAME="space_curving_draft Coverage Results" MODIFIED="1610613269911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$down_up_sample.coverage" NAME="down_up_sample Coverage Results" MODIFIED="1614189388337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />

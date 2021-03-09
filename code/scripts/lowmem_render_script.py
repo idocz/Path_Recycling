@@ -7,11 +7,9 @@ from classes.scene_gpu import *
 from classes.camera import *
 from classes.visual import *
 from time import time
-from classes.phase_function import *
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)
-from numba.cuda.random import init_xoroshiro128p_states
 print("low_mem fast branch")
 
 ###################
@@ -30,7 +28,7 @@ z_size = 0.04
 ########################
 # Atmosphere parameters#
 ########################
-sun_angles = np.array([180, 0]) * (np.pi/180)
+sun_angles = np.array([165, 0]) * (np.pi/180)
 
 
 #####################
@@ -64,7 +62,6 @@ volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
 # phase_function = UniformPhaseFunction()
 g_cloud = 0.85
 g_air = 0.8
-phase_function = HGPhaseFunction(g_cloud)
 #######################
 # Cameras declaration #
 #######################
@@ -113,11 +110,11 @@ if run_lowmem_gpu:
     print("####### gpu lowmem renderer ########")
     # scene_lowmem.init_cuda_param(Np, init=True)
     Np_compilation = 1000
-    # cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
-    # _, _ = scene_lowmem.render(cuda_paths, 0)
-    # print("finished compliations")
-    # del(cuda_paths)
-    volume.set_beta_cloud(fake_cloud)
+    cuda_paths = scene_lowmem.build_paths_list(Np_compilation, Ns)
+    _, _ = scene_lowmem.render(cuda_paths, 0)
+    print("finished compliations")
+    del(cuda_paths)
+    scene_lowmem.init_cuda_param(Np, init=True)
     print("generating paths")
     start = time()
     cuda_paths = scene_lowmem.build_paths_list(Np, Ns, to_print=True)
@@ -130,10 +127,12 @@ if run_lowmem_gpu:
     # print(f"grad_norm:{np.linalg.norm(grad)}")
     del(cuda_paths)
     cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
-    I_total_lowmem, grad_lowmem2 = scene_lowmem.render(cuda_paths, 0)
+    I_total_lowmem2, grad_lowmem2 = scene_lowmem.render(cuda_paths, 0)
     visual.plot_images(I_total_lowmem, f"GPU_lowmem: maximum scattering={Ns}")
     plt.show()
     visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
+    plt.show()
+    visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
     plt.show()
 
 if run_gpu:

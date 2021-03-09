@@ -166,3 +166,9 @@ def cloud_preproccess(beta_cloud, beta_max):
 
 def relative_distance(A, B):
     return np.sum(np.abs(A-B)) / np.sum(np.abs(A))
+
+def cuda_weight(cuda_path):
+    sum = 0
+    for array in cuda_path:
+        sum += array.nbytes
+    return sum/1e9
