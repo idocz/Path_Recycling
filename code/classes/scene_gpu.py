@@ -408,7 +408,7 @@ class SceneGPU(object):
         self.threadsperblock = threadsperblock
         self.blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
         if init:
-            self.seed = np.random.randint(1, int(1e10))
+            self.seed = np.random.randint(1, int(1e9))
             self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
 
     def build_paths_list(self, Np, Ns):

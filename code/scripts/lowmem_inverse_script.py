@@ -123,6 +123,8 @@ win_size = 100
 seed = None
 # Cloud mask (GT for now)
 cloud_mask = beta_cloud > 0
+cloud_mask = np.load(join("data","Rico_mask_2.npy"))
+
 # cloud_mask = beta_cloud >= 0
 volume.set_mask(cloud_mask)
 
