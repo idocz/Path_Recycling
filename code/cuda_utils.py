@@ -471,3 +471,9 @@ def argmin(x,y,z):
         return y,1
     else:
         return z,2
+
+@cuda.jit(device=True)
+def mat_dot_vec(mat, vec, res):
+    res[0] = mat[0,0] * vec[0] + mat[0,1] * vec[1] + mat[0,2] * vec[2]
+    res[1] = mat[1,0] * vec[0] + mat[1,1] * vec[1] + mat[1,2] * vec[2]
+    res[2] = mat[2,0] * vec[0] + mat[2,1] * vec[1] + mat[2,2] * vec[2]

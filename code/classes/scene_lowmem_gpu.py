@@ -463,6 +463,24 @@ class SceneLowMemGPU(object):
 
                     assign_3d(cam_direction, direction)  # using cam direction as temp direction
 
+
+        @cuda.jit()
+        def space_curving(N_cams, width, height, spp, I_mask, RKs_inv):
+            i, j, cam_ind = cuda.grid(3)
+            tid = height * width * N_cams + width * j + i
+            pixel = cuda.local.array(3, dtype=float_precis)
+            direction = cuda.local.array(3, dtype=float_precis)
+            pixel[2] = 1
+            if i < width and j < height and cam_ind < N_cams:
+                if I_mask[cam_ind,j,i]:
+                    for s in range(spp):
+                        pixel[0] = i + sample_uniform()
+                        pixel[1] = j + sample_uniform()
+                        mat_dot_vec(RKs_inv[cam_ind], pixel, direction)
+
+
+
+
         self.calc_scatter_sizes = calc_scatter_sizes
         self.generate_paths = generate_paths
         self.render_cuda = render_cuda

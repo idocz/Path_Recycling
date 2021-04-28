@@ -8,6 +8,8 @@ from os.path import join
 from datetime import datetime
 from scipy.ndimage import zoom
 from scipy.io import loadmat
+from struct import pack, unpack
+from os import path, unlink
 
 def theta_phi_to_direction(theta, phi):
     return np.array([np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)])
@@ -46,7 +48,7 @@ def add_camera_to_ax(ax, t, R, label):
     camera_z = R[:, 2]
     ax.quiver(t[0], t[1], t[2], *camera_x, color='r', length=dist)
     ax.quiver(t[0], t[1], t[2], *camera_y, color='b', length=dist)
-    ax.quiver(t[0], t[1], t[2], *camera_z, color='g', length=dist)
+    ax.quiver(t[0], t[1], t[2], *camera_z, color='g', length=dist*5)
     ax.scatter(*t, s=20)
     text_x = t + camera_x * dist
     text_y = t + camera_y * dist
@@ -172,3 +174,38 @@ def cuda_weight(cuda_path):
     for array in cuda_path:
         sum += array.nbytes
     return sum/1e9
+
+
+def get_density(filename, scale):
+    """
+    Generates 3D matrix (ndarray) from a binary of .vol type
+    Output
+      volume: 3D matrix of float representing the voxels values of the object
+      bounding_box: bounding box of the object [xmin, ymin, zmin, xmax, ymax, zmax]
+    """
+
+    fid = open(filename, encoding="utf-8")
+
+    # Reading first 48 bytes of volFileName as header , count begins from zero
+    header = fid.read(48)
+
+    # Converting header bytes 8-21 to volume size [xsize,ysize,zsize] , type = I : 32 bit integer
+    size = unpack(3 * 'I', bytearray(header[8:20]))
+
+    # Converting header bytes 24-47 to bounding box [xmin,ymin,zmin],[xmax,ymax,zmax] type = f : 32 bit float
+    # bounding_box = unpack(6*'f', bytearray(header[24:48]))
+
+    # Converting data bytes 49-* to a 3D matrix size of [xsize,ysize,zsize],
+    # type = f : 32 bit float
+    binary_data = fid.read()
+    nCells = size[0] * size[1] * size[2]
+    volume = np.array(unpack(nCells * 'f', bytearray(binary_data)))
+    volume = volume.reshape(size, order='F')
+    fid.close()
+    for ax in range(3):
+        u_volume, counts = np.unique(volume, axis=ax, return_counts=True)
+        if np.all(counts == 2):
+            volume = u_volume
+
+    volume *= scale
+    return volume
