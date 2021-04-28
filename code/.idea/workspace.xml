@@ -19,18 +19,17 @@
     <select>
       <path>
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="BRANCH:remove_ISs" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:origin/variance_reduction" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="ddis has finished. next goal: mem-eff path generating">
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="pull variance_reduction">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +58,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -68,7 +68,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/scripts" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Path_Recycling_Surfaces/code" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
   </component>
@@ -79,7 +79,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.lowmem_render_script">
+  <component name="RunManager" selected="Python.lowmem_inverse_script">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -216,9 +216,6 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -238,9 +235,12 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="sftp://idocz@132.68.58.142:22/home/idocz/miniconda3/envs/py36/bin/python" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -291,7 +291,15 @@
       <workItem from="1615191227371" duration="4070000" />
       <workItem from="1615199655502" duration="5666000" />
       <workItem from="1615205918966" duration="5552000" />
-      <workItem from="1615212381603" duration="8613000" />
+      <workItem from="1615212381603" duration="8707000" />
+      <workItem from="1615290196412" duration="893000" />
+      <workItem from="1615378263314" duration="10645000" />
+      <workItem from="1615710534330" duration="155000" />
+      <workItem from="1617785592567" duration="223000" />
+      <workItem from="1619161915890" duration="33000" />
+      <workItem from="1619162149077" duration="270000" />
+      <workItem from="1619162511451" duration="3462000" />
+      <workItem from="1619527915191" duration="20000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -461,7 +469,14 @@
       <option name="project" value="LOCAL" />
       <updated>1614871251056</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="building path list has debugged. Taking a break from this repository to learn surface rendering.">
+      <created>1615279570245</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1615279570246</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -478,7 +493,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="remove_ISs" />
+                        <option value="fast_lowmem_rendering" />
                       </list>
                     </value>
                   </entry>
@@ -515,25 +530,20 @@
     <MESSAGE value="commit before implementing binary-step" />
     <MESSAGE value="DDIS without seg=1 contribution added. lowmem does not consider seg =1 for now. (DONT FORGET)" />
     <MESSAGE value="ddis has finished. next goal: mem-eff path generating" />
-    <option name="LAST_COMMIT_MESSAGE" value="ddis has finished. next goal: mem-eff path generating" />
+    <MESSAGE value="building path list has debugged. Taking a break from this repository to learn surface rendering." />
+    <option name="LAST_COMMIT_MESSAGE" value="building path list has debugged. Taking a break from this repository to learn surface rendering." />
   </component>
   <component name="WindowStateProjectService">
-    <state x="444" y="167" key="#Deployment" timestamp="1610529524337">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="444" y="167" key="#Deployment/0.0.1920.1040@0.0.1920.1040" timestamp="1610529524337" />
     <state x="639" y="233" key="#Options" timestamp="1611332686803">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="639" y="233" key="#Options/0.0.1920.1040@0.0.1920.1040" timestamp="1611332686803" />
-    <state x="428" y="154" key="#SSH_Configurations" timestamp="1610529499956">
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1619510420971">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="428" y="154" key="#SSH_Configurations/0.0.1920.1040@0.0.1920.1040" timestamp="1610529499956" />
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1615123732968">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1615123732968" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619510420971" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1619162408995" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615379459301" />
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog" timestamp="1613997691795">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -552,14 +562,12 @@
     </state>
     <state x="168" y="122" width="1715" height="475" maximized="true" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614781134149" />
     <state x="155" y="269" width="1715" height="476" maximized="true" key="DiffContextDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615272964754" />
-    <state x="105" y="130" width="1715" height="817" key="DirDiffDialog" timestamp="1610457755516">
+    <state x="733" y="293" key="FileChooserDialogImpl" timestamp="1619527932942">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="105" y="130" width="1715" height="817" key="DirDiffDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1610457755516" />
-    <state x="733" y="293" key="FileChooserDialogImpl" timestamp="1615106693720">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1615106693720" />
+    <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619527932942" />
+    <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1619162417547" />
+    <state x="733" y="293" key="FileChooserDialogImpl/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615471233494" />
     <state width="1877" height="357" key="GridCell.Tab.0.bottom" timestamp="1615278520684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -600,14 +608,16 @@
     </state>
     <state width="1877" height="241" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
     <state width="1877" height="357" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state x="506" y="165" key="SettingsEditor" timestamp="1614844959265">
+    <state x="506" y="165" key="SettingsEditor" timestamp="1619510940508">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="506" y="165" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619510940508" />
     <state x="506" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1614844959265" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1614871260138">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1615279575022">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614871260138" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615279575022" />
     <state x="628" y="254" key="VcsDiffUtil.ChangesDialog" timestamp="1615273318462">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -628,14 +638,15 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="953" y="0" width="974" height="1047" key="dock-window-1/0.0.1920.1040@0.0.1920.1040" timestamp="1614781134149" />
-    <state x="892" y="250" width="283" height="539" key="ftp.server.browser" timestamp="1610451092639">
+    <state x="703" y="251" key="git4idea.branch.GitSmartOperationDialog" timestamp="1619592270606">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="892" y="250" width="283" height="539" key="ftp.server.browser/0.0.1920.1040@0.0.1920.1040" timestamp="1610451092639" />
-    <state x="703" y="251" key="git4idea.branch.GitSmartOperationDialog" timestamp="1613917300018">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
+    <state x="703" y="251" key="git4idea.branch.GitSmartOperationDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619592270606" />
     <state x="703" y="251" key="git4idea.branch.GitSmartOperationDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613917300018" />
+    <state x="813" y="451" key="publish.login" timestamp="1615379513462">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="813" y="451" key="publish.login/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615379513462" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1614846464708">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -718,6 +729,11 @@
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
           <line>526</line>
           <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>636</line>
+          <option name="timeStamp" value="60" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

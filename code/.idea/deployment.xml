@@ -5,7 +5,7 @@
       <paths name="idocz@132.68.58.142:22">
         <serverdata>
           <mappings>
-            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/idocz/repos/3D_Graph_Renderer/code" local="$PROJECT_DIR$" web="/" />
             <mapping local="" />
           </mappings>
         </serverdata>
