@@ -105,7 +105,7 @@ for cam_ind in range(N_cams):
 
 # Simulation parameters
 Np_gt = int(5e7)
-Np_max = int(1e8)
+Np_max = int(5e7)
 Np = int(5e5)
 resample_freq = 10
 step_size = 2e8
