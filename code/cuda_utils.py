@@ -297,19 +297,20 @@ def get_intersection_with_bbox(point, direction, bbox):
     # print_3d(direction)
     # print_3d(bbox[1])
     t1 = (bbox[0, 0] - point[0]) / direction[0]
-    t2 = (bbox[1, 0] - point[0]) / direction[0]
-    t3 = (bbox[0, 1] - point[1]) / direction[1]
+    t2 = (bbox[0, 1] - point[0]) / direction[0]
+    t3 = (bbox[1, 0] - point[1]) / direction[1]
     t4 = (bbox[1, 1] - point[1]) / direction[1]
-    t5 = (bbox[0, 2] - point[2]) / direction[2]
-    t6 = (bbox[1, 2] - point[2]) / direction[2]
+    t5 = (bbox[2, 0] - point[2]) / direction[2]
+    t6 = (bbox[2, 1] - point[2]) / direction[2]
     # print(t1,t2,t3,t4,t5,t6)
     tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6))
     tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6))
-
-    # ray (line) is intersecting AABB, but the whole AABB is behind us
+    # print(tmin, tmax)
+    # ray (line) is intersecting AABB, but the whole AABB is behind us or the ray does not intersect
     if tmax < 0 or tmin>tmax:
       return False
-    tmin += 1e-6
+
+    # tmin += 1e-6
     step_in_direction(point, direction, tmin)
     return True
 
@@ -444,6 +445,14 @@ def min_3d(x, y, z):
 @cuda.jit(device=True)
 def dot_3d(a,b):
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
+
+@cuda.jit(device=True)
+def norm_3d(vec):
+    dist = math.sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2])
+    vec[0] /= dist
+    vec[1] /= dist
+    vec[2] /= dist
+
 
 @cuda.jit(device=True)
 def print_3d(a):

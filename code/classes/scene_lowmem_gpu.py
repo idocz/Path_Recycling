@@ -46,7 +46,7 @@ class SceneLowMemGPU(object):
         self.dts = cuda.to_device(ts)
         self.dPs = cuda.to_device(self.Ps)
         self.dis_in_medium = cuda.to_device(self.is_camera_in_medium)
-        self.dcloud_mask = cuda.to_device(self.volume.cloud_mask)
+        self.dcloud_mask = None
         self.dpath_contrib = None
         self.dgrad_contrib = None
 
@@ -481,19 +481,22 @@ class SceneLowMemGPU(object):
 
                 for s in range(spp):
                     assign_3d(current_point, ts[cam_ind])
-                    pixel[0] = i + sample_uniform(rng_states, tid)
-                    pixel[1] = j + sample_uniform(rng_states, tid)
+                    pixel[0] = j + sample_uniform(rng_states, tid)
+                    pixel[1] = i + sample_uniform(rng_states, tid)
                     mat_dot_vec(RKs_inv[cam_ind], pixel, direction)
-                    distance_and_direction(ts[cam_ind], direction, direction)
+                    norm_3d(direction)
                     intersected = get_intersection_with_bbox(current_point, direction, bbox)
                     if intersected:
-                        print_3d(current_point)
                         get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
                         get_intersection_with_borders(current_point, direction, bbox, dest_point)
-
+                        # print2_3d(current_point, dest_point)
                         get_voxel_of_point(dest_point, grid_shape, bbox, bbox_size, dest_voxel)
                         path_size = estimate_voxels_size(dest_voxel, current_voxel)
-                        for _ in range(path_size):
+                        for ps in range(path_size):
+                            if not is_voxel_valid(current_voxel, grid_shape):
+                                print("bug")
+                            # cuda.atomic.add(grid_counter,
+                            #                 (current_voxel[0], current_voxel[1], current_voxel[2], cam_ind), True)
                             grid_counter[current_voxel[0], current_voxel[1], current_voxel[2], cam_ind] = True
                             border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
                             border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
@@ -502,8 +505,11 @@ class SceneLowMemGPU(object):
                             t_y = (border_y - current_point[1]) / direction[1]
                             t_z = (border_z - current_point[2]) / direction[2]
                             length, border_ind = argmin(t_x, t_y, t_z)
+                            # if ps < path_size - 1:
                             current_voxel[border_ind] += sign(direction[border_ind])
                             step_in_direction(current_point, direction, length)
+
+
 
 
 
@@ -644,16 +650,19 @@ class SceneLowMemGPU(object):
         total_grad /= (self.Np * N_cams)
         return I_total, total_grad
 
-    def space_curving(self, I_total, image_threshold, hit_threshold, spp=1):
+    def space_curving(self, I_total, image_threshold, hit_threshold, spp):
         shape = self.volume.grid.shape
         pixels = self.cameras[0].pixels
         I_mask = np.zeros(I_total.shape, dtype=bool)
         I_mask[I_total/np.mean(I_total) > image_threshold] = True
+        plt.figure()
         for k in range(self.N_cams):
-            ax = plt.subplot(self.N_cams, 2, 1 + 2 * k)
-            ax.imshow(I_mask[k], cmap="gray")
-            ax = plt.subplot(self.N_cams, 2, 2 + 2 * k)
-            ax.imshow(I_total[k], cmap="gray")
+            img_and_mask = np.vstack([I_total[k]/np.max(I_total[k]), I_mask[k]])
+            ax = plt.subplot(1, self.N_cams, k+1)
+            ax.imshow(img_and_mask, cmap="gray")
+            plt.axis('off')
+
+
         plt.show()
         dgrid_counter = cuda.to_device(np.zeros((*shape, self.N_cams), dtype=np.bool))
         RKs_inv = np.concatenate([(cam.R @ cam.K_inv).reshape(1,3,3) for cam in self.cameras])
@@ -676,6 +685,7 @@ class SceneLowMemGPU(object):
         self.space_curving_cuda[blockspergrid, threadsperblock] \
         (dpixel_mat, spp, dRKs_inv, self.dts,self.dbbox, self.dbbox_size, self.dvoxel_size, dgrid_shape, self.rng_states, dgrid_counter)
         grid_counter = dgrid_counter.copy_to_host()
+        grid_counter = grid_counter.astype(np.bool)
         grid_mean = np.mean(grid_counter, axis=-1)
         cloud_mask = np.zeros(grid_shape, dtype=bool)
         cloud_mask[grid_mean>hit_threshold] = True
@@ -684,41 +694,9 @@ class SceneLowMemGPU(object):
         # pixel_mat, N_cams, width, height, spp, I_mask, RKs_inv, ts, bbox, bbox_size, voxel_size, grid_shape, grid_counter):
 
 
-    def space_curving_cpu(self, image_mask, to_print=True):
-        shape = self.volume.grid.shape
-        N_cams = image_mask.shape[0]
-        cloud_mask = np.zeros(shape, dtype=np.bool)
-        point = np.zeros(3, dtype=np.float)
-        voxel_size = self.volume.grid.voxel_size
-        for i in range(shape[0]):
-            for j in range(shape[1]):
-                for k in range(shape[2]):
-                    point[0] = voxel_size[0] * (i + 0.5)
-                    point[1] = voxel_size[1] * (j + 0.5)
-                    point[2] = voxel_size[2] * (k + 0.5)
-                    counter = 0
-                    for cam_ind in range(N_cams):
-                        pixel = self.cameras[cam_ind].project_point(point)
-                        if image_mask[cam_ind, pixel[0], pixel[1]]:
-                            counter += 1
-                    if counter >= 7:
-                        cloud_mask[i, j, k] = True
-        cloud_mask = binary_dilation(cloud_mask).astype(np)
-        if to_print:
-            beta_cloud = self.volume.beta_cloud
-            cloud_mask_real = beta_cloud > 0
-            print(f"accuracy:", np.mean(cloud_mask == cloud_mask_real))
-            print(f"fp:", np.mean((cloud_mask == 1) * (cloud_mask_real == 0)))
-            fn = (cloud_mask == 0) * (cloud_mask_real == 1)
-            print(f"fn:", np.mean(fn))
-            fn_exp = (fn * beta_cloud).reshape(-1)
-            print(f"fn_exp mean:", np.mean(fn_exp))
-            print(f"fn_exp max:", np.max(fn_exp))
-            print(f"fn_exp min:", np.min(fn_exp[fn_exp != 0]))
-            print("missed beta:", np.sum(fn_exp) / np.sum(beta_cloud))
-
+    def set_cloud_mask(self, cloud_mask):
         self.volume.set_mask(cloud_mask)
-        self.dcloud_mask.copy_to_device(cloud_mask)
+        self.dcloud_mask = cuda.to_device(cloud_mask)
 
     def __str__(self):
         text = ""

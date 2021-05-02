@@ -114,10 +114,8 @@ win_size = 100
 
 seed = None
 # Cloud mask (GT for now)
-cloud_mask = beta_cloud > 0.1
 # cloud_mask = beta_cloud >= 0
 # cloud_mask = np.load(join("data","Rico_mask_2.npy"))
-volume.set_mask(cloud_mask)
 
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
 
@@ -134,7 +132,9 @@ max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, "GT")
 plt.show()
 
-
+print("Calculating Cloud Mask")
+cloud_mask = scene_lowmem.space_curving(I_gt, image_threshold=0.7, hit_threshold=0.9, spp=1000)
+scene_lowmem.set_cloud_mask(cloud_mask)
 
 # mask_thresh = 2e-6
 # img_mask = np.zeros(I_gt.shape, dtype=np.bool)
