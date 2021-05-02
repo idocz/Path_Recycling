@@ -5,6 +5,7 @@ from cuda_utils import *
 from utils import cuda_weight
 from time import time
 from scipy.ndimage import binary_dilation
+import matplotlib.pyplot as plt
 
 threadsperblock = 256
 
@@ -465,18 +466,44 @@ class SceneLowMemGPU(object):
 
 
         @cuda.jit()
-        def space_curving(N_cams, width, height, spp, I_mask, RKs_inv):
-            i, j, cam_ind = cuda.grid(3)
-            tid = height * width * N_cams + width * j + i
-            pixel = cuda.local.array(3, dtype=float_precis)
-            direction = cuda.local.array(3, dtype=float_precis)
-            pixel[2] = 1
-            if i < width and j < height and cam_ind < N_cams:
-                if I_mask[cam_ind,j,i]:
-                    for s in range(spp):
-                        pixel[0] = i + sample_uniform()
-                        pixel[1] = j + sample_uniform()
-                        mat_dot_vec(RKs_inv[cam_ind], pixel, direction)
+        def space_curving_cuda(pixels_mat, spp, RKs_inv, ts, bbox, bbox_size, voxel_size, grid_shape, rng_states,
+                               grid_counter):
+            tid = cuda.grid(1)
+            if tid < pixels_mat.shape[1]:
+                cam_ind, j, i = pixels_mat[:,tid]
+                pixel = cuda.local.array(3, dtype=float_precis)
+                current_point = cuda.local.array(3, dtype=float_precis)
+                dest_point = cuda.local.array(3, dtype=float_precis)
+                current_voxel = cuda.local.array(3, dtype=np.uint8)
+                dest_voxel = cuda.local.array(3, dtype=np.uint8)
+                direction = cuda.local.array(3, dtype=float_precis)
+                pixel[2] = 1
+
+                for s in range(spp):
+                    assign_3d(current_point, ts[cam_ind])
+                    pixel[0] = i + sample_uniform(rng_states, tid)
+                    pixel[1] = j + sample_uniform(rng_states, tid)
+                    mat_dot_vec(RKs_inv[cam_ind], pixel, direction)
+                    distance_and_direction(ts[cam_ind], direction, direction)
+                    intersected = get_intersection_with_bbox(current_point, direction, bbox)
+                    if intersected:
+                        print_3d(current_point)
+                        get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
+                        get_intersection_with_borders(current_point, direction, bbox, dest_point)
+
+                        get_voxel_of_point(dest_point, grid_shape, bbox, bbox_size, dest_voxel)
+                        path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                        for _ in range(path_size):
+                            grid_counter[current_voxel[0], current_voxel[1], current_voxel[2], cam_ind] = True
+                            border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
+                            border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
+                            border_z = (current_voxel[2] + (direction[2] > 0)) * voxel_size[2]
+                            t_x = (border_x - current_point[0]) / direction[0]
+                            t_y = (border_y - current_point[1]) / direction[1]
+                            t_z = (border_z - current_point[2]) / direction[2]
+                            length, border_ind = argmin(t_x, t_y, t_z)
+                            current_voxel[border_ind] += sign(direction[border_ind])
+                            step_in_direction(current_point, direction, length)
 
 
 
@@ -486,6 +513,7 @@ class SceneLowMemGPU(object):
         self.render_cuda = render_cuda
         self.calc_gradient_contribution = calc_gradient_contribution
         self.render_differentiable_cuda = render_differentiable_cuda
+        self.space_curving_cuda = space_curving_cuda
 
     def init_cuda_param(self, Np, init=False, seed=None):
         self.threadsperblock = threadsperblock
@@ -616,9 +644,47 @@ class SceneLowMemGPU(object):
         total_grad /= (self.Np * N_cams)
         return I_total, total_grad
 
+    def space_curving(self, I_total, image_threshold, hit_threshold, spp=1):
+        shape = self.volume.grid.shape
+        pixels = self.cameras[0].pixels
+        I_mask = np.zeros(I_total.shape, dtype=bool)
+        I_mask[I_total/np.mean(I_total) > image_threshold] = True
+        for k in range(self.N_cams):
+            ax = plt.subplot(self.N_cams, 2, 1 + 2 * k)
+            ax.imshow(I_mask[k], cmap="gray")
+            ax = plt.subplot(self.N_cams, 2, 2 + 2 * k)
+            ax.imshow(I_total[k], cmap="gray")
+        plt.show()
+        dgrid_counter = cuda.to_device(np.zeros((*shape, self.N_cams), dtype=np.bool))
+        RKs_inv = np.concatenate([(cam.R @ cam.K_inv).reshape(1,3,3) for cam in self.cameras])
+        dRKs_inv = cuda.to_device(RKs_inv)
+
+        grid_shape = self.volume.beta_cloud.shape
+        dgrid_shape = cuda.to_device(grid_shape)
+
+        #building pxiel_mat
+        jj, kk, ii = np.meshgrid(np.arange(pixels[0]), np.arange(self.N_cams), np.arange(pixels[1]))
+        ii = ii[I_mask == True]
+        jj = jj[I_mask == True]
+        kk = kk[I_mask == True]
+        pixel_mat = np.vstack([kk, jj, ii])
+        dpixel_mat = cuda.to_device(pixel_mat)
+        print(pixel_mat.shape[1])
+        self.init_cuda_param(pixel_mat.shape[1])
+        threadsperblock = self.threadsperblock
+        blockspergrid = self.blockspergrid
+        self.space_curving_cuda[blockspergrid, threadsperblock] \
+        (dpixel_mat, spp, dRKs_inv, self.dts,self.dbbox, self.dbbox_size, self.dvoxel_size, dgrid_shape, self.rng_states, dgrid_counter)
+        grid_counter = dgrid_counter.copy_to_host()
+        grid_mean = np.mean(grid_counter, axis=-1)
+        cloud_mask = np.zeros(grid_shape, dtype=bool)
+        cloud_mask[grid_mean>hit_threshold] = True
+
+        return cloud_mask
+        # pixel_mat, N_cams, width, height, spp, I_mask, RKs_inv, ts, bbox, bbox_size, voxel_size, grid_shape, grid_counter):
 
 
-    def space_curving(self, image_mask, to_print=True):
+    def space_curving_cpu(self, image_mask, to_print=True):
         shape = self.volume.grid.shape
         N_cams = image_mask.shape[0]
         cloud_mask = np.zeros(shape, dtype=np.bool)

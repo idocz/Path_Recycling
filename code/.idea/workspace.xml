@@ -26,16 +26,14 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="pull variance_reduction">
-      <change afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="smoke has added to inverse support. next goal: write space curving on gpu.">
+      <change afterPath="$PROJECT_DIR$/drafts/space_curving_gpu_draft.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/space_curving_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/space_curving_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +83,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.lowmem_inverse_smoke">
+  <component name="RunManager" selected="Python.space_curving_gpu_draft">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -218,6 +216,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="error_stats" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/error_stats.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="lowmem_inverse_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -244,6 +264,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -285,6 +308,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -304,6 +330,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -311,6 +340,25 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/space_curving_draft.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="space_curving_gpu_draft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/space_curving_gpu_draft.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -330,9 +378,13 @@
       <item itemvalue="Python.lowmem_render_smoke" />
       <item itemvalue="Python.lowmem_inverse_smoke" />
       <item itemvalue="Python.space_curving_draft" />
+      <item itemvalue="Python.error_stats" />
+      <item itemvalue="Python.space_curving_gpu_draft" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.space_curving_gpu_draft" />
+        <item itemvalue="Python.error_stats" />
         <item itemvalue="Python.lowmem_inverse_smoke" />
         <item itemvalue="Python.space_curving_draft" />
         <item itemvalue="Python.lowmem_render_smoke" />
@@ -377,7 +429,8 @@
       <workItem from="1619162511451" duration="3462000" />
       <workItem from="1619527915191" duration="20000" />
       <workItem from="1619608708734" duration="2601000" />
-      <workItem from="1619612270441" duration="12764000" />
+      <workItem from="1619612270441" duration="25752000" />
+      <workItem from="1619947222152" duration="4873000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -561,7 +614,14 @@
       <option name="project" value="LOCAL" />
       <updated>1619592275394</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="smoke has added to inverse support. next goal: write space curving on gpu.">
+      <created>1619625197613</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1619625197614</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -592,7 +652,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="points changed from float32 to float64" />
     <MESSAGE value="float 32 problem has beed solved with grad mask (no clue why). GPU implementation of part 1 and 2 is working as expected. next goal: dual phase function" />
     <MESSAGE value="GPU work with mask. next goal: fix non mask bug and implement non-active photon removal" />
     <MESSAGE value="non-active has implemented" />
@@ -617,28 +676,29 @@
     <MESSAGE value="ddis has finished. next goal: mem-eff path generating" />
     <MESSAGE value="building path list has debugged. Taking a break from this repository to learn surface rendering." />
     <MESSAGE value="pull variance_reduction" />
-    <option name="LAST_COMMIT_MESSAGE" value="pull variance_reduction" />
+    <MESSAGE value="smoke has added to inverse support. next goal: write space curving on gpu." />
+    <option name="LAST_COMMIT_MESSAGE" value="smoke has added to inverse support. next goal: write space curving on gpu." />
   </component>
   <component name="WindowStateProjectService">
     <state x="639" y="233" key="#Options" timestamp="1611332686803">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="639" y="233" key="#Options/0.0.1920.1040@0.0.1920.1040" timestamp="1611332686803" />
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1619614509772">
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1619886688900">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619614509772" />
-    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1619162408995" />
+    <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1619886688900" />
     <state x="459" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615379459301" />
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog" timestamp="1613997691795">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="774" y="350" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613997691795" />
-    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1619621932506">
+    <state x="1357" y="256" key="#xdebugger.evaluate" timestamp="1619955258821">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="1357" y="256" key="#xdebugger.evaluate/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619621932506" />
-    <state x="1357" y="256" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1615112249158" />
+    <state x="1357" y="256" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1619955258821" />
     <state x="1357" y="256" key="#xdebugger.evaluate/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615277072821" />
     <state x="700" y="382" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1614785554911">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -655,62 +715,63 @@
     <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619527932942" />
     <state x="733" y="293" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1619162417547" />
     <state x="733" y="293" key="FileChooserDialogImpl/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615471233494" />
-    <state width="1877" height="357" key="GridCell.Tab.0.bottom" timestamp="1619624370015">
+    <state width="1877" height="338" key="GridCell.Tab.0.bottom" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370015" />
-    <state width="1877" height="241" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.0.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state width="1877" height="357" key="GridCell.Tab.0.center" timestamp="1619624370015">
+    <state width="1877" height="338" key="GridCell.Tab.0.center" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370015" />
-    <state width="1877" height="241" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="338" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.0.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state width="1877" height="357" key="GridCell.Tab.0.left" timestamp="1619624370015">
+    <state width="1877" height="338" key="GridCell.Tab.0.left" timestamp="1619955259379">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370015" />
-    <state width="1877" height="241" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="338" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259379" />
     <state width="1877" height="357" key="GridCell.Tab.0.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state width="1877" height="357" key="GridCell.Tab.0.right" timestamp="1619624370015">
+    <state width="1877" height="338" key="GridCell.Tab.0.right" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370015" />
-    <state width="1877" height="241" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320927" />
+    <state width="1877" height="338" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.0.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state width="1877" height="357" key="GridCell.Tab.1.bottom" timestamp="1619624370016">
+    <state width="1877" height="338" key="GridCell.Tab.1.bottom" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.1.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370016" />
-    <state width="1877" height="241" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="338" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.1.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520685" />
-    <state width="1877" height="357" key="GridCell.Tab.1.center" timestamp="1619624370015">
+    <state width="1877" height="338" key="GridCell.Tab.1.center" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.1.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370015" />
-    <state width="1877" height="241" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="338" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.1.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state width="1877" height="357" key="GridCell.Tab.1.left" timestamp="1619624370015">
+    <state width="1877" height="338" key="GridCell.Tab.1.left" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.1.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370015" />
-    <state width="1877" height="241" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="338" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.1.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state width="1877" height="357" key="GridCell.Tab.1.right" timestamp="1619624370016">
+    <state width="1877" height="338" key="GridCell.Tab.1.right" timestamp="1619955259380">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="357" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619624370016" />
-    <state width="1877" height="241" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1615127320928" />
+    <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1619955259380" />
     <state width="1877" height="357" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615278520684" />
-    <state x="506" y="165" key="SettingsEditor" timestamp="1619621981663">
+    <state x="506" y="165" key="SettingsEditor" timestamp="1619889575493">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="506" y="165" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619621981663" />
-    <state x="506" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1614844959265" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1615279575022">
+    <state x="506" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1619889575493" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1619625211318">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619625211318" />
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1614871260138" />
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615279575022" />
     <state x="628" y="254" key="VcsDiffUtil.ChangesDialog" timestamp="1615273318462">
@@ -739,15 +800,16 @@
     </state>
     <state x="703" y="251" key="git4idea.branch.GitSmartOperationDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619592270606" />
     <state x="703" y="251" key="git4idea.branch.GitSmartOperationDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1613917300018" />
-    <state x="813" y="451" key="publish.login" timestamp="1619612872460">
+    <state x="813" y="451" key="publish.login" timestamp="1619951925234">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="813" y="451" key="publish.login/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1619612872460" />
+    <state x="813" y="451" key="publish.login/0.0.1920.1040@0.0.1920.1040" timestamp="1619951925234" />
     <state x="813" y="451" key="publish.login/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1615379513462" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1614846464708">
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1619888759534">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1614846464708" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1619888759534" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -799,7 +861,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>370</line>
+          <line>371</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -824,7 +886,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
-          <line>654</line>
+          <line>720</line>
           <option name="timeStamp" value="60" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -841,6 +903,21 @@
           <url>file://$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py</url>
           <line>31</line>
           <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>682</line>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/drafts/space_curving_gpu_draft.py</url>
+          <line>101</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
+          <line>659</line>
+          <option name="timeStamp" value="70" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -863,6 +940,7 @@
     <SUITE FILE_PATH="coverage/code$lowmem_render_script.coverage" NAME="lowmem_render_script Coverage Results" MODIFIED="1615278373713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$space_curving_draft.coverage" NAME="space_curving_draft Coverage Results" MODIFIED="1619615518458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$space_curving_gpu_draft.coverage" NAME="space_curving_gpu_draft Coverage Results" MODIFIED="1619954896485" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$down_up_sample.coverage" NAME="down_up_sample Coverage Results" MODIFIED="1614189388337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
   </component>
 </project>

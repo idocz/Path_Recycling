@@ -114,7 +114,7 @@ win_size = 100
 
 seed = None
 # Cloud mask (GT for now)
-cloud_mask = beta_cloud >= 0
+cloud_mask = beta_cloud > 0.1
 # cloud_mask = beta_cloud >= 0
 # cloud_mask = np.load(join("data","Rico_mask_2.npy"))
 volume.set_mask(cloud_mask)
@@ -162,7 +162,7 @@ if tensorboard:
 
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = 0.5
+beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0
 volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud

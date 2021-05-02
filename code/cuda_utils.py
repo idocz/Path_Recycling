@@ -292,6 +292,29 @@ def get_intersection_with_borders(point, direction, bbox, res):
     return t_min
 
 @cuda.jit(device=True)
+def get_intersection_with_bbox(point, direction, bbox):
+    # print_3d(point)
+    # print_3d(direction)
+    # print_3d(bbox[1])
+    t1 = (bbox[0, 0] - point[0]) / direction[0]
+    t2 = (bbox[1, 0] - point[0]) / direction[0]
+    t3 = (bbox[0, 1] - point[1]) / direction[1]
+    t4 = (bbox[1, 1] - point[1]) / direction[1]
+    t5 = (bbox[0, 2] - point[2]) / direction[2]
+    t6 = (bbox[1, 2] - point[2]) / direction[2]
+    # print(t1,t2,t3,t4,t5,t6)
+    tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6))
+    tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6))
+
+    # ray (line) is intersecting AABB, but the whole AABB is behind us
+    if tmax < 0 or tmin>tmax:
+      return False
+    tmin += 1e-6
+    step_in_direction(point, direction, tmin)
+    return True
+
+
+@cuda.jit(device=True)
 def estimate_voxels_size(voxel_a, voxel_b):
     res = 0
     if voxel_a[0] >= voxel_b[0]:
