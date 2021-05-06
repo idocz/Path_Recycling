@@ -1,5 +1,6 @@
 
 import sys
+from os.path import join
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
 from classes.scene_lowmem_gpu import *
@@ -9,6 +10,7 @@ from classes.visual import *
 from time import time
 from utils import *
 from cuda_utils import *
+
 cuda.select_device(0)
 print("low_mem fast branch")
 
@@ -38,7 +40,7 @@ sun_angles = np.array([165, 0]) * (np.pi/180)
 beta_air = 0.004
 
 beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
-# beta_cloud *= 0.1
+# beta_cloud *= 0.1[
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
 edge_z = z_size * beta_cloud.shape[2]
@@ -66,7 +68,7 @@ height_factor = 2.5
 
 focal_length = 50e-3
 sensor_size = np.array((56e-3, 56e-3)) / height_factor
-ps = 80
+ps = 50
 
 pixels = np.array((ps, ps))
 
@@ -86,17 +88,18 @@ for cam_ind in range(N_cams):
 # cameras = [cameras[0]]
 # Np = int(5e7)ג
 # Np = int(5e7)
-Np = int(5e7)
+Np = int(1e7)
 Ns = 15
 
 volume.set_mask(beta_cloud>0)
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
+scene_lowmem.set_cloud_mask(volume.cloud_mask)
 scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_cloud, Ns)
 visual = Visual_wrapper(scene_lowmem)
 
 
 run_lowmem_gpu = True
-run_gpu = True
+run_gpu = False
 if Np >5e6:
     run_gpu =False
 fake_cloud = beta_cloud #* 0.5
@@ -122,15 +125,15 @@ if run_lowmem_gpu:
     I_total_lowmem, grad_lowmem = scene_lowmem.render(cuda_paths, 0, to_print=True)
     print(f" rendering took: {time() - start}")
     # print(f"grad_norm:{np.linalg.norm(grad)}")
-    del(cuda_paths)
-    cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
-    I_total_lowmem2, grad_lowmem2 = scene_lowmem.render(cuda_paths, 0)
+    # del(cuda_paths)
+    # cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
+    # I_total_lowmem2, grad_lowmem2 = scene_lowmem.render(cuda_paths, 0)
     visual.plot_images(I_total_lowmem, f"GPU_lowmem: maximum scattering={Ns}")
     plt.show()
-    visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
-    plt.show()
-    visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
-    plt.show()
+    # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
+    # plt.show()
+    # visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
+    # plt.show()
 
 if run_gpu:
     print("####### gpu renderer ########")

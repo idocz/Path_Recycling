@@ -59,8 +59,7 @@ class Visual_wrapper(object):
             ax.imshow(I_total[i].T, cmap="gray")#, vmin=0, vmax=max_val[i])
         plt.suptitle(title)
 
-    def \
-            scatter_plot_comparison(self, signal1, signal2, title):
+    def scatter_plot_comparison(self, signal1, signal2, title):
         plt.figure()
         X = signal1.reshape(-1)
         Y = signal2.reshape(-1)

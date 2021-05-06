@@ -218,7 +218,6 @@ class SceneLowMemGPU(object):
                 assign_3d(current_point, starting_points[:, tid])
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
 
-                beta = 1.0 # for type decleration
                 cloud_prob = 1.0
                 beta0 = 1.0 # for type decleration
                 IS = 1.0
@@ -279,7 +278,7 @@ class SceneLowMemGPU(object):
                             distance_to_camera = distance_and_direction(camera_point, ts[k], cam_direction)
                             cos_theta = dot_3d(direction, cam_direction)
                             le_pdf = cloud_prob * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob) * rayleigh_pdf(cos_theta)
-                            pc = (1 / (distance_to_camera ** 2)) * IS * le_pdf * attenuation
+                            pc = (1 / (distance_to_camera * distance_to_camera)) * IS * le_pdf * attenuation
                             if is_in_medium[k]:
                                 assign_3d(next_point, ts[k])
                             else:
@@ -542,12 +541,15 @@ class SceneLowMemGPU(object):
         self.dbeta_zero.copy_to_device(self.volume.beta_cloud)
         beta_air = self.volume.beta_air
         # outputs
+        start = time()
         dscatter_sizes = cuda.to_device(np.empty(Np, dtype=np.uint8))
         drng_states = cuda.to_device(self.rng_states.copy_to_host())
         self.calc_scatter_sizes[blockspergrid, threadsperblock](Np, Ns, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
             self.dsun_direction, dscatter_sizes, self.rng_states)
 
         cuda.synchronize()
+        if to_print:
+            print("calc_scatter_sizes:",time()-start)
         scatter_sizes = dscatter_sizes.copy_to_host()
         del(dscatter_sizes)
         cond = scatter_sizes != 0
@@ -560,12 +562,15 @@ class SceneLowMemGPU(object):
         dstarting_inds = cuda.to_device(starting_inds)
         dstarting_points = cuda.to_device(np.zeros((3,Np_nonan), dtype=float_precis))
         dscatter_points = cuda.to_device(np.zeros((3,total_scatter_num), dtype=float_precis))
-
+        start = time()
         self.generate_paths[blockspergrid, threadsperblock]\
             (Np, Ns, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
             self.dsun_direction, dstarting_points, dscatter_points, dstarting_inds, dscatter_inds, drng_states)
 
         cuda.synchronize()
+        if to_print:
+            print("generate_paths:"
+                  "", time() - start)
         del(dscatter_inds)
         del(dstarting_inds)
         del(drng_states)
@@ -697,6 +702,29 @@ class SceneLowMemGPU(object):
     def set_cloud_mask(self, cloud_mask):
         self.volume.set_mask(cloud_mask)
         self.dcloud_mask = cuda.to_device(cloud_mask)
+
+    def set_cameras(self, cameras):
+        self.cameras = cameras
+        self.N_cams = len(cameras)
+        self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
+        for k in range(self.N_cams):
+            self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
+
+        self.pixels_shape = self.cameras[0].pixels
+        ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
+        Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
+        self.dts.copy_to_device(ts)
+        self.dPs.copy_to_device(Ps)
+
+    def upscale_cameras(self, ps_new):
+        del(self.dI_total)
+        del(self.dpixels_shape)
+        for cam in self.cameras:
+            cam.update_pixels(np.array([ps_new, ps_new]))
+        self.pixels_shape = np.array([ps_new, ps_new])
+        self.dI_total = cuda.device_array((self.N_cams, *self.pixels_shape), dtype=float_reg)
+        self.dpixels_shape = cuda.to_device(self.pixels_shape)
+        self.set_cameras(self.cameras)
 
     def __str__(self):
         text = ""

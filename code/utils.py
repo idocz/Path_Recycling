@@ -205,15 +205,23 @@ def get_density(filename, scale):
     volume *= scale
     return volume
 
-def animate(image_list, interval):
+def animate(image_list, interval, repeat_delay=250, output_name=None):
     ims = []
     fig = plt.figure()
     for image in image_list:
-        im = plt.imshow(image, animated=True)
+        plt.axis("off")
+        im = plt.imshow(image, animated=True, cmap="gray")
+
         ims.append([im])
 
+
     ani = animation.ArtistAnimation(fig, ims, interval=interval, blit=True,
-                                    repeat_delay=250)
+                                    repeat_delay=repeat_delay)
+    if not output_name is None:
+        Writer = animation.writers['ffmpeg']
+        # writer = animation.FFMpegWriter(fps=30)
+        writer = animation.PillowWriter(fps=15)
+        ani.save(output_name, writer=writer)
     plt.title("Reconstructed Vs Ground Truth")
     plt.show()
 
@@ -228,3 +236,22 @@ def get_images_from_TB(exp_dir, label):
         img = np.array(img)
         img_list.append(img)
     return img_list
+
+def get_scalars_from_TB(exp_dir, label):
+    ea = event_accumulator.EventAccumulator(exp_dir, size_guidance={"scalars": 0})
+    ea.Reload()
+    return ea.scalars.Items(label)
+
+
+def mask_grader(cloud_mask, cloud_mask_real, beta_cloud):
+    print(f"accuracy:", np.mean(cloud_mask == cloud_mask_real))
+    print(f"fp:", np.mean((cloud_mask == 1) * (cloud_mask_real == 0)))
+    fn = (cloud_mask == 0) * (cloud_mask_real == 1)
+    print(f"fn:", np.mean(fn))
+    fn_exp = (fn * beta_cloud).reshape(-1)
+    print(f"fn_exp mean:", np.mean(fn_exp))
+    print(f"fn_exp max:", np.max(fn_exp))
+    print(f"fn_exp min:", np.min(fn_exp[fn_exp != 0]))
+    plt.hist(fn_exp[fn_exp != 0])
+    print("missed beta:", np.sum(fn_exp) / np.sum(beta_cloud))
+    print("rel_dit:", relative_distance(beta_cloud, beta_cloud * cloud_mask))

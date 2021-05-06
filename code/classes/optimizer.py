@@ -107,7 +107,7 @@ class ADAM(object):
             delta = -(self.step_size * m_hat) / (np.sqrt((v_hat) + self.eps))
         else:
             delta = -(self.step_size * m_hat)
-        print("max_delta = ",np.max(delta))
+        # print("max_delta = ",np.max(delta))
         # delta[delta>self.max_update] = self.max_update
         self.volume.beta_cloud[mask] += delta
         self.volume.beta_cloud[self.volume.beta_cloud < 0] = 0

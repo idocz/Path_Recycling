@@ -42,6 +42,12 @@ def get_voxel_of_point(point, grid_shape, bbox, bbox_size, res):
     else:
         res[2] = int(((point[2] - bbox[2, 0]) / bbox_size[2]) * grid_shape[2])
 
+@cuda.jit(device=True)
+def get_voxel_of_point_temp(point, grid_shape, bbox, bbox_size, res):
+    res[0] = min(int(((point[0] - bbox[0, 0]) / bbox_size[0]) * grid_shape[0]), grid_shape[0] - 1)
+    res[1] = min(int(((point[1] - bbox[1, 0]) / bbox_size[1]) * grid_shape[1]), grid_shape[1] - 1)
+    res[2] = min(int(((point[2] - bbox[2, 0]) / bbox_size[2]) * grid_shape[2]), grid_shape[2] - 1)
+
 
 @cuda.jit(device=True)
 def is_voxel_valid(voxel, grid_shape):
@@ -333,6 +339,16 @@ def estimate_voxels_size(voxel_a, voxel_b):
     else:
         res += voxel_b[2] - voxel_a[2]
     return res
+
+@cuda.jit(device=True)
+def estimate_voxels_size_temp(voxel_a, voxel_b):
+    a = voxel_a[0] - voxel_b[0]
+    b = voxel_a[1] - voxel_b[1]
+    c = voxel_a[2] - voxel_b[2]
+    # return max(voxel_a[0]-voxel_b[0], voxel_b[0]-voxel_a[0]) + max(voxel_a[1]-voxel_b[1], voxel_b[1]-voxel_a[1]) + max(voxel_a[2]-voxel_b[2], voxel_b[2]-voxel_a[2])
+    res = max(a, -a) + max(b,-b) + max(c,-c)
+    return res
+
 
 
 #### CAMERA FUNCTIONS ####

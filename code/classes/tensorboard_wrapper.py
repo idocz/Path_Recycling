@@ -9,6 +9,7 @@ class TensorBoardWrapper(object):
     def __init__(self, I_gt, betas_gt, title=None):
         self.max_val = np.max(I_gt, axis=(1,2)).reshape(-1,1,1)
         self.min_val = np.min(I_gt, axis=(1,2)).reshape(-1,1,1)
+        self.gt_counter = 1
         if title is None:
             self.train_id = datetime.now().strftime("%d%m-%H%M-%S")
         else:
@@ -22,7 +23,7 @@ class TensorBoardWrapper(object):
                  min_val=self.min_val, max_val=self.max_val)
         I_gt_norm = transform(np.copy(I_gt), self.min_val, self.max_val)
         for i in range(I_gt.shape[0]):
-            self.writer.add_image(f"ground_truth/{i}", I_gt_norm[i][None, :, :])
+            self.writer.add_image(f"ground_truth/{i}", I_gt_norm[i][None, :, :], global_step=0)
 
 
 
@@ -31,8 +32,8 @@ class TensorBoardWrapper(object):
 
 
     def update(self, beta_opt, I_opt, loss, max_dist, rel_dist1, Np, iter):
-        if iter % (15*100) ==0:
-            np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt, images=I_opt)
+        if iter % (100) ==0:
+            np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt)#, images=I_opt)
         I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
         for i in range(I_opt.shape[0]):
             self.writer.add_image(f"simulated_images/{i}", I_opt_norm[i][None, :, :],
@@ -42,6 +43,13 @@ class TensorBoardWrapper(object):
         self.writer.add_scalar("relative_dist1", rel_dist1, global_step=iter)
         self.writer.add_scalar("Np", Np, global_step=iter)
 
+    def update_gt(self, I_gt):
+        self.max_val = np.max(I_gt, axis=(1,2)).reshape(-1,1,1)
+        self.min_val = np.min(I_gt, axis=(1,2)).reshape(-1,1,1)
+        I_gt_norm = transform(np.copy(I_gt), self.min_val, self.max_val)
+        for i in range(I_gt.shape[0]):
+            self.writer.add_image(f"ground_truth/{i}", I_gt_norm[i][None, :, :], global_step=self.gt_counter)
+        self.gt_counter += 1
 
 
 
