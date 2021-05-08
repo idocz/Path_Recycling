@@ -19,31 +19,23 @@
     <select>
       <path>
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="BRANCH:origin/variance_reduction" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:fast_build_path_list" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="starting presetations experiments. moving to my pc to animate better.">
-      <change afterPath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/recycling_illustration.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/rotating_result.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke_upscaling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="smoke has been finished but rendering is too slow. Trying to find a hybrid approach">
+      <change afterPath="$PROJECT_DIR$/classes/scene_hybrid_gpu.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_sunabove.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_upscaling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/hybrid_render_smoke.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/camera.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/optimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/optimizer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/cloud_evolving_new_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/cloud_evolving_new_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/rotating_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/rotating_result.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +74,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/scripts" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
@@ -94,7 +86,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.lowmem_render_smoke">
+  <component name="RunManager" selected="Python.rotating_result">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -109,25 +101,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="cloud_evolving_new_views" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/cloud_evolving_new_views.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -228,6 +201,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -235,6 +211,72 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/down_up_sample.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="hybrid_inverse_smoke_sunabove" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_sunabove.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="hybrid_inverse_smoke_upscaling" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_upscaling.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="hybrid_render_smoke" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/hybrid_render_smoke.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -269,6 +311,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -288,6 +333,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -307,6 +355,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="sftp://idocz@132.68.58.142:22/home/idocz/miniconda3/envs/py36/bin/python" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="false" />
@@ -322,48 +373,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="lowmem_render_smoke" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="rel_dist_loss_plot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="rotating_result" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -383,6 +399,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -408,19 +427,19 @@
       <item itemvalue="Python.lowmem_inverse_script" />
       <item itemvalue="Python.lowmem_inverse_smoke" />
       <item itemvalue="Python.lowmem_inverse_smoke_upscaling" />
-      <item itemvalue="Python.cloud_evolving_new_views" />
-      <item itemvalue="Python.rotating_result" />
-      <item itemvalue="Python.lowmem_render_smoke" />
+      <item itemvalue="Python.hybrid_render_smoke" />
+      <item itemvalue="Python.hybrid_inverse_smoke_upscaling" />
+      <item itemvalue="Python.hybrid_inverse_smoke_sunabove" />
       <item itemvalue="Python.upscaling_constant_finder" />
-      <item itemvalue="Python.rel_dist_loss_plot" />
+      <item itemvalue="Python.rotating_result" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.lowmem_render_smoke" />
-        <item itemvalue="Python.rel_dist_loss_plot" />
         <item itemvalue="Python.rotating_result" />
+        <item itemvalue="Python.hybrid_inverse_smoke_sunabove" />
         <item itemvalue="Python.upscaling_constant_finder" />
-        <item itemvalue="Python.cloud_evolving_new_views" />
+        <item itemvalue="Python.hybrid_render_smoke" />
+        <item itemvalue="Python.hybrid_inverse_smoke_upscaling" />
       </list>
     </recent_temporary>
   </component>
@@ -465,7 +484,8 @@
       <workItem from="1619608708734" duration="2601000" />
       <workItem from="1619612270441" duration="25752000" />
       <workItem from="1619947222152" duration="4873000" />
-      <workItem from="1619970291258" duration="79659000" />
+      <workItem from="1619970291258" duration="125125000" />
+      <workItem from="1620466154509" duration="166000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -663,7 +683,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620114262115</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="smoke has been finished but rendering is too slow. Trying to find a hybrid approach">
+      <created>1620306401703</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1620306401703</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -680,7 +707,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/variance_reduction" />
+                        <option value="fast_build_path_list" />
                       </list>
                     </value>
                   </entry>
@@ -694,7 +721,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="GPU work with mask. next goal: fix non mask bug and implement non-active photon removal" />
     <MESSAGE value="non-active has implemented" />
     <MESSAGE value="commit before eff_scatter branch" />
     <MESSAGE value="still buggy" />
@@ -719,72 +745,85 @@
     <MESSAGE value="pull variance_reduction" />
     <MESSAGE value="smoke has added to inverse support. next goal: write space curving on gpu." />
     <MESSAGE value="starting presetations experiments. moving to my pc to animate better." />
-    <option name="LAST_COMMIT_MESSAGE" value="starting presetations experiments. moving to my pc to animate better." />
+    <MESSAGE value="smoke has been finished but rendering is too slow. Trying to find a hybrid approach" />
+    <option name="LAST_COMMIT_MESSAGE" value="smoke has been finished but rendering is too slow. Trying to find a hybrid approach" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1620228476906">
+    <state x="535" y="167" key="#Deployment" timestamp="1620466318094">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620156148564" />
-    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1620228476906" />
-    <state x="941" y="187" width="490" height="606" key="#xdebugger.evaluate" timestamp="1620223213351">
+    <state x="535" y="167" key="#Deployment/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466318094" />
+    <state x="519" y="154" key="#SSH_Configurations" timestamp="1620466301419">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="519" y="154" key="#SSH_Configurations/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466301419" />
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1620466186294">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466186294" />
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1620404076908" />
+    <state x="578" y="348" width="490" height="606" key="#xdebugger.evaluate" timestamp="1620391235760">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="941" y="187" width="490" height="606" key="#xdebugger.evaluate/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152881542" />
-    <state x="941" y="187" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1620223213351" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1620116616345">
+    <state x="578" y="348" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1620391235760" />
+    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1620400484131">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620116616345" />
-    <state width="1877" height="338" key="GridCell.Tab.0.bottom" timestamp="1620224029760">
+    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1620400484131" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1620464772071">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029760" />
-    <state width="1877" height="338" key="GridCell.Tab.0.center" timestamp="1620224029759">
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620464772071" />
+    <state width="1877" height="338" key="GridCell.Tab.0.bottom" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029759" />
-    <state width="1877" height="338" key="GridCell.Tab.0.left" timestamp="1620224029759">
+    <state width="1877" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982793" />
+    <state width="1877" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239004" />
+    <state width="1877" height="338" key="GridCell.Tab.0.center" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991887" />
-    <state width="1877" height="338" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029759" />
-    <state width="1877" height="338" key="GridCell.Tab.0.right" timestamp="1620224029759">
+    <state width="1877" height="338" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982793" />
+    <state width="1877" height="338" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239004" />
+    <state width="1877" height="338" key="GridCell.Tab.0.left" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029759" />
-    <state width="1877" height="338" key="GridCell.Tab.1.bottom" timestamp="1620224029760">
+    <state width="1877" height="338" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982793" />
+    <state width="1877" height="338" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239004" />
+    <state width="1877" height="338" key="GridCell.Tab.0.right" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.1.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029760" />
-    <state width="1877" height="338" key="GridCell.Tab.1.center" timestamp="1620224029760">
+    <state width="1877" height="338" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982793" />
+    <state width="1877" height="338" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239004" />
+    <state width="1877" height="338" key="GridCell.Tab.1.bottom" timestamp="1620465982794">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.1.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029760" />
-    <state width="1877" height="338" key="GridCell.Tab.1.left" timestamp="1620224029760">
+    <state width="1877" height="338" key="GridCell.Tab.1.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982794" />
+    <state width="1877" height="338" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239009" />
+    <state width="1877" height="338" key="GridCell.Tab.1.center" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.1.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029760" />
-    <state width="1877" height="338" key="GridCell.Tab.1.right" timestamp="1620224029760">
+    <state width="1877" height="338" key="GridCell.Tab.1.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982793" />
+    <state width="1877" height="338" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239005" />
+    <state width="1877" height="338" key="GridCell.Tab.1.left" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620152991888" />
-    <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1620224029760" />
+    <state width="1877" height="338" key="GridCell.Tab.1.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982793" />
+    <state width="1877" height="338" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239004" />
+    <state width="1877" height="338" key="GridCell.Tab.1.right" timestamp="1620465982794">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982794" />
+    <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239008" />
     <state x="461" y="165" key="SettingsEditor" timestamp="1620223277049">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620156296298" />
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1620223277049" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1620114269382">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1620306407279">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1620114269382" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1620306407279" />
     <state x="565" y="130" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1620142230323">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -797,6 +836,10 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2108" y="-11" width="1054" height="642" maximized="true" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620154919453" />
+    <state x="788" y="413" key="publish.login" timestamp="1620466258202">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="788" y="413" key="publish.login/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466258202" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -903,7 +946,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/experiments/rotating_result.py</url>
-          <line>23</line>
+          <line>20</line>
           <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -920,6 +963,11 @@
           <url>file://$PROJECT_DIR$/classes/scene_lowmem_gpu.py</url>
           <line>468</line>
           <option name="timeStamp" value="82" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_hybrid_gpu.py</url>
+          <line>531</line>
+          <option name="timeStamp" value="84" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -940,6 +988,7 @@
     <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$ddis_std_script.coverage" NAME="ddis_std_script Coverage Results" MODIFIED="1615102211432" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$lowmem_inverse_smoke_upscaling.coverage" NAME="lowmem_inverse_smoke_upscaling Coverage Results" MODIFIED="1620204091836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$hybrid_render_smoke.coverage" NAME="hybrid_render_smoke Coverage Results" MODIFIED="1620391193486" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$down_up_sample.coverage" NAME="down_up_sample Coverage Results" MODIFIED="1614189388337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$lowmem_inverse_smoke.coverage" NAME="lowmem_inverse_smoke Coverage Results" MODIFIED="1619624281724" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />

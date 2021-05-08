@@ -104,7 +104,7 @@ Np = int(5e5)
 resample_freq = 10
 step_size = 1e9
 # Ns = 15
-Ns = 15
+Ns = 5
 iterations = 10000000
 to_mask = True
 tensorboard = True
@@ -123,8 +123,9 @@ visual.plot_cameras()
 plt.show()
 cuda_paths = scene_lowmem.build_paths_list(Np_gt, Ns)
 I_gt, grad = scene_lowmem.render(cuda_paths, 0)
-scene_lowmem.upscale_cameras(80)
+scene_lowmem.upscale_cameras(5)
 cuda_paths = scene_lowmem.build_paths_list(Np_gt, Ns)
 I_gt_downscale, grad_downscale = scene_lowmem.render(cuda_paths, 0)
 print(np.mean(I_gt)/np.mean(I_gt_downscale))
-print(np.mean(grad)/np.mean(grad_downscale))
+print(np.mean(grad_downscale)/np.mean(grad))
+print(np.sum(I_gt_downscale**2)/np.sum(I_gt**2))

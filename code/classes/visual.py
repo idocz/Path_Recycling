@@ -17,13 +17,15 @@ class Visual_wrapper(object):
         x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], grid.shape[0] + 1)
         y = np.linspace(grid.bbox[1,0], grid.bbox[1,1], grid.shape[1] + 1)
         z = np.linspace(grid.bbox[2,0], grid.bbox[2,1], grid.shape[2] + 1)
-        xx, yy, zz = np.meshgrid(x, y, z,)
+        yy, xx, zz = np.meshgrid(y, x, z,)
 
         medium = np.ones(grid.shape) * 0.5
         medium[self.scene.volume.beta_cloud<0.1] = 0
         colors = cm.gray(medium)
         self.ax.voxels(xx, yy, zz, medium, alpha=0.7, edgecolors='gray', facecolors=colors)
-
+        self.ax.set_xlabel("x")
+        self.ax.set_ylabel("y")
+        self.ax.set_zlabel("z")
     def create_grid(self):
         grid = self.scene.volume.grid
         if self.ax is None:
