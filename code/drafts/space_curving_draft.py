@@ -3,7 +3,7 @@ import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 from classes.scene import *
-from classes.scene_gpu import *
+from classes.scene_lowmem_gpu import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
@@ -38,7 +38,7 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
 beta_cloud = beta_cloud.astype(float_reg)
 shape = beta_cloud.shape
 # beta_cloud *= (127/beta_cloud.max())
@@ -63,42 +63,42 @@ beta_gt = np.copy(beta_cloud)
 
 
 focal_length = 60e-3
-sensor_size = np.array((40e-3, 40e-3))
-ps = 70
+height_factor = 2.5
+sensor_size = np.array((56e-3, 56e-3)) / height_factor
+ps = 80
 pixels = np.array((ps, ps))
 
 N_cams = 9
+volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.6
+
+
+R = height_factor * edge_z
 cameras = []
-volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
-
-
-# R = 1.5 * edge_z
-# cameras = []
-# for cam_ind in range(N_cams):
-#     phi = 0
-#     theta = (-(N_cams//2) + cam_ind) * 40
-#     theta_rad = theta * (np.pi/180)
-#     t = R * theta_phi_to_direction(theta_rad,phi) + volume_center
-#     euler_angles = np.array((180, theta, 0))
-#     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
-#     cameras.append(camera)
-#
-R = 2.5 * edge_z
-t = R * theta_phi_to_direction(0, 0) + volume_center
-euler_angles = np.array((180, 0, 0))
-cameras.append(Camera(t, euler_angles, focal_length, sensor_size, pixels))
-phis = np.linspace(0, 360, N_cams - 1)
-phis_rad = phis * (np.pi / 180)
-theta = 50
-theta_rad = theta * (np.pi / 180)
-for k in range(N_cams - 1):
-    t = R * theta_phi_to_direction(theta_rad, phis_rad[k]) + volume_center
-    euler_angles = np.array((180, theta, phis[k]))
+for cam_ind in range(N_cams):
+    phi = 0
+    theta = (-(N_cams//2) + cam_ind) * 40
+    theta_rad = theta * (np.pi/180)
+    t = R * theta_phi_to_direction(theta_rad,phi) + volume_center
+    euler_angles = np.array((180, theta, 0))
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
+#
+# R = 2.5 * edge_z
+# t = R * theta_phi_to_direction(0, 0) + volume_center
+# euler_angles = np.array((180, 0, 0))
+# cameras.append(Camera(t, euler_angles, focal_length, sensor_size, pixels))
+# phis = np.linspace(0, 360, N_cams - 1)
+# phis_rad = phis * (np.pi / 180)
+# theta = 50
+# theta_rad = theta * (np.pi / 180)
+# for k in range(N_cams - 1):
+#     t = R * theta_phi_to_direction(theta_rad, phis_rad[k]) + volume_center
+#     euler_angles = np.array((180, theta, phis[k]))
+#     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
+#     cameras.append(camera)
 
 # Simulation parameters
-Np_gt = int(3e6)
+Np_gt = int(1e7)
 Ns = 15
 # grads_window = np.zeros((win_size, *beta_cloud.shape), dtype=float_reg)
 
@@ -108,21 +108,17 @@ cloud_mask_real = beta_cloud > 0
 # cloud_mask = beta_cloud >= 0
 volume.set_mask(cloud_mask_real)
 
-scene_gpu = SceneGPU(volume, cameras, sun_angles, g_cloud, g_air, Ns)
+scene_gpu = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
 
 visual = Visual_wrapper(scene_gpu)
-# visual.plot_medium()
-visual.create_grid()
-visual.plot_cameras()
-plt.show()
 scene_gpu.init_cuda_param(Np_gt, init=True)
-cuda_paths, Np_nonan = scene_gpu.build_paths_list(Np_gt, Ns)
-print(Np_nonan)
-I_gt = scene_gpu.render(cuda_paths, Np_gt, Np_nonan)
+cuda_paths = scene_gpu.build_paths_list(Np_gt, Ns)
+print(scene_gpu.Np_nonan)
+I_gt = scene_gpu.render(cuda_paths)
 del (cuda_paths)
 cuda_paths = None
 max_val = np.max(I_gt, axis=(1, 2))
-visual.plot_images(I_gt, max_val, "GT")
+visual.plot_images(I_gt, "GT")
 # plt.show()
 
 plt.hist(I_gt.reshape(-1))
@@ -140,7 +136,7 @@ plt.show()
 
 cloud_mask = np.zeros(shape, dtype=np.bool)
 point = np.zeros(3, dtype=np.float)
-N_sample = 10
+N_sample = 1
 counters = np.zeros(cloud_mask.shape)
 for cam_ind in tqdm(range(N_cams)):
     for i in range(shape[0]):

@@ -1,17 +1,10 @@
-from classes.grid import *
 from classes.volume import *
-from classes.sparse_path import SparsePath
-from classes.path import CudaPaths
 from utils import  theta_phi_to_direction
-from tqdm import tqdm
-import math
-from numba import njit
-from numba import cuda
-from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
+from numba.cuda.random import create_xoroshiro128p_states
 from cuda_utils import *
 from time import time
 from scipy.ndimage import binary_dilation
-import matplotlib.pyplot as plt
+
 threadsperblock = 256
 
 
@@ -415,7 +408,7 @@ class SceneGPU(object):
         self.threadsperblock = threadsperblock
         self.blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
         if init:
-            self.seed = np.random.randint(1, int(1e10))
+            self.seed = np.random.randint(1, int(1e9))
             self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
 
     def build_paths_list(self, Np, Ns):

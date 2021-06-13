@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 threadsperblock = 256
 
 
-class SceneLowMemGPU(object):
+class SceneHybridGpu(object):
     def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, Ns):
         self.Ns = Ns
         self.Np = 0
@@ -145,7 +145,6 @@ class SceneLowMemGPU(object):
                 starting_point[2] = bbox[2, 1]
                 assign_3d(current_point, starting_point)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
-
                 for seg in range(Ns):
                     seg_ind = scatter_ind + seg
                     p = sample_uniform(rng_states, tid)
@@ -192,6 +191,66 @@ class SceneLowMemGPU(object):
                 if N_seg != 0:
                     assign_3d(starting_points[:,starting_inds[tid]], starting_point)
 
+        # @cuda.jit()
+        # def calc_path_length(grid_shape, bbox, bbox_size, N_cams, ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds, path_sizes):
+        #     tid = cuda.grid(1)
+        #     if tid < scatter_inds.shape[0] - 1:
+        #         scatter_ind = scatter_inds[tid]
+        #         N_seg = scatter_inds[tid + 1] - scatter_ind
+        #         # local memory
+        #         current_voxel = cuda.local.array(3, dtype=np.uint8)
+        #         # next_voxel = cuda.local.array(3, dtype=np.uint8)
+        #         dest_voxel = cuda.local.array(3, dtype=np.uint8)
+        #         current_point = cuda.local.array(3, dtype=float_precis)
+        #         next_point = cuda.local.array(3, dtype=float_precis)
+        #         direction = cuda.local.array(3, dtype=float_precis)
+        #         pixel = cuda.local.array(2, dtype=np.uint8)
+        #         assign_3d(current_point, starting_points[:, tid])
+        #         get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
+        #
+        #         ps_counter = 0
+        #         for seg in range(N_seg):
+        #             seg_ind = seg + scatter_ind
+        #             assign_3d(next_point, scatter_points[:, seg_ind])
+        #             distance_and_direction(current_point, next_point, direction)
+        #             get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
+        #
+        #             path_size = estimate_voxels_size(dest_voxel, current_voxel)
+        #             ps_counter += path_size
+        #
+        #             for k in range(N_cams):
+        #                 project_point(current_point, Ps[k], pixel_shape, pixel)
+        #                 # pixel[0] = pixel_mat[0, k, seg_ind]
+        #                 if pixel[0] != 255:
+        #                     # pixel[1] = pixel_mat[1, k, seg_ind]
+        #                     if is_in_medium[k]:
+        #                         assign_3d(next_point, ts[k])
+        #                     else:
+        #                         get_intersection_with_borders(current_point, direction, bbox, next_point)
+        #
+        #                     get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
+        #                     path_size = estimate_voxels_size(dest_voxel, current_voxel)
+        #                     ###########################################################################
+        #                     ######################## local estimation save ############################
+        #                     ps_counter += path_size
+        #
+        #         path_sizes[tid] = ps_counter
+
+        @cuda.jit()
+        def sort_scatter_points(scatter_points, starting_points, sorted_inds, sorted_scatter_inds, scatter_inds,
+                                sorted_scatter_points, sorted_starting_points):
+            tid = cuda.grid(1)
+            if tid < sorted_inds.shape[0]:
+                assign_3d(sorted_starting_points[:,tid], starting_points[:, sorted_inds[tid]])
+
+                start_ind = scatter_inds[sorted_inds[tid]]
+                sorted_start_ind = sorted_scatter_inds[tid]
+                N_seg = sorted_scatter_inds[tid+1] - sorted_start_ind
+
+                for seg in range(N_seg):
+                    assign_3d(sorted_scatter_points[:, sorted_start_ind+seg], scatter_points[:, start_ind+seg])
+
+
 
         @cuda.jit()
         def render_cuda(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, N_cams,
@@ -222,6 +281,7 @@ class SceneLowMemGPU(object):
                 beta0 = 1.0 # for type decleration
                 IS = 1.0
                 attenuation = 1.0
+                ps_counter = 0
                 for seg in range(N_seg):
                     seg_ind = seg + scatter_ind
                     assign_3d(next_point, scatter_points[:, seg_ind])
@@ -237,6 +297,7 @@ class SceneLowMemGPU(object):
                     ############## voxel_fixed traversal_algorithm_save #############
 
                     path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                    ps_counter += path_size
 
                     tau = 0
                     for pi in range(path_size):
@@ -289,6 +350,7 @@ class SceneLowMemGPU(object):
                             ###########################################################################
                             ######################## local estimation save ############################
                             tau = 0
+                            ps_counter += path_size
                             for pi in range(path_size):
                                 ##### border traversal #####
                                 border_x = (camera_voxel[0] + (cam_direction[0] > 0)) * voxel_size[0]
@@ -319,6 +381,7 @@ class SceneLowMemGPU(object):
                             cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
 
                     assign_3d(cam_direction, direction) #using cam direction as temp direction
+                # cuda.atomic.add(counter, 0, ps_counter)
 
 
         @cuda.jit()
@@ -515,6 +578,7 @@ class SceneLowMemGPU(object):
 
         self.calc_scatter_sizes = calc_scatter_sizes
         self.generate_paths = generate_paths
+        self.sort_scatter_points = sort_scatter_points
         self.render_cuda = render_cuda
         self.calc_gradient_contribution = calc_gradient_contribution
         self.render_differentiable_cuda = render_differentiable_cuda
@@ -545,7 +609,7 @@ class SceneLowMemGPU(object):
         dscatter_sizes = cuda.to_device(np.empty(Np, dtype=np.uint8))
         drng_states = cuda.to_device(self.rng_states.copy_to_host())
         self.calc_scatter_sizes[blockspergrid, threadsperblock](Np, Ns, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
-            self.dsun_direction, dscatter_sizes, self.rng_states)
+                                                                self.dsun_direction, dscatter_sizes, self.rng_states)
 
         cuda.synchronize()
         if to_print:
@@ -562,35 +626,75 @@ class SceneLowMemGPU(object):
         dstarting_inds = cuda.to_device(starting_inds)
         dstarting_points = cuda.to_device(np.zeros((3,Np_nonan), dtype=float_precis))
         dscatter_points = cuda.to_device(np.zeros((3,total_scatter_num), dtype=float_precis))
+
         start = time()
-        self.generate_paths[blockspergrid, threadsperblock]\
+        self.generate_paths[blockspergrid, threadsperblock] \
             (Np, Ns, self.dbeta_zero, beta_air, self.g_cloud,  self.dbbox, self.dbbox_size, self.dvoxel_size,
-            self.dsun_direction, dstarting_points, dscatter_points, dstarting_inds, dscatter_inds, drng_states)
+             self.dsun_direction, dstarting_points, dscatter_points, dstarting_inds, dscatter_inds, drng_states)
 
         cuda.synchronize()
         if to_print:
-            print("generate_paths:"
-                  "", time() - start)
+            print("generate_paths:", time() - start)
         del(dscatter_inds)
         del(dstarting_inds)
         del(drng_states)
+        self.init_cuda_param(Np_nonan)
+
+
         scatter_sizes = scatter_sizes[cond]
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
         scatter_inds = np.cumsum(scatter_inds)
+
+        # sorted_inds = np.argsort(dpath_sizes.copy_to_host())
+        # sorted_inds = np.argsort(scatter_sizes[sorted_inds])
+
+
+        start = time()
         dscatter_inds = cuda.to_device(scatter_inds)
+        dsorted_scatter_points = cuda.to_device(np.empty((3,total_scatter_num), dtype=float_precis))
+        dsorted_starting_points = cuda.to_device(np.empty((3,Np_nonan), dtype=float_precis))
 
+        sorted_inds = np.argsort(scatter_sizes)
+        scatter_sizes = scatter_sizes[sorted_inds]
+        scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
+        scatter_inds = np.cumsum(scatter_inds)
+        dsorted_scatter_inds = cuda.to_device(scatter_inds)
 
+        self.sort_scatter_points[self.blockspergrid, self.threadsperblock]\
+            (dscatter_points, dstarting_points, sorted_inds, dsorted_scatter_inds, dscatter_inds, dsorted_scatter_points,
+             dsorted_starting_points)
+        # scatter_points = dscatter_points.copy_to_host()
+        # counter = 0
+        # for n in range(scatter_sizes.shape[0]):
+        #     index = sorted_inds[n]
+        #     sorted_scatter_points[:,counter:counter+scatter_sizes[index]] = scatter_points[:,scatter_inds[index]:scatter_inds[index]+scatter_sizes[index]]
+        #     counter += scatter_sizes[index]
+        cuda.synchronize()
+        if to_print:
+            print("rearanging took",time()-start)
+        # scatter_sizes = scatter_sizes[sorted_inds]
+        # scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
+        # scatter_inds = np.cumsum(scatter_inds)
+
+        # dscatter_inds = cuda.to_device(scatter_inds)
+        # dscatter_points.copy_to_device(sorted_scatter_points)
+        # start = time()
+        # dstarting_points.copy_to_device(dstarting_points.copy_to_host()[:, sorted_inds])
+        # print("startingpoint took",time()-start )
+        del(dscatter_inds)
+        del(dstarting_points)
+        del(dscatter_points)
         self.total_num_of_scatter = total_scatter_num
         self.Np_nonan = Np_nonan
         self.dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
         self.dgrad_contrib = cuda.to_device(np.empty(self.total_num_of_scatter, dtype=float_reg))
-        if to_print:
-            print(f"total_num_of_scatter={total_scatter_num}")
-            print(f"not none paths={Np_nonan / Np}")
-            path_weight = cuda_weight((self.dpath_contrib, self.dgrad_contrib, dstarting_points, dscatter_points,
-                                       dscatter_inds,self.rng_states, self.dbeta_cloud))
-            print(f"paths weight: {path_weight:.2f} GB")
-        return dstarting_points, dscatter_points, dscatter_inds
+        # if to_print:
+        #     print(f"total_num_of_scatter={total_scatter_num}")
+        #     print(f"not none paths={Np_nonan / Np}")
+        #     path_weight = cuda_weight((self.dpath_contrib, self.dgrad_contrib, dstarting_points, dscatter_points,
+        #                                dscatter_inds,self.rng_states, self.dbeta_cloud))
+        #     print(f"paths weight: {path_weight:.2f} GB")
+        return dsorted_starting_points, dsorted_scatter_points, dsorted_scatter_inds
 
 
 
@@ -612,13 +716,14 @@ class SceneLowMemGPU(object):
 
         # dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
 
-
+        # dcounter = cuda.to_device(np.zeros(1, dtype=int))
         self.render_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths,self.dI_total,
              self.dpath_contrib)
 
         cuda.synchronize()
+        # print("voxel counter",dcounter.copy_to_host())
         I_total = self.dI_total.copy_to_host()
         I_total /= self.Np
         if to_print:

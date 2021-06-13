@@ -1,8 +1,7 @@
 import os, sys
-my_lib_path = os.path.abspath('./')
+my_lib_path = os.path.abspath('../')
 sys.path.append(my_lib_path)
-from classes.scene import *
-from classes.scene_numba import *
+from classes.deprecated.scene_numba import *
 from classes.camera import *
 from classes.visual import *
 from utils import *

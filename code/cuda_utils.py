@@ -11,7 +11,8 @@ reg_size = 32 / 8
 precis_size = 32 / 8
 divide_beta_eps = 1.25e-1
 # divide_beta_eps = 0
-b = 0.0
+b  = 0.0
+e_ddis = 0.05
 
 if float_eff == np.float64:
     eff_size *= 2
@@ -40,6 +41,12 @@ def get_voxel_of_point(point, grid_shape, bbox, bbox_size, res):
         res[2] = grid_shape[2] - 1
     else:
         res[2] = int(((point[2] - bbox[2, 0]) / bbox_size[2]) * grid_shape[2])
+
+@cuda.jit(device=True)
+def get_voxel_of_point_temp(point, grid_shape, bbox, bbox_size, res):
+    res[0] = min(int(((point[0] - bbox[0, 0]) / bbox_size[0]) * grid_shape[0]), grid_shape[0] - 1)
+    res[1] = min(int(((point[1] - bbox[1, 0]) / bbox_size[1]) * grid_shape[1]), grid_shape[1] - 1)
+    res[2] = min(int(((point[2] - bbox[2, 0]) / bbox_size[2]) * grid_shape[2]), grid_shape[2] - 1)
 
 
 @cuda.jit(device=True)
@@ -291,6 +298,30 @@ def get_intersection_with_borders(point, direction, bbox, res):
     return t_min
 
 @cuda.jit(device=True)
+def get_intersection_with_bbox(point, direction, bbox):
+    # print_3d(point)
+    # print_3d(direction)
+    # print_3d(bbox[1])
+    t1 = (bbox[0, 0] - point[0]) / direction[0]
+    t2 = (bbox[0, 1] - point[0]) / direction[0]
+    t3 = (bbox[1, 0] - point[1]) / direction[1]
+    t4 = (bbox[1, 1] - point[1]) / direction[1]
+    t5 = (bbox[2, 0] - point[2]) / direction[2]
+    t6 = (bbox[2, 1] - point[2]) / direction[2]
+    # print(t1,t2,t3,t4,t5,t6)
+    tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6))
+    tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6))
+    # print(tmin, tmax)
+    # ray (line) is intersecting AABB, but the whole AABB is behind us or the ray does not intersect
+    if tmax < 0 or tmin>tmax:
+      return False
+
+    # tmin += 1e-6
+    step_in_direction(point, direction, tmin)
+    return True
+
+
+@cuda.jit(device=True)
 def estimate_voxels_size(voxel_a, voxel_b):
     res = 0
     if voxel_a[0] >= voxel_b[0]:
@@ -309,11 +340,22 @@ def estimate_voxels_size(voxel_a, voxel_b):
         res += voxel_b[2] - voxel_a[2]
     return res
 
+@cuda.jit(device=True)
+def estimate_voxels_size_temp(voxel_a, voxel_b):
+    a = voxel_a[0] - voxel_b[0]
+    b = voxel_a[1] - voxel_b[1]
+    c = voxel_a[2] - voxel_b[2]
+    # return max(voxel_a[0]-voxel_b[0], voxel_b[0]-voxel_a[0]) + max(voxel_a[1]-voxel_b[1], voxel_b[1]-voxel_a[1]) + max(voxel_a[2]-voxel_b[2], voxel_b[2]-voxel_a[2])
+    res = max(a, -a) + max(b,-b) + max(c,-c)
+    return res
+
+
 
 #### CAMERA FUNCTIONS ####
 @cuda.jit(device=True)
 def project_point(point, P, pixels_shape, res):
     res[0] = 255
+    # res[1] = 255
     z = point[0]*P[2,0] + point[1]*P[2,1] + point[2]*P[2,2] + P[2,3]
     x = (point[0]*P[0,0] + point[1]*P[0,1] + point[2]*P[0,2] + P[0,3]) / z
     y = (point[0]*P[1,0] + point[1]*P[1,1] + point[2]*P[1,2] + P[1,3]) / z
@@ -421,6 +463,14 @@ def dot_3d(a,b):
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 
 @cuda.jit(device=True)
+def norm_3d(vec):
+    dist = math.sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2])
+    vec[0] /= dist
+    vec[1] /= dist
+    vec[2] /= dist
+
+
+@cuda.jit(device=True)
 def print_3d(a):
     return print(a[0],a[1],a[2])
 @cuda.jit(device=True)
@@ -469,3 +519,9 @@ def argmin(x,y,z):
         return y,1
     else:
         return z,2
+
+@cuda.jit(device=True)
+def mat_dot_vec(mat, vec, res):
+    res[0] = mat[0,0] * vec[0] + mat[0,1] * vec[1] + mat[0,2] * vec[2]
+    res[1] = mat[1,0] * vec[0] + mat[1,1] * vec[1] + mat[1,2] * vec[2]
+    res[2] = mat[2,0] * vec[0] + mat[2,1] * vec[1] + mat[2,2] * vec[2]

@@ -1,16 +1,11 @@
-from classes.grid import *
 from classes.volume import *
-from classes.sparse_path import SparsePath
-from classes.path import CudaPaths
 from utils import  theta_phi_to_direction
 from tqdm import tqdm
 import math
 from numba import njit
-from numba import cuda
 
-class SceneGPU(object):
-    def __init__(self, volume: Volume, cameras, sun_angles, g, Ns = 15):
-        self.Ns = Ns
+class SceneNumba(object):
+    def __init__(self, volume: Volume, cameras, sun_angles, g):
         self.volume = volume
         self.sun_angles = sun_angles
         self.sun_direction = theta_phi_to_direction(*sun_angles)
@@ -22,136 +17,6 @@ class SceneGPU(object):
         for k in range(self.N_cams):
             self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
 
-        N_cams = self.N_cams
-        pixels = self.cameras[0].pixels
-
-        # gpu array
-        max_voxels = int(5e8)
-        max_scatter = int(1e6)
-        self.dbetas = cuda.device_array_like(self.volume.betas)
-        self.dI_total = cuda.device_array((N_cams, pixels[0], pixels[1]), dtype=np.float32)
-        self.dtotal_grad = cuda.device_array(self.volume.betas.shape, dtype=np.float32)
-        # self.all_lengths_inds =cuda.device_array((max_voxels,5), dtype=np.uint8)
-        # self.all_lengths = cuda.device_array(max_voxels, dtype=np.float32)
-        # self.all_ISs_mat = cuda.device_array() #TODO: predefine  all cuda arrays!!!
-        # self.all_scatter_tensor = cuda.device_array(
-        # self.all_camera_pixels = cuda.device_array(
-        # self.scatter_inds = cuda.device_array(
-        # self.voxel_inds = cuda.device_array(
-        @cuda.jit()
-        def render_cuda(all_lengths_inds, all_lengths, all_ISs_mat, all_scatter_tensor, \
-                        all_camera_pixels, scatter_inds, voxel_inds, betas, beta_air, w0_cloud, w0_air, I_total):
-            tid = cuda.grid(1)
-            if tid < voxel_inds.shape[0] - 1:
-                # reading thread indices
-                scatter_start = scatter_inds[tid]
-                scatter_end = scatter_inds[tid + 1]
-                voxel_start = voxel_inds[tid]
-                voxel_end = voxel_inds[tid + 1]
-
-                # reading thread data
-                length_inds = all_lengths_inds[voxel_start:voxel_end]
-                lengths = all_lengths[voxel_start:voxel_end]
-                ISs_mat = all_ISs_mat[:, scatter_start:scatter_end]
-                scatter_tensor = all_scatter_tensor[:, scatter_start:scatter_end]
-                camera_pixels = all_camera_pixels[:, :, scatter_start:scatter_end]
-
-                # rendering
-                N_seg = scatter_tensor.shape[1]
-                path_contrib = cuda.local.array(shape=(N_cams, Ns), dtype=np.float32)
-                # optical_lengths = optical_lengths[:,:N_seg]
-
-                for row_ind in range(lengths.shape[0]):
-                    i, j, k, cam_ind, seg = length_inds[row_ind]
-                    L = lengths[row_ind]
-                    if cam_ind == 255:
-                        for cam_j in range(N_cams):
-                            for seg_j in range(N_seg - seg):
-                                path_contrib[cam_j, seg + seg_j] += betas[i, j, k] * L
-                    else:
-                        path_contrib[cam_ind, seg] += betas[i, j, k] * L
-
-                si = scatter_tensor
-                prod = 1
-                for seg in range(N_seg):
-                    prod *= (w0_cloud * (betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air)
-                    for cam_j in range(N_cams):
-                        pc = ISs_mat[cam_j, seg] * math.exp(-path_contrib[cam_j, seg]) * prod
-                        pixel = camera_pixels[:, cam_j, seg]
-                        cuda.atomic.add(I_total, (cam_j, pixel[0], pixel[1]), pc)
-
-        @cuda.jit()
-        def render_differentiable_cuda(all_lengths_inds, all_lengths, all_ISs_mat, all_scatter_tensor, \
-                            all_camera_pixels, scatter_inds, voxel_inds, betas, beta_air, w0_cloud, w0_air, I_dif,
-                            total_grad,):
-            tid = cuda.grid(1)
-            if tid < voxel_inds.shape[0] - 1:
-                # reading thread indices
-                scatter_start = scatter_inds[tid]
-                scatter_end = scatter_inds[tid + 1]
-                voxel_start = voxel_inds[tid]
-                voxel_end = voxel_inds[tid + 1]
-
-                # reading thread data
-                length_inds = all_lengths_inds[voxel_start:voxel_end]
-                lengths = all_lengths[voxel_start:voxel_end]
-                ISs_mat = all_ISs_mat[:, scatter_start:scatter_end]
-                scatter_tensor = all_scatter_tensor[:, scatter_start:scatter_end]
-                camera_pixels = all_camera_pixels[:, :, scatter_start:scatter_end]
-
-                # rendering
-                N_seg = scatter_tensor.shape[1]
-                path_contrib = cuda.local.array(shape=(N_cams, Ns), dtype=np.float32)
-                # optical_lengths = optical_lengths[:,:N_seg]
-                # rendering
-
-                for row_ind in range(lengths.shape[0]):
-                    i, j, k, cam_ind, seg = length_inds[row_ind]
-                    L = lengths[row_ind]
-                    if cam_ind == 255:
-                        for cam_j in range(N_cams):
-                            for seg_j in range(N_seg - seg):
-                                path_contrib[cam_j, seg + seg_j] += betas[i, j, k] * L
-                    else:
-                        path_contrib[cam_ind, seg] += betas[i, j, k] * L
-
-                si = scatter_tensor
-                prod = 1
-                for seg in range(N_seg):
-                    prod *= (w0_cloud * (betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air)
-                    for cam_j in range(N_cams):
-                        path_contrib[cam_j, seg] = ISs_mat[cam_j, seg] * math.exp(-path_contrib[cam_j, seg]) * prod
-
-
-                for row_ind in range(lengths.shape[0]):
-                    i, j, k, cam_ind, seg = length_inds[row_ind]
-                    L = lengths[row_ind]
-                    if cam_ind == 255:
-                        pixel = camera_pixels[:, :, seg:]
-                        for pj in range(pixel.shape[2]):
-                            for cam_j in range(N_cams):
-                                grad_contrib = -L * path_contrib[cam_j, seg + pj]*\
-                                               I_dif[cam_j, pixel[0, cam_j, pj], pixel[1, cam_j, pj]]
-                                cuda.atomic.add(total_grad, (i, j, k), grad_contrib)
-
-                    else:
-                        pixel = camera_pixels[:, cam_ind, seg]
-                        grad_contrib = -L * path_contrib[cam_ind, seg] * I_dif[cam_ind, pixel[0], pixel[1]]
-                        cuda.atomic.add(total_grad, (i, j, k), grad_contrib)
-
-                for seg in range(N_seg):
-                    beta_scatter = w0_cloud * (betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air
-                    pixel = camera_pixels[:, :, seg:]
-                    for pj in range(pixel.shape[2]):
-                        for cam_ind in range(N_cams):
-                            grad_contrib = (w0_cloud / beta_scatter) * path_contrib[cam_ind, seg + pj] *\
-                                           I_dif[cam_ind, pixel[0, cam_ind, pj], pixel[1, cam_ind, pj]]
-                            cuda.atomic.add(total_grad, (si[0, seg], si[1, seg], si[2, seg]), grad_contrib)
-
-
-
-        self.render_cuda = render_cuda
-        self.render_differentiable_cuda = render_differentiable_cuda
 
     def build_paths_list(self, Np, Ns, workers=1):
         paths = []
@@ -174,46 +39,38 @@ class SceneGPU(object):
             pass
 
         print(f"none: {len([path for path in paths if path is None])/Np}")
-        cuda_paths = CudaPaths(paths)
-        cuda_paths.compress()
-        return cuda_paths
+        return paths
 
 
 
-    def render(self, cuda_paths, I_gt=None):
+    def render(self, paths, differentiable=False):
         # east declerations
-        Np = cuda_paths.Np
+        Np = len(paths)
         N_cams = len(self.cameras)
         pixels_shape = self.cameras[0].pixels
         betas = self.volume.betas
         beta_air = self.volume.beta_air
         w0_cloud = self.volume.w0_cloud
         w0_air = self.volume.w0_air
+        I_total = np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=np.float64)
+        if differentiable:
+            shape = self.volume.grid.shape
+            total_grad = np.zeros((shape[0],shape[1],shape[2],N_cams,pixels_shape[0],pixels_shape[1]), dtype=np.float64)
+        for path in tqdm(paths):
+            if path is None:
+                continue
+            else:
+                res = render_path(path, betas, beta_air, w0_cloud, w0_air)
+                camera_pixels = path[-1]
+                update_image(I_total, res, camera_pixels)
 
-        threadsperblock = 256
-        blockspergrid = (cuda_paths.Np_nonan + (threadsperblock - 1)) // threadsperblock
+                if differentiable:
+                    update_gradient(total_grad, path, res, betas, beta_air, w0_cloud, w0_air)
 
-        self.dbetas.copy_to_device(self.volume.betas)
-        self.dI_total.copy_to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=np.float32))
-        self.dtotal_grad.copy_to_device(np.zeros_like(betas, dtype=np.float32))
-
-        if not cuda_paths.in_device:
-            cuda_paths.to_device()
-            print("paths moved to device")
-        args = cuda_paths.get_args()
-        self.render_cuda[blockspergrid, threadsperblock](*args, self.dbetas, beta_air, w0_cloud, w0_air, self.dI_total)
-        I_total = self.dI_total.copy_to_host()
-        I_total /= Np
-        if I_gt is None:
-            return I_total
-        I_dif = (I_total - I_gt).astype(np.float32)
-        self.dI_total.copy_to_device(I_dif)
-        self.render_differentiable_cuda[blockspergrid, threadsperblock](*args, self.dbetas, beta_air, w0_cloud, w0_air,
-                                                                        self.dI_total, self.dtotal_grad)
-        total_grad = self.dtotal_grad.copy_to_host()
-
-        total_grad /= (Np * N_cams)
-        return I_total, total_grad
+        if differentiable:
+            return I_total/Np, total_grad/Np
+        else:
+            return I_total / Np
 
     def __str__(self):
         text = ""
@@ -248,9 +105,9 @@ def generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams,
 
     # helpful list
     voxels =  [np.array([x,x,x], dtype=np.int32) for x in range(0)]
-    cam_vec = [np.uint8(x) for x in range(0)]
-    seg_vec = [np.uint8(x) for x in range(0)]
-    lengths = [np.float32(x) for x in range(0)]
+    cam_vec = [np.int(x) for x in range(0)]
+    seg_vec = [np.int(x) for x in range(0)]
+    lengths = [np.float(x) for x in range(0)]
 
     direction =np.copy(sun_direction)
     # sample entering point
@@ -331,7 +188,72 @@ def generate_path(Ns, betas, bbox, bbox_size, voxel_size, sun_direction, N_cams,
     length_inds = np.hstack((voxels, cam_vec, seg_vec))
     return length_inds, lengths, ISs_mat, scatter_tensor, camera_pixels
 
+@njit()
+def render_path(path, betas, beta_air, w0_cloud, w0_air):
+    length_inds, lengths, ISs_mat, scatter_tensor, camera_pixels = path
+    N_seg = scatter_tensor.shape[1]
+    N_cams = camera_pixels.shape[1]
+    optical_length = np.zeros((N_cams, N_seg), dtype=np.float64)
 
+    for row_ind in range(lengths.shape[0]):
+        i, j, k, cam_ind, seg = length_inds[row_ind]
+        L = lengths[row_ind]
+        if cam_ind == -1:
+            for cam_j in range(N_cams):
+                for seg_j in range(N_seg - seg):
+                    optical_length[cam_j,seg+seg_j] += betas[i,j,k] * L
+        else:
+            optical_length[cam_ind, seg] += betas[i, j, k] * L
+
+    res = np.exp(-optical_length) * ISs_mat
+    si = scatter_tensor
+    prod = 1
+    for seg in range(N_seg):
+        prod *= (w0_cloud * (betas[si[0,seg], si[1,seg], si[2,seg]] - beta_air) + w0_air * beta_air)
+        for cam_j in range(N_cams):
+            res[cam_j,seg] *= prod
+        if prod == 0:
+            print("does not make sense")
+            print(si[:, seg])
+
+    return res
+
+@njit()
+def update_image(I_total, res, camera_pixels):
+    for cam in range(I_total.shape[0]):
+        for seg in range(res.shape[1]):
+            pixel = camera_pixels[:, cam, seg]
+            if (pixel != -1).all():
+                I_total[cam, pixel[0], pixel[1]] += res[cam, seg]
+@njit()
+def update_gradient(total_grad, path, res, betas, beta_air, w0_cloud, w0_air):
+    length_inds, lengths, ISs_mat, scatter_tensor, camera_pixels = path
+    N_seg = scatter_tensor.shape[1]
+    N_cams = camera_pixels.shape[1]
+    for row_ind in range(lengths.shape[0]):
+        i, j, k, cam_ind, seg = length_inds[row_ind]
+        L = lengths[row_ind]
+        if cam_ind == -1:
+            pixel = camera_pixels[:,:, seg:]
+            for pj in range(pixel.shape[2]):
+                for cam_j in range(N_cams):
+                    total_grad[i,j,k,cam_j,pixel[0,cam_j,pj],pixel[1,cam_j,pj]] -= L * res[cam_j, seg + pj]
+        else:
+            pixel = camera_pixels[:, cam_ind, seg]
+            total_grad[i, j, k, cam_ind, pixel[0], pixel[1]] -= L * res[cam_ind, seg]
+
+    si = scatter_tensor
+
+    for seg in range(N_seg):
+        beta_scatter = w0_cloud*(betas[si[0, seg], si[1, seg], si[2, seg]] - beta_air) + w0_air * beta_air
+        if beta_scatter == 0:
+            print("bug!!!")
+            continue
+        pixel = camera_pixels[:, :, seg:]
+        for pj in range(pixel.shape[2]):
+            for cam_ind in range(N_cams):
+                total_grad[si[0,seg], si[1,seg], si[2, seg], cam_ind, pixel[0,cam_ind,pj], pixel[1,cam_ind,pj]] += \
+                    (w0_cloud/beta_scatter) * res[cam_ind, seg + pj]
 
 
 

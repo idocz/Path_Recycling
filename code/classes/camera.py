@@ -9,6 +9,8 @@ class Camera(object):
         self.sensor_size = sensor_size
         self.R = euler_to_rotmat(euler_angles)
         self.pixels = pixels
+        self.sensor_size = sensor_size
+        self.focal_length = focal_length
         s = pixels / sensor_size
         fx, fy = focal_length * s
         cx = pixels[0] / 2
@@ -33,6 +35,19 @@ class Camera(object):
         points_2d = np.floor(points_2d).astype("int")
 
         return points_2d
+    def update_pixels(self, pixels):
+        self.pixels = pixels
+        s = pixels / self.sensor_size
+        fx, fy = self.focal_length * s
+        cx = pixels[0] / 2
+        cy = pixels[1] / 2
+        self.K = np.array([[fx, 0, cx],
+                           [0, fy, cy],
+                           [0, 0, 1]])
+        self.K_inv = np.linalg.inv(self.K)
+        self.G = np.hstack([self.R.T, -self.R.T @ self.t.reshape(3, 1)])
+        self.P = self.K @ self.G
+
 
     def __str__(self):
         return f"t={self.t}, euler={self.euler_angles}, focal_length={self.focal_length}," \

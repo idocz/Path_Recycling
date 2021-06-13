@@ -1,5 +1,4 @@
-from classes.scene import *
-from classes.scene_graph import *
+from classes.deprecated.scene_graph import *
 from classes.camera import *
 from classes.visual import *
 from utils import construct_beta

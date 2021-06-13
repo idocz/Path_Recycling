@@ -1,13 +1,6 @@
-from classes.grid import *
 from classes.volume import *
-from classes.sparse_path import SparsePath
-from classes.path import CudaPaths
 from utils import  theta_phi_to_direction
-from tqdm import tqdm
-import math
-from numba import njit
-from numba import cuda
-from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
+from numba.cuda.random import create_xoroshiro128p_states
 from cuda_utils import *
 from time import time
 from scipy.ndimage import binary_dilation

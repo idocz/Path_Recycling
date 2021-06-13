@@ -1,12 +1,11 @@
-from classes.scene import *
-from classes.scene_sparse import *
-from classes.scene_numba import *
+from classes.deprecated.scene_sparse import *
+from classes.deprecated.scene_numba import *
 from classes.camera import *
 from classes.visual import *
-from utils import construct_beta
+from classes.phase_function import HGPhaseFunction
 from time import time
 import matplotlib.pyplot as plt
-from classes.phase_function import *
+
 def main():
     ###################
     # Grid parameters #
@@ -28,33 +27,27 @@ def main():
     #####################
     # construct betas
     grid_size = 3
+    mid = grid_size // 2
+    beta = 4
+    # beta_cloud = construct_beta(grid_size, False, beta)
+    # beta_cloud = np.zeros((grid_size,grid_size,grid_size))
+    # beta_cloud[mid,mid,mid] = beta
+    beta_cloud = np.ones((1,1,1)) * beta
     beta_air = 0.1
-    beta_cloud = np.array([[[0, 0, 0],
-                            [0, 2, 0],
-                            [0, 0, 0]],
-
-                           [[0, 3, 0],
-                            [3, 4, 3],
-                            [0, 3, 0]],
-
-                           [[0, 0, 0],
-                            [0, 5, 0],
-                            [0, 0, 0]]])
     w0_air = 0.8
     w0_cloud = 0.7
     # Declerations
     grid = Grid(bbox, beta_cloud.shape)
     volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
-    # phase_function = UniformPhaseFunction()
     g = 0.5
     phase_function = HGPhaseFunction(g)
     print(volume.betas)
     #######################
     # Cameras declaration #
     #######################
-    N_cams = 2
+    N_cams = 1
     focal_length = 70e-3
-    sensor_size = np.array((80e-3, 80e-3))
+    sensor_size = np.array((40e-3, 40e-3))
     ps = 1
     pixels = np.array((ps, ps))
 
@@ -68,6 +61,18 @@ def main():
 
     cameras = [camera1,camera2]
 
+    # N_cams = 7
+    # cameras = []
+    # for cam_ind in range(N_cams):
+    #     phi = 0
+    #     theta = (-(N_cams // 2) + cam_ind) * 40
+    #     theta_rad = theta * (np.pi / 180)
+    #     t = 1.5 * theta_phi_to_direction(theta_rad, phi) + np.array([0.5, 0.5, 0.5])
+    #     euler_angles = np.array((180, theta, 0))
+    #     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
+    #     cameras.append(camera)
+
+
     scene = Scene(volume, cameras, sun_angles, phase_function)
     scene_sparse = SceneSparse(volume, cameras, sun_angles, phase_function)
     scene_numba = SceneNumba(volume, cameras, sun_angles, g)
@@ -80,7 +85,6 @@ def main():
     sparse_render = True
     basic_render = False
 
-
     visual = Visual_wrapper(scene)
     if plot_scene:
         visual.plot_cloud()
@@ -88,22 +92,26 @@ def main():
         visual.plot_cameras()
         plt.show()
 
-    fake_cloud = beta_cloud * 1#.5
+    fake_cloud = beta_cloud #* 1.5
     # fake_cloud = construct_beta(grid_size, False, beta + 2)
 
-    max_val = None
     if numba_render:
         print("####### numba renderer ########")
         print("generating paths")
 
         volume.set_beta_cloud(fake_cloud)
         paths = scene_numba.build_paths_list(Np, Ns)
-        I_total = scene_numba.render(paths)
-        max_val = np.max(I_total, axis=(1,2))
+        volume.set_beta_cloud(beta_cloud)
+        print(" start rendering...")
         start = time()
+        # I_total, total_grad = scene_numba.render(paths, differentiable=True)
+        I_total = scene_numba.render(paths)
+        exit()
+        max_val = np.max(I_total, axis=(1, 2))
         print(f" rendering took: {time() - start}")
-        print(I_total)
-        visual.plot_images(I_total, max_val, "sparse")
+        print(f"I_total={I_total}")
+        print(f"total_grad={total_grad}")
+        visual.plot_images(I_total, max_val, "Numba")
         plt.show()
 
     if sparse_render:
@@ -115,26 +123,24 @@ def main():
         volume.set_beta_cloud(beta_cloud)
         print(" start rendering...")
         start = time()
-        I_total = scene_sparse.render(paths)
-        if max_val is None:
-            max_val = np.max(I_total, axis=(1, 2))
-
+        I_total, total_grad = scene_sparse.render(paths, differentiable=True)
+        max_val = np.max(I_total, axis=(1, 2))
         print(f" rendering took: {time() - start}")
-        print(I_total)
+        print(f"I_total={I_total}")
+        print(f"total_grad={total_grad}")
         visual.plot_images(I_total, max_val, "sparse")
         plt.show()
+
 
     if basic_render:
         print("####### basic renderer ########")
         print(" start rendering...")
         start = time()
-        I_total = scene.render(Np, Ns)
-        print(I_total[0].T)
-        print(I_total[1].T)
+        I_total,total_grad = scene.render_differentiable(Np, Ns)
         print(f" rendering took: {time() - start}")
-        if max_val is None:
-            max_val = np.max(I_total, axis=(1, 2))
-        visual.plot_images(I_total, max_val, "basic")
+        print(f"I_total={I_total}")
+        print(f"total_grad={total_grad}")
+        visual.plot_images(I_total,max_val, "basic")
         plt.show()
 
 
