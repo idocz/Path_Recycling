@@ -14,15 +14,18 @@ class Visual_wrapper(object):
         self.ax = plt.axes(projection='3d')
         grid = self.scene.volume.grid
         # set the colors of each object
-        x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], 1)
-        y = np.linspace(grid.bbox[1,0], grid.bbox[1,1],  1)
+        x = np.linspace(grid.bbox[0,0], grid.bbox[0,1], grid.shape[0] + 1)
+        y = np.linspace(grid.bbox[1,0], grid.bbox[1,1], grid.shape[1] + 1)
         z = np.linspace(grid.bbox[2,0], grid.bbox[2,1], grid.shape[2] + 1)
-        xx, yy, zz = np.meshgrid(y, x, z,)
+        yy, xx, zz = np.meshgrid(y, x, z,)
 
         medium = np.ones(grid.shape) * 0.5
+        medium[self.scene.volume.beta_cloud<0.1] = 0
         colors = cm.gray(medium)
-        self.ax.voxels(0, 0, 0, medium, alpha=0.7, edgecolors='gray')
-
+        self.ax.voxels(xx, yy, zz, medium, alpha=0.7, edgecolors='gray', facecolors=colors)
+        self.ax.set_xlabel("x")
+        self.ax.set_ylabel("y")
+        self.ax.set_zlabel("z")
     def create_grid(self):
         grid = self.scene.volume.grid
         if self.ax is None:
@@ -48,7 +51,7 @@ class Visual_wrapper(object):
         for i, cam in enumerate(cameras):
             add_camera_to_ax(self.ax, cam.t, cam.R, i)
 
-    def plot_images(self, I_total, max_val, title):
+    def plot_images(self, I_total, title):
         N_cams = I_total.shape[0]
         plt.figure()
         N_ax = int(np.ceil(np.sqrt(N_cams)))
@@ -70,7 +73,6 @@ class Visual_wrapper(object):
         plt.scatter(X, Y)
         plt.plot([min_val, max_val], [min_val,max_val])
         plt.title(title)
-        plt.show()
 
 
 

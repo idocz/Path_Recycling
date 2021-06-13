@@ -1,5 +1,5 @@
 import pickle
-from classes.scene_numba import *
+from classes.deprecated.scene_numba import *
 from os.path import join
 
 checkpoint_id = "1612-0025-00"

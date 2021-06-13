@@ -2,16 +2,11 @@
 import sys
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
-from classes.scene_numba import *
 from classes.scene_gpu import *
 from classes.camera import *
 from classes.visual import *
 from time import time
-import matplotlib.pyplot as plt
 from classes.phase_function import *
-from scipy.io import loadmat
-from os.path import join
-from numba import cuda
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)

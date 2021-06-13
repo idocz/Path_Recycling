@@ -1,11 +1,7 @@
-from classes.scene import *
-from classes.scene_graph import *
-from classes.scene_sparse import *
+from classes.deprecated.scene_sparse import *
 from classes.camera import *
 from classes.visual import *
-from classes.phase_function import HGPhaseFunction, UniformPhaseFunction
-from utils import construct_beta
-from time import time
+from classes.phase_function import HGPhaseFunction
 from utils import *
 import matplotlib.pyplot as plt
 from classes.tensorboard_wrapper import TensorBoardWrapper

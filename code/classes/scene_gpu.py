@@ -1,17 +1,10 @@
-from classes.grid import *
 from classes.volume import *
-from classes.sparse_path import SparsePath
-from classes.path import CudaPaths
 from utils import  theta_phi_to_direction
-from tqdm import tqdm
-import math
-from numba import njit
-from numba import cuda
-from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32, xoroshiro128p_uniform_float64
+from numba.cuda.random import create_xoroshiro128p_states
 from cuda_utils import *
 from time import time
 from scipy.ndimage import binary_dilation
-import matplotlib.pyplot as plt
+
 threadsperblock = 256
 
 
@@ -204,7 +197,7 @@ class SceneGPU(object):
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
 
-                    path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                    path_size = estimate_voxels_size(dest_voxel, current_voxel) + 1
                     reach_dest = False
                     counter = 0
 
@@ -269,7 +262,7 @@ class SceneGPU(object):
                                 get_intersection_with_borders(camera_point, cam_direction, bbox, dest)
 
                             get_voxel_of_point(dest, grid_shape, bbox, bbox_size, dest_voxel)
-                            path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                            path_size = estimate_voxels_size(dest_voxel, current_voxel) + 1
                             counter = 0
                             ###########################################################################
                             ######################## local estimation save ############################
@@ -391,7 +384,7 @@ class SceneGPU(object):
                                 get_intersection_with_borders(current_point, cam_direction, bbox, dest)
                                 get_intersection_with_borders(current_point, cam_direction, bbox, dest)
                             get_voxel_of_point(dest, grid_shape, bbox, bbox_size, camera_voxel)
-                            total_voxels_size += estimate_voxels_size(current_voxel, camera_voxel)
+                            total_voxels_size += estimate_voxels_size(current_voxel, camera_voxel)+1
                     # sampling new direction
                     cloud_prob = (beta - beta_air) / beta
                     p = sample_uniform(rng_states, tid)
@@ -415,7 +408,7 @@ class SceneGPU(object):
         self.threadsperblock = threadsperblock
         self.blockspergrid = (Np + (threadsperblock - 1)) // threadsperblock
         if init:
-            self.seed = np.random.randint(1, int(1e10))
+            self.seed = np.random.randint(1, int(1e9))
             self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
 
     def build_paths_list(self, Np, Ns):

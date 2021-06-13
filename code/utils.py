@@ -1,14 +1,11 @@
 import numpy as np
-from torch.utils.tensorboard import SummaryWriter
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-import os
-from os.path import join
-from datetime import datetime
 from scipy.ndimage import zoom
+from struct import pack, unpack
+import matplotlib.animation as animation
+from tensorboard.backend.event_processing import event_accumulator
+import cv2
 from scipy.io import loadmat
-
 def theta_phi_to_direction(theta, phi):
     return np.array([np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)])
 
@@ -46,7 +43,7 @@ def add_camera_to_ax(ax, t, R, label):
     camera_z = R[:, 2]
     ax.quiver(t[0], t[1], t[2], *camera_x, color='r', length=dist)
     ax.quiver(t[0], t[1], t[2], *camera_y, color='b', length=dist)
-    ax.quiver(t[0], t[1], t[2], *camera_z, color='g', length=dist)
+    ax.quiver(t[0], t[1], t[2], *camera_z, color='g', length=dist*5)
     ax.scatter(*t, s=20)
     text_x = t + camera_x * dist
     text_y = t + camera_y * dist
@@ -166,3 +163,94 @@ def cloud_preproccess(beta_cloud, beta_max):
 
 def relative_distance(A, B):
     return np.sum(np.abs(A-B)) / np.sum(np.abs(A))
+
+def cuda_weight(cuda_path):
+    sum = 0
+    for array in cuda_path:
+        sum += array.nbytes
+    return sum/1e9
+
+
+def get_density(filename, scale):
+    """
+    Generates 3D matrix (ndarray) from a binary of .vol type
+    Output
+      volume: 3D matrix of float representing the voxels values of the object
+      bounding_box: bounding box of the object [xmin, ymin, zmin, xmax, ymax, zmax]
+    """
+
+    fid = open(filename, encoding="utf-8")
+
+    # Reading first 48 bytes of volFileName as header , count begins from zero
+    header = fid.read(48)
+
+    # Converting header bytes 8-21 to volume size [xsize,ysize,zsize] , type = I : 32 bit integer
+    size = unpack(3 * 'I', bytearray(header[8:20]))
+
+    # Converting header bytes 24-47 to bounding box [xmin,ymin,zmin],[xmax,ymax,zmax] type = f : 32 bit float
+    # bounding_box = unpack(6*'f', bytearray(header[24:48]))
+
+    # Converting data bytes 49-* to a 3D matrix size of [xsize,ysize,zsize],
+    # type = f : 32 bit float
+    binary_data = fid.read()
+    nCells = size[0] * size[1] * size[2]
+    volume = np.array(unpack(nCells * 'f', bytearray(binary_data)))
+    volume = volume.reshape(size, order='F')
+    fid.close()
+    for ax in range(3):
+        u_volume, counts = np.unique(volume, axis=ax, return_counts=True)
+        if np.all(counts == 2):
+            volume = u_volume
+
+    volume *= scale
+    return volume
+
+def animate(image_list, interval, repeat_delay=250, output_name=None):
+    ims = []
+    fig = plt.figure()
+    for image in image_list:
+        plt.axis("off")
+        im = plt.imshow(image, animated=True, cmap="gray")
+
+        ims.append([im])
+
+
+    ani = animation.ArtistAnimation(fig, ims, interval=interval, blit=True,
+                                    repeat_delay=repeat_delay)
+    if not output_name is None:
+        writer = animation.FFMpegWriter(fps=15)
+        # writer = animation.PillowWriter(fps=15)
+        ani.save(output_name, writer=writer)
+    plt.title("Reconstructed Vs Ground Truth")
+    plt.show()
+
+def get_images_from_TB(exp_dir, label):
+    ea = event_accumulator.EventAccumulator(exp_dir, size_guidance={"images": 0})
+    ea.Reload()
+    img_list = []
+    for img_bytes in ea.images.Items(label):
+        img = np.frombuffer(img_bytes.encoded_image_string, dtype=np.uint8)
+        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = np.array(img)
+        img_list.append(img)
+    return img_list
+
+def get_scalars_from_TB(exp_dir, label):
+    ea = event_accumulator.EventAccumulator(exp_dir, size_guidance={"scalars": 0})
+    ea.Reload()
+    return ea.scalars.Items(label)
+
+
+def mask_grader(cloud_mask, cloud_mask_real, beta_cloud):
+    print(f"accuracy:", np.mean(cloud_mask == cloud_mask_real))
+    print(f"fp:", np.mean((cloud_mask == 1) * (cloud_mask_real == 0)))
+    fn = (cloud_mask == 0) * (cloud_mask_real == 1)
+    print(f"fn:", np.mean(fn))
+    fn_exp = (fn * beta_cloud).reshape(-1)
+    print(f"fn_exp mean:", np.mean(fn_exp))
+    print(f"fn_exp max:", np.max(fn_exp))
+    print(f"fn_exp min:", np.min(fn_exp[fn_exp != 0]))
+    plt.hist(fn_exp[fn_exp != 0])
+    print("missed beta:", np.sum(fn_exp) / np.sum(beta_cloud))
+    print("rel_dit:", relative_distance(beta_cloud, beta_cloud * cloud_mask))
