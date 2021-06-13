@@ -102,7 +102,7 @@ for frame in tqdm(range(frames)):
     img_list.extend(img_concat)
 
 print("saving gif...")
-output_name = join("experiments","gifs","recycling_illustration.gif")
+output_name = join("experiments","gifs","recycling_illustration.mp4")
 # output_name = None
 animate(img_list, interval=60, repeat_delay=2000, output_name=output_name)
 

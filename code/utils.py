@@ -218,9 +218,8 @@ def animate(image_list, interval, repeat_delay=250, output_name=None):
     ani = animation.ArtistAnimation(fig, ims, interval=interval, blit=True,
                                     repeat_delay=repeat_delay)
     if not output_name is None:
-        Writer = animation.writers['ffmpeg']
-        # writer = animation.FFMpegWriter(fps=30)
-        writer = animation.PillowWriter(fps=15)
+        writer = animation.FFMpegWriter(fps=15)
+        # writer = animation.PillowWriter(fps=15)
         ani.save(output_name, writer=writer)
     plt.title("Reconstructed Vs Ground Truth")
     plt.show()

@@ -26,16 +26,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="smoke has been finished but rendering is too slow. Trying to find a hybrid approach">
-      <change afterPath="$PROJECT_DIR$/classes/scene_hybrid_gpu.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_sunabove.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_upscaling.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/hybrid_render_smoke.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/recycling_illustration.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/recycling_illustration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/rotating_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/rotating_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_sunabove.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_sunabove.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +73,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -86,7 +82,7 @@
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\drafts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.rotating_result">
+  <component name="RunManager" selected="Python.voxels_traversal_draft">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -241,50 +237,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="hybrid_inverse_smoke_upscaling" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_upscaling.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="hybrid_render_smoke" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/hybrid_render_smoke.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="lowmem_inverse_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -373,6 +325,50 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="recycling_illustration" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/recycling_illustration.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="rel_dist_loss_plot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="rotating_result" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -395,7 +391,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="upscaling_constant_finder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="voxels_traversal_draft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -403,12 +399,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/drafts" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/voxels_traversal_draft.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -427,19 +423,19 @@
       <item itemvalue="Python.lowmem_inverse_script" />
       <item itemvalue="Python.lowmem_inverse_smoke" />
       <item itemvalue="Python.lowmem_inverse_smoke_upscaling" />
-      <item itemvalue="Python.hybrid_render_smoke" />
-      <item itemvalue="Python.hybrid_inverse_smoke_upscaling" />
       <item itemvalue="Python.hybrid_inverse_smoke_sunabove" />
-      <item itemvalue="Python.upscaling_constant_finder" />
       <item itemvalue="Python.rotating_result" />
+      <item itemvalue="Python.rel_dist_loss_plot" />
+      <item itemvalue="Python.recycling_illustration" />
+      <item itemvalue="Python.voxels_traversal_draft" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.rotating_result" />
+        <item itemvalue="Python.voxels_traversal_draft" />
         <item itemvalue="Python.hybrid_inverse_smoke_sunabove" />
-        <item itemvalue="Python.upscaling_constant_finder" />
-        <item itemvalue="Python.hybrid_render_smoke" />
-        <item itemvalue="Python.hybrid_inverse_smoke_upscaling" />
+        <item itemvalue="Python.recycling_illustration" />
+        <item itemvalue="Python.rotating_result" />
+        <item itemvalue="Python.rel_dist_loss_plot" />
       </list>
     </recent_temporary>
   </component>
@@ -486,6 +482,9 @@
       <workItem from="1619947222152" duration="4873000" />
       <workItem from="1619970291258" duration="125125000" />
       <workItem from="1620466154509" duration="166000" />
+      <workItem from="1620467083811" duration="13069000" />
+      <workItem from="1622446152757" duration="777000" />
+      <workItem from="1622631246831" duration="5771000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -749,19 +748,20 @@
     <option name="LAST_COMMIT_MESSAGE" value="smoke has been finished but rendering is too slow. Trying to find a hybrid approach" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="535" y="167" key="#Deployment" timestamp="1620466318094">
+    <state x="535" y="167" key="#Deployment" timestamp="1620467126137">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="535" y="167" key="#Deployment/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466318094" />
+    <state x="535" y="167" key="#Deployment/0.0.1920.1040@0.0.1920.1040" timestamp="1620467126137" />
     <state x="519" y="154" key="#SSH_Configurations" timestamp="1620466301419">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="519" y="154" key="#SSH_Configurations/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466301419" />
-    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1620466186294">
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1620497505086">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466186294" />
-    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1620404076908" />
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1620497505086" />
     <state x="578" y="348" width="490" height="606" key="#xdebugger.evaluate" timestamp="1620391235760">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -771,10 +771,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1620400484131" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1620464772071">
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1622459266374">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620464772071" />
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1622459266374" />
     <state width="1877" height="338" key="GridCell.Tab.0.bottom" timestamp="1620465982793">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -815,10 +815,10 @@
     </state>
     <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620465982794" />
     <state width="1877" height="338" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1620391239008" />
-    <state x="461" y="165" key="SettingsEditor" timestamp="1620223277049">
+    <state x="461" y="165" key="SettingsEditor" timestamp="1622459248111">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620156296298" />
+    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1622459248111" />
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1620223277049" />
     <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1620306407279">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -836,10 +836,11 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2108" y="-11" width="1054" height="642" maximized="true" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620154919453" />
-    <state x="788" y="413" key="publish.login" timestamp="1620466258202">
+    <state x="788" y="413" key="publish.login" timestamp="1620469617815">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="788" y="413" key="publish.login/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1620466258202" />
+    <state x="788" y="413" key="publish.login/0.0.1920.1040@0.0.1920.1040" timestamp="1620469617815" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -956,7 +957,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils.py</url>
-          <line>242</line>
+          <line>241</line>
           <option name="timeStamp" value="81" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

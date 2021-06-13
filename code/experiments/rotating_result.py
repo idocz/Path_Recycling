@@ -120,7 +120,7 @@ for iteration, min in zip(iterations, mins):
         img_list.extend(img_concat)
 
     print("saving gif...")
-    output_name = join(output_dir,f"rotation_iter{iteration}_min{min}.gif")
+    output_name = join(output_dir,f"rotation_iter{iteration}_min{min}.mp4")
     # output_name = None
     animate(img_list, interval=100, output_name=output_name, repeat_delay=0)
 

@@ -27,7 +27,7 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
+beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 50
 beta_cloud = np.ascontiguousarray(np.rot90(beta_cloud, axes=(2,1)))
 beta_cloud =np.roll(beta_cloud, axis=0, shift=-15)
 # beta_cloud = beta_cloud.T
@@ -96,7 +96,7 @@ for cam_ind in range(N_cams):
 Np_gt = int(5e7)
 Np_max = int(5e7)
 Np = int(1e6)
-resample_freq = 1
+resample_freq = 10
 step_size = 5e5
 # Ns = 15
 Ns = 15
@@ -207,7 +207,7 @@ for iter in range(iterations):
         if non_min_couter >= win_size and iter > start_iter:
             if Np < Np_max :
                 Np = int(Np * scaling_factor)
-                # resample_freq = 30
+                resample_freq = 30
                 non_min_couter = 0
                 # step_size *= scaling_factor
                 if Np > Np_max:
