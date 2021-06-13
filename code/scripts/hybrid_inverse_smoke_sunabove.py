@@ -179,7 +179,7 @@ if tensorboard:
 # grad_norm = None
 non_min_couter = 0
 next_phase = False
-min_loss = 1
+min_loss = 1#
 upscaling_counter = 0
 # photon_scale = (ps/ps_gt)**2
 # cuda_paths = scene_lowmem.build_paths_list(int(Np_gt*photon_scale), Ns)
