@@ -58,7 +58,7 @@ print(beta_cloud.shape)
 w0_air = 0.912
 w0_cloud = 0.9
 # w0_air = 1
-# w0_cloud = 0.01
+# w0_cloud = 1
 
 # Declerations
 grid = Grid(bbox, beta_cloud.shape)
@@ -72,7 +72,7 @@ height_factor = 1.5
 
 focal_length = 50e-3
 sensor_size = np.array((50e-3, 50e-3)) / height_factor
-ps = 50
+ps = 120
 
 pixels = np.array((ps, ps))
 
@@ -107,9 +107,11 @@ for cam_ind in range(N_cams):
 # Np = int(5e7)
 Np = int(1e8)
 Ns = 15
+rr_depth = 5
+rr_stop_prob = 0.5
 
 volume.set_mask(beta_cloud>0)
-scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, Ns)
+scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 scene_hybrid = SceneHybridGpu(volume, cameras, sun_angles, g_cloud, Ns)
 
 scene_rr.set_cloud_mask(volume.cloud_mask)
@@ -131,14 +133,14 @@ if run_rr:
     print("####### GPU Rusian Roulette renderer ########")
     Np_compilation = 1000
     volume.set_beta_cloud(fake_cloud)
-    cuda_paths = scene_rr.build_paths_list(Np_compilation, Ns)
+    cuda_paths = scene_rr.build_paths_list(Np_compilation)
     volume.set_beta_cloud(beta_cloud)
     _, _ = scene_rr.render(cuda_paths, 0)
     print("finished compliations")
     del(cuda_paths)
     print("generating paths")
     start = time()
-    cuda_paths = scene_rr.build_paths_list(Np, Ns, to_print=True)
+    cuda_paths = scene_rr.build_paths_list(Np, to_print=True)
     end = time()
     print(f"building paths took: {end - start}")
     volume.set_beta_cloud(beta_cloud)
@@ -148,7 +150,7 @@ if run_rr:
     # del(cuda_paths)
     # cuda_paths = scene_hybrid.build_paths_list(Np, Ns)
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
-    visual.plot_images(I_total_rr, f"GPU Rusian Roulette maximum scattering={Ns}")
+    visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()

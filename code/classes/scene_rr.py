@@ -11,8 +11,11 @@ threadsperblock = 256
 
 
 class SceneRR(object):
-    def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, Ns):
-        self.Ns = Ns
+    def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob):
+        self.rr_depth = rr_depth
+        self.rr_stop_prob = rr_stop_prob
+        rr_factor = 1.0 / (1.0 - self.rr_stop_prob)
+        self.rr_factor = rr_factor
         self.Np = 0
         self.volume = volume
         self.sun_angles = sun_angles
@@ -51,7 +54,7 @@ class SceneRR(object):
         self.dgrad_contrib = None
 
         @cuda.jit()
-        def calc_scatter_sizes(Np, Ns, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction,
+        def calc_scatter_sizes(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction,
                                scatter_sizes, rng_states):
 
             tid = cuda.grid(1)
@@ -66,18 +69,22 @@ class SceneRR(object):
                 new_direction = cuda.local.array(3, dtype=float_precis)
                 assign_3d(direction, sun_direction)
                 # sample entering point
-                p = sample_uniform(rng_states, tid)
-                starting_point[0] = bbox_size[0] * p + bbox[0, 0]
+                starting_point[0] = bbox_size[0] * sample_uniform(rng_states, tid) + bbox[0, 0]
 
-                p = sample_uniform(rng_states, tid)
-                starting_point[1] = bbox_size[1] * p + bbox[1, 0]
+                starting_point[1] = bbox_size[1] * sample_uniform(rng_states, tid) + bbox[1, 0]
 
                 starting_point[2] = bbox[2, 1]
 
                 assign_3d(current_point, starting_point)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
 
-                for seg in range(Ns):
+                # for seg in range(Ns):
+                seg = 0
+                while True:
+                    # Russian Roulette
+                    if seg >= rr_depth:
+                        if sample_uniform(rng_states, tid) <= rr_stop_prob:
+                            break
                     tau_rand = -math.log(1 - sample_uniform(rng_states, tid))
                     ###########################################################
                     ############## voxel_traversal_algorithm_save #############
@@ -104,7 +111,8 @@ class SceneRR(object):
                     ###########################################################################
                     if in_medium == False:
                         break
-                    # keeping track of scatter points
+
+                    seg+=1
 
                     # sampling new direction
                     cloud_prob_scat =  w0_cloud*beta_c / (w0_cloud*beta_c + w0_air*beta_air)
@@ -115,10 +123,10 @@ class SceneRR(object):
                     assign_3d(direction, new_direction)
 
                 # voxels and scatter sizes for this path (this is not in a loop)
-                scatter_sizes[tid] = seg + int(in_medium)
+                scatter_sizes[tid] = seg
 
         @cuda.jit()
-        def generate_paths(Np, Ns, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction, starting_points,
+        def generate_paths(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction, starting_points,
                            scatter_points, starting_inds, scatter_inds, rng_states):
 
             tid = cuda.grid(1)
@@ -142,7 +150,13 @@ class SceneRR(object):
                 starting_point[2] = bbox[2, 1]
                 assign_3d(current_point, starting_point)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
-                for seg in range(Ns):
+                # for seg in range(Ns):
+                seg = 0
+                while True:
+                    # Russian Roulette
+                    if seg >= rr_depth:
+                        if sample_uniform(rng_states, tid) <= rr_stop_prob:
+                            break
                     seg_ind = scatter_ind + seg
                     tau_rand = -math.log(1 - sample_uniform(rng_states, tid))
                     ###########################################################
@@ -170,6 +184,7 @@ class SceneRR(object):
                     if in_medium == False:
                         break
                     # keeping track of scatter points
+                    seg += 1
 
                     scatter_points[0, seg_ind] = current_point[0]
                     scatter_points[1, seg_ind] = current_point[1]
@@ -286,6 +301,8 @@ class SceneRR(object):
                     cloud_prob = 1 - (beta_air / beta)
                     cloud_prob_scat = (w0_cloud*beta_c)/(w0_cloud*beta_c + w0_air*beta_air)
                     attenuation *= cloud_prob * w0_cloud + (1-cloud_prob) * w0_air
+                    if seg >= rr_depth:
+                        attenuation *= rr_factor
                     for k in range(N_cams):
                         project_point(current_point, Ps[k], pixel_shape, pixel)
                         # pixel[0] = pixel_mat[0, k, seg_ind]
@@ -557,7 +574,7 @@ class SceneRR(object):
             self.rng_states = create_xoroshiro128p_states(threadsperblock * self.blockspergrid, seed=self.seed)
             self.Np = Np
 
-    def build_paths_list(self, Np, Ns, to_print=False):
+    def build_paths_list(self, Np, to_print=False):
         # inputs
         del(self.dpath_contrib)
         del(self.dgrad_contrib)
@@ -573,13 +590,16 @@ class SceneRR(object):
         dscatter_sizes = cuda.to_device(np.empty(Np, dtype=np.uint8))
         drng_states = cuda.to_device(self.rng_states.copy_to_host())
         self.calc_scatter_sizes[blockspergrid, threadsperblock]\
-            (Np, Ns, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
+            (Np, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
              self.dvoxel_size,self.dsun_direction, dscatter_sizes, self.rng_states)
 
         cuda.synchronize()
         if to_print:
             print("calc_scatter_sizes:",time()-start)
         scatter_sizes = dscatter_sizes.copy_to_host()
+        # plt.figure()
+        # plt.hist(scatter_sizes[scatter_sizes!=0])
+        # plt.show()
         del(dscatter_sizes)
         cond = scatter_sizes != 0
         starting_inds = np.cumsum(np.concatenate([np.array([0]), cond]))
@@ -594,7 +614,7 @@ class SceneRR(object):
 
         start = time()
         self.generate_paths[blockspergrid, threadsperblock] \
-            (Np, Ns, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
+            (Np, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
              self.dsun_direction, dstarting_points, dscatter_points, dstarting_inds, dscatter_inds, drng_states)
 
         cuda.synchronize()

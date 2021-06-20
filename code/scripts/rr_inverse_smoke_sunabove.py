@@ -99,7 +99,8 @@ Np = int(1e6)
 resample_freq = 10
 step_size = 5e5
 # Ns = 15
-Ns = 15
+rr_depth = 5
+rr_stop_prob = 0.5
 iterations = 10000000
 to_mask = True
 tensorboard = True
@@ -108,14 +109,14 @@ beta_max = beta_cloud.max()
 win_size = 100
 
 
-scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, Ns)
+scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 
 visual = Visual_wrapper(scene_rr)
 # visual.create_grid()
 # visual.plot_cameras()
 # visual.plot_medium()
 plt.show()
-cuda_paths = scene_rr.build_paths_list(Np_gt, Ns)
+cuda_paths = scene_rr.build_paths_list(Np_gt)
 I_gt = scene_rr.render(cuda_paths)
 del(cuda_paths)
 cuda_paths = None
@@ -167,7 +168,7 @@ print(pss)
 scene_rr.upscale_cameras(ps)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
-    cp_wrapper = CheckpointWrapper(scene_rr, optimizer, Np_gt, Np, Ns, resample_freq, step_size, iterations,
+    cp_wrapper = CheckpointWrapper(scene_rr, optimizer, Np_gt, Np, 0, resample_freq, step_size, iterations,
                             tensorboard_freq, tb.train_id)
     tb.add_scene_text(str(cp_wrapper))
     pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
@@ -228,7 +229,7 @@ for iter in range(iterations):
         print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)
-        cuda_paths = scene_rr.build_paths_list(Np, Ns)
+        cuda_paths = scene_rr.build_paths_list(Np)
         end = time()
         print(f"building path list took: {end - start}")
     # differentiable forward model
