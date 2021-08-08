@@ -1,5 +1,5 @@
 import os, sys
-my_lib_path = os.path.abspath('./')
+my_lib_path = os.path.abspath('../')
 sys.path.append(my_lib_path)
 from classes.scene import *
 from classes.scene_lowmem_gpu import *
@@ -13,8 +13,7 @@ import pickle
 from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
 from classes.optimizer import *
-from os.path import join
-from tqdm import tqdm
+from scipy.ndimage import zoom
 cuda.select_device(0)
 
 
@@ -27,8 +26,8 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
-# beta_cloud = beta_cloud.T
+beta_cloud = loadmat(join("data", "rico.mat"))["beta"]
+
 # beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
 beta_cloud = beta_cloud.astype(float_reg)
 # beta_cloud *= (127/beta_cloud.max())
@@ -53,7 +52,7 @@ beta_air = 0.004
 w0_air = 0.912
 # w0_cloud = 0.8 #0.9
 w0_cloud = 0.9
-g_cloud = 0.5
+g_cloud = 0.85
 
 # Declerations
 grid = Grid(bbox, beta_cloud.shape)
@@ -66,16 +65,15 @@ beta_gt = np.copy(beta_cloud)
 
 
 focal_length = 60e-3
-sensor_size = np.array((56e-3, 56e-3))
+sensor_size = np.array((40e-3, 40e-3))
+ps = 80
+pixels = np.array((ps, ps))
 
-
-ps_max = 200
-pixels = np.array([ps_max, ps_max])
 N_cams = 9
 cameras = []
-volume_center = (bbox[:,1] - bbox[:,0]) / 1.6
+volume_center = (bbox[:,1] - bbox[:,0])/2
 R = 1.5 * edge_z
-#
+
 for cam_ind in range(N_cams):
     phi = 0
     theta = (-(N_cams//2) + cam_ind) * 40
@@ -84,42 +82,56 @@ for cam_ind in range(N_cams):
     euler_angles = np.array((180, theta, 0))
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
+
+# height_factor = 1.5
+# focal_length = 45e-3
+# sensor_size = np.array((40e-3, 40e-3)) / height_factor
+# ps = 55
 #
+# pixels = np.array((ps, ps))
+#
+# N_cams = 9
+# cameras = []
+# volume_center = (bbox[:, 1] - bbox[:, 0]) / 2
+# R = height_factor * edge_z
 # for cam_ind in range(N_cams):
-#     theta = np.pi/2
-#     phi = (-(N_cams//2) + cam_ind) * 40
-#     phi_rad = phi * (np.pi/180)
-#     t = R * theta_phi_to_direction(theta,phi_rad) + volume_center
-#     print(cam_ind, t-volume_center)
-#     euler_angles = np.array((90, 0, phi-90))
+#     phi = 0
+#     theta = (-(N_cams // 2) + cam_ind) * 40
+#     theta_rad = theta * (np.pi / 180)
+#     t = R * theta_phi_to_direction(theta_rad, phi) + volume_center
+#     euler_angles = np.array((180, theta, 0))
 #     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
 #     cameras.append(camera)
-
 
 
 # Simulation parameters
 Np_gt = int(5e7)
 Np_max = int(5e7)
-Np = int(1e6)
+Np = int(5e5)
 resample_freq = 10
-step_size = 4e5
+step_size = 2e8
 # Ns = 15
 Ns = 15
 iterations = 10000000
 to_mask = True
 tensorboard = True
-tensorboard_freq = 50
+tensorboard_freq = 15
 beta_max = beta_cloud.max()
+# beta_max = 140
 win_size = 100
 
+
+seed = None
+# Cloud mask (GT for now)
+cloud_mask = beta_cloud > 0
+# cloud_mask = beta_cloud >= 0
+cloud_mask = np.load(join("data","Rico_mask_2.npy"))
+volume.set_mask(cloud_mask)
 
 scene_lowmem = SceneLowMemGPU(volume, cameras, sun_angles, g_cloud, Ns)
 
 visual = Visual_wrapper(scene_lowmem)
-visual.create_grid()
-visual.plot_cameras()
-# visual.plot_medium()
-plt.show()
+
 cuda_paths = scene_lowmem.build_paths_list(Np_gt, Ns)
 I_gt = scene_lowmem.render(cuda_paths)
 del(cuda_paths)
@@ -128,12 +140,11 @@ max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, "GT")
 plt.show()
 
-print("Calculating Cloud Mask")
-cloud_mask = scene_lowmem.space_curving(I_gt, image_threshold=0.7, hit_threshold=0.9, spp=1000)
-mask_grader(cloud_mask, beta_gt>0.1, beta_gt)
-scene_lowmem.set_cloud_mask(cloud_mask)
-
-
+# mask_thresh = 2e-6
+# img_mask = np.zeros(I_gt.shape, dtype=np.bool)
+# img_mask[I_gt > mask_thresh] = 1
+# scene_gpu.space_curving(img_mask)
+# cloud_mask = scene_gpu.volume.cloud_mask
 
 
 scene_lowmem.init_cuda_param(Np)
@@ -141,36 +152,10 @@ alpha = 0.9
 beta1 = 0.9
 beta2 = 0.999
 start_iter = 500
-scaling_factor = 1.5
 # optimizer = SGD(volume,step_size)
 beta_mean = np.mean(beta_cloud[volume.cloud_mask])
 # optimizer = MomentumSGD(volume, step_size, alpha, beta_mean, beta_max)
 optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_mean, beta_max, 1)
-
-ps = 30
-# n = int(np.log(Np_gt/Np)/np.log(1.5))
-r = 1/np.sqrt(scaling_factor)
-n = int(np.ceil(np.log(ps/ps_max)/np.log(r)))
-
-I_gts = [I_gt]
-pss = [ps_max]
-print("creating I_gt pyramid...")
-for iter in tqdm(range(n)):
-    if iter < n-1:
-        ps_temp = int(ps_max * r**iter)
-        temp = ps_temp/ps_max
-    else:
-        temp = ps/ps_max
-        ps_temp = ps
-    I_temp = zoom(I_gt, (1,temp, temp), order=1)
-    I_temp *= 1/(temp*temp) # light correction factor
-    I_gts.insert(0,I_temp)
-    pss.insert(0, ps_temp)
-#
-I_gt = I_gts[0]
-ps = pss[0]
-print(pss)
-scene_lowmem.upscale_cameras(ps)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
     cp_wrapper = CheckpointWrapper(scene_lowmem, optimizer, Np_gt, Np, Ns, resample_freq, step_size, iterations,
@@ -179,71 +164,46 @@ if tensorboard:
     pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
     print("Checkpoint wrapper has been saved")
 
-
-
+# Initialization
+beta_init = np.zeros_like(beta_cloud)
+beta_init[volume.cloud_mask] = 2
+# beta_init[volume.cloud_mask] = 0
+volume.set_beta_cloud(beta_init)
+beta_opt = volume.beta_cloud
 
 # grad_norm = None
 non_min_couter = 0
 next_phase = False
 min_loss = 1
-upscaling_counter = 0
-# photon_scale = (ps/ps_gt)**2
-# cuda_paths = scene_lowmem.build_paths_list(int(Np_gt*photon_scale), Ns)
-# I_gt = scene_lowmem.render(cuda_paths)
-# I_gt = I_gts[0]
-tb.update_gt(I_gt)
-# Initialization
-beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = 2.5
-# beta_init[volume.cloud_mask] = 0
-volume.set_beta_cloud(beta_init)
-beta_opt = volume.beta_cloud
 for iter in range(iterations):
-    # if iter > start_iter:
-    #     resample_freq = 1
-    # print(f"\niter {iter}")
+    print(f"\niter {iter}")
     abs_dist = np.abs(beta_cloud[cloud_mask] - beta_opt[cloud_mask])
     max_dist = np.max(abs_dist)
     rel_dist1 = relative_distance(beta_cloud, beta_opt)
 
-    # print(f"rel_dist1={rel_dist1}, max_dist={max_dist}, Np={Np:.2e}, ps={ps} counter={non_min_couter}")
+    print(f"rel_dist1={rel_dist1}, max_dist={max_dist}, Np={Np:.2e}, counter={non_min_couter}")
 
     if iter % resample_freq == 0:
         if non_min_couter >= win_size:
             if Np < Np_max and iter > start_iter:
-                Np = int(Np * scaling_factor)
+                Np = int(Np * 1.5)
                 resample_freq = 30
                 non_min_couter = 0
-                step_size *= scaling_factor
-                if Np > Np_max:
-                    Np = Np_max
-
-            if ps < ps_max:
-                upscaling_counter += 1
-                # photon_scale = (ps / ps_gt) ** 2
-                ps = pss[upscaling_counter]
-                scene_lowmem.upscale_cameras(ps)
-                # volume.beta_cloud = beta_gt
-                # cuda_paths = scene_lowmem.build_paths_list(int(Np_gt*photon_scale), Ns)
-                I_gt = I_gts[upscaling_counter]
-                # I_gt = scene_lowmem.render(cuda_paths)
-                tb.update_gt(I_gt)
-                # volume.beta_cloud = beta_opt
-        # print("RESAMPLING PATHS ")
+                step_size *= 1.5
+        print("RESAMPLING PATHS ")
         start = time()
         del(cuda_paths)
         cuda_paths = scene_lowmem.build_paths_list(Np, Ns)
         end = time()
-        # print(f"building path list took: {end - start}")
+        print(f"building path list took: {end - start}")
     # differentiable forward model
     start = time()
     I_opt, total_grad = scene_lowmem.render(cuda_paths, I_gt=I_gt)
-    total_grad *= (ps*ps)
     end = time()
-    # print(f"rendering took: {end-start}")
+    print(f"rendering took: {end-start}")
 
 
-    dif = (I_opt - I_gt).reshape(1,1,1, N_cams, *scene_lowmem.pixels_shape)
+    dif = (I_opt - I_gt).reshape(1,1,1, N_cams, pixels[0], pixels[1])
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta
@@ -253,14 +213,14 @@ for iter in range(iterations):
     # loss calculation
     start = time()
     optimizer.step(total_grad)
-    # print("gradient step took:",time()-start)
+    print("gradient step took:",time()-start)
     loss = 0.5 * np.sum(dif ** 2)
     if loss < min_loss:
         min_loss = loss
         non_min_couter = 0
     else:
         non_min_couter += 1
-    # print(f"loss = {loss}, grad_norm={grad_norm}, max_grad={np.max(total_grad)}")
+    print(f"loss = {loss}, grad_norm={grad_norm}, max_grad={np.max(total_grad)}")
 
     # Writing scalar and images to tensorboard
     if tensorboard and iter % tensorboard_freq == 0:

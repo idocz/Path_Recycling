@@ -2,10 +2,12 @@ from classes.volume import *
 from utils import  theta_phi_to_direction
 from numba.cuda.random import create_xoroshiro128p_states
 from cuda_utils import *
+from utils import relative_distance
 from utils import cuda_weight
 from time import time
 from scipy.ndimage import binary_dilation
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 threadsperblock = 256
 
@@ -788,6 +790,36 @@ class SceneRR(object):
         return cloud_mask
         # pixel_mat, N_cams, width, height, spp, I_mask, RKs_inv, ts, bbox, bbox_size, voxel_size, grid_shape, grid_counter):
 
+    def find_best_initialization(self, beta_gt, I_gt, beta_low, beta_high, N_samples, Np, to_plot=False):
+        betas = np.linspace(beta_low, beta_high, N_samples)
+        losses = []
+        # rel_dists = []
+        if to_plot:
+            plt.figure()
+        for beta in tqdm(betas):
+            self.volume.beta_cloud[self.volume.cloud_mask] = beta
+            cuda_path = self.build_paths_list(Np)
+            I = self.render(cuda_path)
+            del(cuda_path)
+            dif = I-I_gt
+            loss = 0.5 * np.sum(dif * dif)
+            rel_dist = relative_distance(beta_gt, beta)
+            if to_plot:
+                plt.scatter(loss, rel_dist, color="b")
+            losses.append(loss)
+
+        if to_plot:
+            plt.grid()
+            plt.xlabel("loss")
+            plt.ylabel("rel_dist")
+            plt.show()
+        min_ind = np.argmin(losses)
+        print(relative_distance(beta_gt,betas[min_ind]))
+        return betas[min_ind]
+
+
+
+
 
     def set_cloud_mask(self, cloud_mask):
         self.volume.set_mask(cloud_mask)
@@ -795,16 +827,30 @@ class SceneRR(object):
 
     def set_cameras(self, cameras):
         self.cameras = cameras
-        self.N_cams = len(cameras)
         self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
         for k in range(self.N_cams):
             self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
-
         self.pixels_shape = self.cameras[0].pixels
         ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
         Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
         self.dts.copy_to_device(ts)
         self.dPs.copy_to_device(Ps)
+
+    def reset_cameras(self, cameras):
+        self.cameras = cameras
+        self.N_cams = len(cameras)
+        self.N_pixels = cameras[0].pixels
+        self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
+        for k in range(self.N_cams):
+            self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
+        self.pixels_shape = self.cameras[0].pixels
+        ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
+        self.Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
+        self.dpixels_shape = cuda.to_device(self.cameras[0].pixels)
+        self.dts = cuda.to_device(ts)
+        self.dPs = cuda.to_device(self.Ps)
+        self.dis_in_medium = cuda.to_device(self.is_camera_in_medium)
+        self.dI_total = cuda.device_array((self.N_cams, *self.pixels_shape), dtype=float_reg)
 
     def upscale_cameras(self, ps_new):
         del(self.dI_total)

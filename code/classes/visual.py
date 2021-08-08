@@ -53,12 +53,15 @@ class Visual_wrapper(object):
 
     def plot_images(self, I_total, title):
         N_cams = I_total.shape[0]
-        plt.figure()
+        fig = plt.figure()
+
         N_ax = int(np.ceil(np.sqrt(N_cams)))
         for i in range(N_cams):
             ax = plt.subplot(N_ax, N_ax, i + 1)
             ax.set_title(f"camera {i}")
+            ax.axis("off")
             ax.imshow(I_total[i].T, cmap="gray")#, vmin=0, vmax=max_val[i])
+
         plt.suptitle(title)
 
     def scatter_plot_comparison(self, signal1, signal2, title):

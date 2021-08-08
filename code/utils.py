@@ -5,7 +5,7 @@ from struct import pack, unpack
 import matplotlib.animation as animation
 from tensorboard.backend.event_processing import event_accumulator
 import cv2
-from scipy.io import loadmat
+from scipy.io import loadmat, savemat
 def theta_phi_to_direction(theta, phi):
     return np.array([np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)])
 
@@ -164,6 +164,9 @@ def cloud_preproccess(beta_cloud, beta_max):
 def relative_distance(A, B):
     return np.sum(np.abs(A-B)) / np.sum(np.abs(A))
 
+def relative_bias(A, B):
+    return (np.sum(np.abs(A))-np.sum(np.abs(B))) / np.sum(np.abs(A))
+
 def cuda_weight(cuda_path):
     sum = 0
     for array in cuda_path:
@@ -228,13 +231,16 @@ def get_images_from_TB(exp_dir, label):
     ea = event_accumulator.EventAccumulator(exp_dir, size_guidance={"images": 0})
     ea.Reload()
     img_list = []
+    wall_time_list = []
     for img_bytes in ea.images.Items(label):
         img = np.frombuffer(img_bytes.encoded_image_string, dtype=np.uint8)
         img = cv2.imdecode(img, cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = np.array(img)
         img_list.append(img)
-    return img_list
+        wall_time_list.append(img_bytes.wall_time)
+    wall_time_list = [int((wall_time - wall_time_list[0])*60) for wall_time in wall_time_list]
+    return img_list, wall_time_list
 
 def get_scalars_from_TB(exp_dir, label):
     ea = event_accumulator.EventAccumulator(exp_dir, size_guidance={"scalars": 0})

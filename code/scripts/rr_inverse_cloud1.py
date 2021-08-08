@@ -27,18 +27,13 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
-beta_cloud = np.ascontiguousarray(np.rot90(beta_cloud, axes=(2,1)))
-beta_cloud =np.roll(beta_cloud, axis=0, shift=-15)
-# beta_cloud = beta_cloud.T
-# beta_cloud = loadmat(join("data", "rico2.mat"))["vol"]
+beta_cloud = loadmat(join("data", "cloud1.mat"))["beta_cloud1"]
 beta_cloud = beta_cloud.astype(float_reg)
-# beta_cloud *= (127/beta_cloud.max())
 # Grid parameters #
 # bounding box
 voxel_size_x = 0.02
 voxel_size_y = 0.02
-voxel_size_z = 0.02
+voxel_size_z = 0.04
 edge_x = voxel_size_x * beta_cloud.shape[0]
 edge_y = voxel_size_y * beta_cloud.shape[1]
 edge_z = voxel_size_z * beta_cloud.shape[2]
@@ -50,12 +45,12 @@ bbox = np.array([[0, edge_x],
 print(beta_cloud.shape)
 print(bbox)
 
-beta_air = 0.004 / 1000
+beta_air = 0.004
 # w0_air = 1.0 #0.912
 w0_air = 0.912
 # w0_cloud = 0.8 #0.9
-w0_cloud = 0.9
-g_cloud = 0.5
+w0_cloud = 0.99
+g_cloud = 0.85
 
 # Declerations
 grid = Grid(bbox, beta_cloud.shape)
@@ -66,36 +61,28 @@ beta_gt = np.copy(beta_cloud)
 # Cameras declaration #
 #######################
 
+height_factor = 2
 
-
-
-ps_max = 200
-pixels = np.array([ps_max, ps_max])
-N_cams = 9
-R = 1.5 * edge_z
-#
-height_factor = 1.5
 focal_length = 50e-3
-sensor_size = np.array((50e-3, 50e-3)) / height_factor
-volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.6
+sensor_size = np.array((25e-3, 25e-3)) / height_factor
+ps_max = 100
+pixels = np.array((ps_max, ps_max))
+
+N_cams = 9
 cameras = []
+volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.7
 R = height_factor * edge_z
 
-cam_deg = 360 // (N_cams-1)
-theta = 90
-theta_rad = theta * (np.pi/180)
-for cam_ind in range(N_cams-1):
-    phi = (-(N_cams//2) + cam_ind) * cam_deg
+for cam_ind in range(N_cams):
+    theta = np.pi/2
+    phi = (-(N_cams//2) + cam_ind) * 40
     phi_rad = phi * (np.pi/180)
-    t = R * theta_phi_to_direction(theta_rad,phi_rad) + volume_center
+    t = R * theta_phi_to_direction(theta,phi_rad) + volume_center
     t[2] -= 0.5
-    euler_angles = np.array((180-theta, 0, phi-90))
+    print(cam_ind, t-volume_center)
+    euler_angles = np.array((90, 0, phi-90))
     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
     cameras.append(camera)
-t = R * theta_phi_to_direction(0,0) + volume_center
-euler_angles = np.array((180, 0, -90))
-cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].sensor_size, cameras[0].pixels))
-
 
 
 
@@ -104,10 +91,10 @@ Np_gt = int(5e7)
 Np_max = int(5e7)
 Np = int(1e6)
 resample_freq = 10
-step_size = 5e5
+step_size = 1e7
 # Ns = 15
-rr_depth = 5
-rr_stop_prob = 0.5
+rr_depth = 10
+rr_stop_prob = 0.05
 iterations = 10000000
 to_mask = True
 tensorboard = True
@@ -132,11 +119,10 @@ visual.plot_images(I_gt, "GT")
 plt.show()
 
 print("Calculating Cloud Mask")
-cloud_mask = scene_rr.space_curving(I_gt, image_threshold=0.9, hit_threshold=0.9, spp=1000)
+cloud_mask = scene_rr.space_curving(I_gt, image_threshold=0.9, hit_threshold=0.9, spp=10000)
 mask_grader(cloud_mask, beta_gt>0.1, beta_gt)
 scene_rr.set_cloud_mask(cloud_mask)
-
-
+# beta_scalar_init = scene_rr.find_best_initialization(beta_gt, I_gt,0,30,10,Np_gt,True)
 
 scene_rr.init_cuda_param(Np)
 alpha = 0.9
@@ -197,6 +183,7 @@ tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
 beta_init[volume.cloud_mask] = np.mean(beta_gt[beta_gt>0.1])
+# beta_init[volume.cloud_mask] = beta_scalar_init
 # beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0
 volume.set_beta_cloud(beta_init)

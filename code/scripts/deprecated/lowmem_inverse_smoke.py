@@ -1,5 +1,5 @@
 import os, sys
-my_lib_path = os.path.abspath('./')
+my_lib_path = os.path.abspath('../')
 sys.path.append(my_lib_path)
 from classes.scene import *
 from classes.scene_lowmem_gpu import *

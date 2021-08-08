@@ -31,9 +31,10 @@ class TensorBoardWrapper(object):
         self.writer.add_text("scene", text)
 
 
-    def update(self, beta_opt, I_opt, loss, max_dist, rel_dist1, Np, iter):
+    def update(self, beta_opt, I_opt, loss, max_dist, rel_dist1, Np, iter, time):
+        time = np.array(time)
         if iter % (100) ==0:
-            np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt)#, images=I_opt)
+            np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt, time=time)#, images=I_opt)
         I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
         for i in range(I_opt.shape[0]):
             self.writer.add_image(f"simulated_images/{i}", I_opt_norm[i][None, :, :],
