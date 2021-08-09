@@ -260,3 +260,8 @@ def mask_grader(cloud_mask, cloud_mask_real, beta_cloud):
     plt.hist(fn_exp[fn_exp != 0])
     print("missed beta:", np.sum(fn_exp) / np.sum(beta_cloud))
     print("rel_dit:", relative_distance(beta_cloud, beta_cloud * cloud_mask))
+    print("number of voxels:",np.sum(cloud_mask==1))
+    print("percentage of voxels:",np.mean(cloud_mask==1))
+    initialization = np.zeros_like(beta_cloud)
+    initialization[cloud_mask] = np.mean(beta_cloud)
+    print("initialization distance:", relative_distance(beta_cloud, initialization))

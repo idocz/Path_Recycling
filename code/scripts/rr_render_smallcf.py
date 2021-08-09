@@ -10,8 +10,8 @@ from classes.visual import *
 from time import time
 from utils import *
 from cuda_utils import *
-gpu = int(input("enter gpu index: "))
-cuda.select_device(gpu)
+# gpu = int(input("enter gpu index: "))
+cuda.select_device(3)
 
 
 ###################
@@ -70,7 +70,7 @@ height_factor = 2
 
 focal_length = 50e-3
 sensor_size = np.array((120e-3, 120e-3)) / height_factor
-ps = 100
+ps = 86
 
 pixels = np.array((ps, ps))
 
@@ -89,7 +89,7 @@ R = height_factor * edge_z
 #     cameras.append(camera)
 cam_deg = 360 // (N_cams-1)
 for cam_ind in range(N_cams-1):
-    theta = 90
+    theta = 33
     theta_rad = theta * (np.pi/180)
     phi = (-(N_cams//2) + cam_ind) * cam_deg
     phi_rad = phi * (np.pi/180)
@@ -104,8 +104,8 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 
 # cameras = [cameras[0]]
 # Np = int(5e7)ג
-# Np = int(5e7)
-Np = int(1e8)
+Np = int(5e7)
+# Np = int(1e8)
 Ns = 15
 rr_depth = 10
 rr_stop_prob = 0.1
@@ -151,7 +151,8 @@ if run_rr:
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
     visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
-    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.9, hit_threshold=0.9, spp=10000)
+    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.1, hit_threshold=0.9, spp=100000)
+    mask_grader(cloud_mask, beta_cloud>0,beta_cloud)
     np.save(join("data","cloud_mask.npy"), cloud_mask)
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()

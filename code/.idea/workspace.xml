@@ -26,41 +26,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="Scattering coefficients for the phase function have added. Adding RR support next">
-      <change afterPath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/confergence_figure.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/error_scatter_plot.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_cloud1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_smallcf.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_render_cloud1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_render_cloud2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_render_jplext.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/3D_Graph_Renderer.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/3D_Graph_Renderer.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_rr.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_rr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/cloud_evolving_new_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/convergence_amination.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/ddis_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/ddis_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/ddis_std_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/ddis_std_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_sunabove.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/hybrid_inverse_smoke_sunabove.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/hybrid_inverse_smoke_upscaling.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/hybrid_inverse_smoke_upscaling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/hybrid_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/hybrid_render_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_inverse_smoke_upscaling.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_smoke_upscaling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/lowmem_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_render_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_smoke.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/error_scatter_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/error_scatter_plot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_smallcf.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_smallcf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_render_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_jplext.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -122,7 +100,7 @@
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts\deprecated" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.rr_render_jplext">
+  <component name="RunManager" selected="Python.rr_render_smallcf">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -137,6 +115,25 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="cloud_checkpoint_extractor" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -208,7 +205,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rel_dist_loss_plot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="rr_inverse_smallcf" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -218,26 +215,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/rel_dist_loss_plot.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="rr_inverse_smoke_sunabove" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_smallcf.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -265,7 +243,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rr_render_smoke" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="rr_render_smallcf" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -275,7 +253,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_render_smoke.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_render_smallcf.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -287,19 +265,19 @@
     <list>
       <item itemvalue="Python.down_up_sample" />
       <item itemvalue="Python.gpu_inverse_script" />
-      <item itemvalue="Python.rel_dist_loss_plot" />
       <item itemvalue="Python.error_scatter_plot" />
-      <item itemvalue="Python.rr_render_smoke" />
-      <item itemvalue="Python.rr_inverse_smoke_sunabove" />
+      <item itemvalue="Python.cloud_checkpoint_extractor" />
+      <item itemvalue="Python.rr_render_smallcf" />
+      <item itemvalue="Python.rr_inverse_smallcf" />
       <item itemvalue="Python.rr_render_jplext" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.rr_render_smallcf" />
         <item itemvalue="Python.rr_render_jplext" />
-        <item itemvalue="Python.rr_inverse_smoke_sunabove" />
-        <item itemvalue="Python.rr_render_smoke" />
+        <item itemvalue="Python.rr_inverse_smallcf" />
+        <item itemvalue="Python.cloud_checkpoint_extractor" />
         <item itemvalue="Python.error_scatter_plot" />
-        <item itemvalue="Python.rel_dist_loss_plot" />
       </list>
     </recent_temporary>
   </component>
@@ -325,6 +303,7 @@
       <workItem from="1623944169097" duration="24071000" />
       <workItem from="1624172362441" duration="345000" />
       <workItem from="1627634326866" duration="70768000" />
+      <workItem from="1628411379182" duration="9654000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -575,7 +554,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/checkpoint_wrapper.py</url>
-          <line>35</line>
+          <line>38</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

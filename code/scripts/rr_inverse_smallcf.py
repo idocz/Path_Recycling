@@ -15,8 +15,8 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-gpu = int(input("enter gpu index: "))
-cuda.select_device(gpu)
+# gpu = int(input("enter gpu index: "))
+cuda.select_device(3)
 
 
 ########################
@@ -65,7 +65,7 @@ height_factor = 2
 
 focal_length = 50e-3
 sensor_size = np.array((120e-3, 120e-3)) / height_factor
-ps_max = 100
+ps_max = 86
 
 pixels = np.array((ps_max, ps_max))
 
@@ -76,7 +76,7 @@ R = height_factor * edge_z
 
 cam_deg = 360 // (N_cams-1)
 for cam_ind in range(N_cams-1):
-    theta = 29
+    theta = 33
     theta_rad = theta * (np.pi/180)
     phi = (-(N_cams//2) + cam_ind) * cam_deg
     phi_rad = phi * (np.pi/180)
@@ -89,19 +89,22 @@ euler_angles = np.array((180, 0, -90))
 cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].sensor_size, cameras[0].pixels))
 
 
+#mask parameters
+load_mask = False
+image_threshold = 0.1
+hit_threshold = 0.9
+spp = 100000
 
 # Simulation parameters
-Np_gt = int(1e8)
-Np_max = int(1e8)
+Np_gt = int(5e7)
+Np_max = int(5e7)
 Np = int(1e6)
-load_mask = True
 resample_freq = 10
 step_size = 1e6
 # Ns = 15
 rr_depth = 10
 rr_stop_prob = 0.05
 iterations = 10000000
-to_mask = True
 tensorboard = True
 tensorboard_freq = 10
 beta_max = beta_cloud.max()
@@ -126,7 +129,7 @@ plt.show()
 
 if not load_mask:
     print("Calculating Cloud Mask")
-    cloud_mask = scene_rr.space_curving(I_gt, image_threshold=0.9, hit_threshold=0.9, spp=10000)
+    cloud_mask = scene_rr.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
 else:
     cloud_mask = np.load(join("data","cloud_mask.npy"))
 
@@ -172,7 +175,7 @@ print(pss)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
     cp_wrapper = CheckpointWrapper(scene_rr, optimizer, Np_gt, Np, rr_depth, rr_stop_prob, pss, I_gts, resample_freq, step_size, iterations,
-                                   tensorboard_freq, tb.train_id)
+                                   tensorboard_freq, tb.train_id, image_threshold, hit_threshold, spp)
     tb.add_scene_text(str(cp_wrapper))
     pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
     print("Checkpoint wrapper has been saved")

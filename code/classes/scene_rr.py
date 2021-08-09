@@ -751,15 +751,17 @@ class SceneRR(object):
         shape = self.volume.grid.shape
         pixels = self.cameras[0].pixels
         I_mask = np.zeros(I_total.shape, dtype=bool)
-        I_mask[I_total/np.mean(I_total) > image_threshold] = True
-        plt.figure()
+        I_total_norm = (I_total-I_total.min())/(I_total.max()-I_total.min())
+        # I_mask[I_total/np.mean(I_total) > image_threshold] = True
+        I_mask[I_total_norm > image_threshold] = True
+        plt.figure(figsize=(I_total.shape[0],2))
         for k in range(self.N_cams):
             img_and_mask = np.vstack([I_total[k]/np.max(I_total[k]), I_mask[k]])
             ax = plt.subplot(1, self.N_cams, k+1)
             ax.imshow(img_and_mask, cmap="gray")
             plt.axis('off')
 
-
+        plt.tight_layout()
         plt.show()
         dgrid_counter = cuda.to_device(np.zeros((*shape, self.N_cams), dtype=np.bool))
         RKs_inv = np.concatenate([(cam.R @ cam.K_inv).reshape(1,3,3) for cam in self.cameras])

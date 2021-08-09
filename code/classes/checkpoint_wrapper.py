@@ -4,7 +4,7 @@ from classes.scene_lowmem_gpu import SceneLowMemGPU
 from classes.scene_rr import SceneRR
 
 class CheckpointWrapper(object):
-    def __init__(self, scene, optimizer, Np_gt, Np_start, rr_depth, rr_stop_prob, pss, I_gts, resample_freq, step_size, iterations, tensorboard_freq, train_id):
+    def __init__(self, scene, optimizer, Np_gt, Np_start, rr_depth, rr_stop_prob, pss, I_gts, resample_freq, step_size, iterations, tensorboard_freq, train_id, image_threshold, hit_threshold, spp):
         self.optimizer = optimizer
         # Scene
         # self.Ns = Ns
@@ -29,6 +29,9 @@ class CheckpointWrapper(object):
         self.iterations = iterations
         self.tensorboard_freq = tensorboard_freq
         self.train_id = train_id
+        self.image_threshold = image_threshold
+        self.hit_threshold = hit_threshold
+        self.spp = spp
 
 
     def recreate_scene(self):
@@ -40,5 +43,6 @@ class CheckpointWrapper(object):
     def __str__(self):
         opti_desc = f"Simualtion Parameters:  \nNp_gt={self.Np_gt:.2e}  \nNp_start={self.Np_start} \nrr_depth={self.rr_depth} \nrr_stop_prob={self.rr_stop_prob}" \
                     f"  \niterations={self.iterations}  \n  nstep_size={self.step_size:.2e}  \nresample_freq={self.resample_freq}" \
-                    f"  \ntensorboard_freq={self.tensorboard_freq}  \nOptimizer:  \n{str(self.optimizer)}"
+                    f"  \ntensorboard_freq={self.tensorboard_freq}  \nOptimizer:  \n{str(self.optimizer)}  " \
+                    f"  \nimage_threshold={self.image_threshold}  \nhit_threshold={self.hit_threshold}  \nspp={self.spp}"
         return str(self.scene_str) + opti_desc

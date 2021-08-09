@@ -11,7 +11,7 @@ from time import time
 from utils import *
 from cuda_utils import *
 
-cuda.select_device(0)
+cuda.select_device(3)
 
 ###################
 # Grid parameters #
@@ -70,7 +70,7 @@ height_factor = 2
 
 focal_length = 50e-3
 sensor_size = np.array((50e-3, 50e-3)) / height_factor
-ps = 80
+ps = 76
 
 pixels = np.array((ps, ps))
 
@@ -88,7 +88,7 @@ R = height_factor * edge_z
 #     camera = Camera(t, euler_angles, focal_length, sensor_size, pixels)
 #     cameras.append(camera)
 cam_deg = 360 // (N_cams-1)
-theta = 90
+theta = 29
 theta_rad = theta * (np.pi/180)
 for cam_ind in range(N_cams-1):
     phi = (-(N_cams//2) + cam_ind) * cam_deg
@@ -118,8 +118,8 @@ scene_rr.set_cloud_mask(volume.cloud_mask)
 scene_hybrid.set_cloud_mask(volume.cloud_mask)
 visual = Visual_wrapper(scene_rr)
 
-visual.create_grid()
-visual.plot_cameras()
+# visual.create_grid()
+# visual.plot_cameras()
 # visual.plot_medium()
 plt.show()
 run_rr = True
@@ -151,6 +151,8 @@ if run_rr:
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
     visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
+    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.2, hit_threshold=0.9, spp=100000)
+    mask_grader(cloud_mask, beta_cloud>0,beta_cloud)
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()
     # visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")
