@@ -11,7 +11,7 @@ from time import time
 from utils import *
 from cuda_utils import *
 
-cuda.select_device(0)
+cuda.select_device(3)
 
 ###################
 # Grid parameters #
@@ -21,9 +21,9 @@ cuda.select_device(0)
 # edge_y = 0.74
 # edge_z = 1.04
 
-x_size = 0.02
-y_size = 0.02
-z_size = 0.02
+# x_size = 0.02
+# y_size = 0.02
+# z_size = 0.02
 
 ########################
 # Atmosphere parameters#
@@ -37,30 +37,27 @@ sun_angles = np.array([180, 0]) * (np.pi/180)
 # construct betas
 beta_air = 0.004 / 1000
 
-_, bbox = read_binary_grid3d(join("data","smoke.vol"))
-# edge_x, edge_z, edge_y  = bbox[:,1] - bbox[:,0]
-beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
-beta_cloud = np.ascontiguousarray(np.rot90(beta_cloud, axes=(2,1)))
-beta_cloud =np.roll(beta_cloud, axis=0, shift=-20)
-# beta_cloud *= 0.1[
 
-voxel_size_x = 0.02
-voxel_size_y = 0.02
-voxel_size_z = 0.02
-edge_x = voxel_size_x * beta_cloud.shape[0]
-edge_y = voxel_size_y * beta_cloud.shape[1]
-edge_z = voxel_size_z * beta_cloud.shape[2]
+_, bbox = read_binary_grid3d(join("data","smoke_mitsuba.vol"))
+# beta_cloud = np.copy(beta_cloud)
+beta_cloud = loadmat(join("data","smoke_mitsuba.mat"))["data"]
+beta_cloud *= 5
+edge_x, edge_z, edge_y = bbox[:,1] - bbox[:,0]
+beta_cloud = np.ascontiguousarray(np.rot90(beta_cloud, axes=(1,2)))
+# beta_cloud =np.roll(beta_cloud, axis=0, shift=-20)
+# beta_cloud = np.rot90(beta_cloud, k=2, axes=(1,2))
+print(edge_x, edge_y, edge_z)
 bbox = np.array([[0, edge_x],
                  [0, edge_y],
                  [0, edge_z]], dtype=float_precis)
 
-print(edge_x, edge_y, edge_z)
 
 # cloud_preproccess(beta_cloud, 120)
 beta_cloud = beta_cloud.astype(float_reg)
+
 print(beta_cloud.shape)
 w0_air = 0.912
-w0_cloud = 0.99
+w0_cloud = 0.5
 # w0_air = 1
 # w0_cloud = 1
 
@@ -75,7 +72,7 @@ g_cloud = 0.5
 height_factor = 1.5
 
 focal_length = 50e-3
-sensor_size = np.array((50e-3, 50e-3)) / height_factor
+sensor_size = np.array((60e-3, 60e-3)) / height_factor
 ps = 200
 
 pixels = np.array((ps, ps))
@@ -123,8 +120,8 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 # cameras = [cameras[0]]
 Np = int(5e7)
 Ns = 15
-rr_depth = 10
-rr_stop_prob = 0.5
+rr_depth = 30
+rr_stop_prob = 0.05
 
 volume.set_mask(beta_cloud>0)
 scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
@@ -161,15 +158,17 @@ if run_rr:
     print(f"building paths took: {end - start}")
     volume.set_beta_cloud(beta_cloud)
     start = time()
-    I_total_rr, grad_rr = scene_rr.render(cuda_paths, 0, to_print=True)
+    # I_total_rr, grad_rr = scene_rr.render(cuda_paths,0, to_print=True)
+    I_total_rr = scene_rr.render(cuda_paths, to_print=True)
     print(f" rendering took: {time() - start}")
-    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.05, hit_threshold=0.9, spp=10000)
+    visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
+    plt.show()
+    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.0005, hit_threshold=0.9, spp=10000)
     mask_grader(cloud_mask, beta_cloud > 0.1, beta_cloud)
     # del(cuda_paths)
     # cuda_paths = scene_hybrid.build_paths_list(Np, Ns)
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
-    visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
-    plt.show()
+
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()
     # visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")

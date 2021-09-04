@@ -265,3 +265,34 @@ def mask_grader(cloud_mask, cloud_mask_real, beta_cloud):
     initialization = np.zeros_like(beta_cloud)
     initialization[cloud_mask] = np.mean(beta_cloud)
     print("initialization distance:", relative_distance(beta_cloud, initialization))
+
+def read_binary_grid3d(filename):
+    end = 'little'
+    dt = np.dtype(np.float32)
+    dt = dt.newbyteorder('<')
+
+    with open(filename, 'rb') as f:
+        if f.read(3) != b'VOL':
+            raise ValueError(f"File {filename} is not a Mitsuba volume file!")
+        version = int.from_bytes(f.read(1), byteorder=end)
+        file_type = int.from_bytes(f.read(4), byteorder=end)
+        size0 = int.from_bytes(f.read(4), byteorder=end)
+        size1 = int.from_bytes(f.read(4), byteorder=end)
+        size2 = int.from_bytes(f.read(4), byteorder=end)
+        channels = int.from_bytes(f.read(4), byteorder=end)
+
+        bbox_x_min = np.frombuffer(f.read(4), dtype=dt)[0]
+        bbox_y_min = np.frombuffer(f.read(4), dtype=dt)[0]
+        bbox_z_min = np.frombuffer(f.read(4), dtype=dt)[0]
+        bbox_x_max = np.frombuffer(f.read(4), dtype=dt)[0]
+        bbox_y_max = np.frombuffer(f.read(4), dtype=dt)[0]
+        bbox_z_max = np.frombuffer(f.read(4), dtype=dt)[0]
+        bbox = np.array([[bbox_x_min, bbox_x_max],
+                         [bbox_y_min,bbox_y_max],
+                         [bbox_z_min, bbox_z_max]])
+        values = np.frombuffer(f.read(4 * size0 * size1 * size2 * channels), dtype=dt)
+
+        if channels == 1:
+            return np.reshape(values, (size0, size1, size2)), bbox
+        else:
+            return np.reshape(values, (size0, size1, size2, channels)), bbox

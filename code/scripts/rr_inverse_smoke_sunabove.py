@@ -15,7 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(0)
+cuda.select_device(3)
 
 
 ########################
@@ -54,7 +54,7 @@ beta_air = 0.004 / 1000
 # w0_air = 1.0 #0.912
 w0_air = 0.912
 # w0_cloud = 0.8 #0.9
-w0_cloud = 0.9
+w0_cloud = 0.99
 g_cloud = 0.5
 
 # Declerations
@@ -72,7 +72,6 @@ beta_gt = np.copy(beta_cloud)
 ps_max = 200
 pixels = np.array([ps_max, ps_max])
 N_cams = 9
-R = 1.5 * edge_z
 #
 height_factor = 1.5
 focal_length = 50e-3
@@ -96,7 +95,11 @@ t = R * theta_phi_to_direction(0,0) + volume_center
 euler_angles = np.array((180, 0, -90))
 cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].sensor_size, cameras[0].pixels))
 
-
+#mask parameters
+load_mask = False
+image_threshold = 0.05
+hit_threshold = 0.9
+spp = 100000
 
 
 # Simulation parameters
@@ -106,8 +109,8 @@ Np = int(1e6)
 resample_freq = 10
 step_size = 5e5
 # Ns = 15
-rr_depth = 5
-rr_stop_prob = 0.5
+rr_depth = 10
+rr_stop_prob = 0.1
 iterations = 10000000
 to_mask = True
 tensorboard = True
@@ -132,7 +135,7 @@ visual.plot_images(I_gt, "GT")
 plt.show()
 
 print("Calculating Cloud Mask")
-cloud_mask = scene_rr.space_curving(I_gt, image_threshold=0.9, hit_threshold=0.9, spp=1000)
+cloud_mask = scene_rr.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
 mask_grader(cloud_mask, beta_gt>0.1, beta_gt)
 scene_rr.set_cloud_mask(cloud_mask)
 
@@ -175,7 +178,7 @@ print(pss)
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
     cp_wrapper = CheckpointWrapper(scene_rr, optimizer, Np_gt, Np, rr_depth, rr_stop_prob, pss, I_gts, resample_freq, step_size, iterations,
-                                   tensorboard_freq, tb.train_id)
+                                   tensorboard_freq, tb.train_id,image_threshold,hit_threshold,spp)
     tb.add_scene_text(str(cp_wrapper))
     pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
     print("Checkpoint wrapper has been saved")
@@ -196,7 +199,7 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = np.mean(beta_gt[beta_gt>0.1])
+beta_init[volume.cloud_mask] = beta_mean
 # beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0
 volume.set_beta_cloud(beta_init)

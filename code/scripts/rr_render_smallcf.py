@@ -11,7 +11,7 @@ from time import time
 from utils import *
 from cuda_utils import *
 # gpu = int(input("enter gpu index: "))
-cuda.select_device(3)
+cuda.select_device(0)
 
 
 ###################
@@ -107,8 +107,8 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 Np = int(5e7)
 # Np = int(1e8)
 Ns = 15
-rr_depth = 10
-rr_stop_prob = 0.1
+rr_depth = 20
+rr_stop_prob = 0.5
 
 volume.set_mask(beta_cloud>0)
 scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
@@ -152,7 +152,7 @@ if run_rr:
     visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
     cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.1, hit_threshold=0.9, spp=100000)
-    mask_grader(cloud_mask, beta_cloud>0,beta_cloud)
+    mask_grader(cloud_mask, beta_cloud>0 ,beta_cloud)
     np.save(join("data","cloud_mask.npy"), cloud_mask)
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()

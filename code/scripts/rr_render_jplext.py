@@ -11,7 +11,7 @@ from time import time
 from utils import *
 from cuda_utils import *
 
-cuda.select_device(3)
+cuda.select_device(0)
 
 ###################
 # Grid parameters #
@@ -62,7 +62,7 @@ w0_cloud = 0.99
 grid = Grid(bbox, beta_cloud.shape)
 volume = Volume(grid, beta_cloud, beta_air, w0_cloud, w0_air)
 # phase_function = UniformPhaseFunction()
-g_cloud = 0.88
+g_cloud = 0.85
 #######################
 # Cameras declaration #
 #######################
@@ -151,7 +151,7 @@ if run_rr:
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
     visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
-    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.2, hit_threshold=0.9, spp=100000)
+    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.1, hit_threshold=0.9, spp=100000)
     mask_grader(cloud_mask, beta_cloud>0,beta_cloud)
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()

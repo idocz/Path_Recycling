@@ -16,7 +16,7 @@ from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
 # gpu = int(input("enter gpu index: "))
-cuda.select_device(3)
+cuda.select_device(2)
 
 
 ########################
@@ -91,9 +91,10 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 
 #mask parameters
 load_mask = False
-image_threshold = 0.1
+image_threshold = 0.08
 hit_threshold = 0.9
 spp = 100000
+print("image_threshold:",image_threshold)
 
 # Simulation parameters
 Np_gt = int(5e7)
@@ -102,7 +103,7 @@ Np = int(1e6)
 resample_freq = 10
 step_size = 1e6
 # Ns = 15
-rr_depth = 10
+rr_depth = 20
 rr_stop_prob = 0.05
 iterations = 10000000
 tensorboard = True
