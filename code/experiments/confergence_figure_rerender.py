@@ -9,7 +9,7 @@ from utils import *
 import pickle
 from classes.camera import Camera
 from tqdm import tqdm
-
+import matplotlib.transforms as mtrans
 
 def transfrom_image(img, gamma):
     img = (img-img.min())/(img.max()-img.min())
@@ -17,8 +17,12 @@ def transfrom_image(img, gamma):
 
 exp_name = "2907-1847-02"
 exp_dir = join("checkpoints",exp_name)
-
 scene_name = "smoke"
+
+# output_dir = join("experiments","plots")
+output_dir = "C:\\Users\\idocz\OneDrive - Technion\\Thesis\\my paper\\figures\\image_convergence"
+
+
 
 cp = pickle.load(open(join(exp_dir,"data","checkpoint_loader"), "rb" ))
 scene_rr = cp.recreate_scene()
@@ -45,7 +49,7 @@ betas_gt = np.load(join(exp_dir,"data","gt.npz"))["betas"]
 betas_list = [np.load(join(exp_dir,"data",f"opt_{step}.npz"))["betas"] for step in steps]
 wall_time_list = [int(np.load(join(exp_dir,"data",f"opt_{step}.npz"))["time"]//60) for step in steps]
 betas_list.append(betas_gt)
-output_dir = join("experiments","plots")
+
 
 # Adding New view
 
@@ -76,6 +80,7 @@ M = len(steps) + 1
 image_list = np.empty((N,M), dtype=np.object)
 # Np_gt = cp.Np_gt
 Np_gt = int(8e7)
+# Np_gt = int(1e3)
 
 for j in tqdm(range(M)):
     scene_rr.volume.beta_cloud = betas_list[j]
@@ -86,9 +91,26 @@ for j in tqdm(range(M)):
     for i in range(N):
         image_list[i,j] = I[i]
 
-scale = 1.5
-fig, axes = plt.subplots(N,M)
-fig.set_size_inches(M*scale,N*scale, forward=True)
+scale_x = 1.55
+scale_y = 1.5
+fig, axes = plt.subplots(N,M, squeeze=False)
+fig.set_size_inches(M*scale_x,N*scale_y, forward=True)
+# plt.subplots_adjust(left=0.01,
+#                     bottom=0.005,
+#                     right=0.99,
+#                     top=0.95,
+#                     wspace=0.05,
+#                     hspace=0.05)
+# fig.tight_layout()
+
+r = fig.canvas.get_renderer()
+get_bbox = lambda ax: ax.get_tightbbox(r).transformed(fig.transFigure.inverted())
+bboxes = np.array(list(map(get_bbox, axes.flat)), mtrans.Bbox).reshape(axes.shape)
+ymax = np.array(list(map(lambda b: b.x1, bboxes.flat))).reshape(axes.shape).max(axis=0)
+ymin = np.array(list(map(lambda b: b.x0, bboxes.flat))).reshape(axes.shape).min(axis=0)
+skew = (ymax[0] - ymin[1])/2
+ys = np.c_[ymax[1:], ymin[:-1]].mean(axis=1)
+
 for i in range(N):
     for j in range(M):
         img = image_list[i,j]
@@ -114,13 +136,17 @@ for i in range(N):
                 ax.set_ylabel(f"view {i+1}")
             else:
                 ax.set_ylabel(f"new view")
-# fig.tight_layout()
-plt.subplots_adjust(left=0.01,
-                    bottom=0.005,
-                    right=0.99,
-                    top=0.95,
-                    wspace=0.05,
-                    hspace=0.05)
+
+# Draw a horizontal lines at those coordinates
+# unit = ys[1] - ys[0]
+# skew = (unit - 0.2)/2
+# skew = 0.02
+for y in ys:
+    line = plt.Line2D([y+skew,y+skew], [0,1], transform=fig.transFigure, color="black")
+    fig.add_artist(line)
+
+
+
 plt.savefig(join(output_dir, f"{scene_name}_convergence_grid.pdf"), bbox_inches='tight')
 
 plt.show()
