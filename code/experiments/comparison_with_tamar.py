@@ -16,7 +16,9 @@ elif scene == "jplext":
     tamar_exp = "single cloud res - 8stages l1 1 l2 1 w air and ocean 9 sensors SC mask beta0 2_84.mat"
     checkpoint_id = "0308-2000-39"
     iter = 8100
-output_dir = join("experiments","plots")
+# output_dir = join("experiments","plots")
+output_dir = "C:\\Users\\idocz\OneDrive - Technion\\Thesis\\my paper\\figures\\comparison_tamar"
+
 text_size = 13
 tick_size = 12
 # Loading Tamars results
@@ -62,10 +64,13 @@ plt.xlabel("runtime [hours]", fontsize=text_size)
 plt.grid()
 # plt.title('Loss vs Time', fontweight='bold')
 # plt.xlim(5e-3, np.max(ts_rec))
-plt.legend(fontsize=text_size)
+# plt.legend(fontsize=text_size)
 plt.tight_layout()
 plt.xticks(fontsize=tick_size)
 plt.yticks(fontsize=tick_size)
+fontsize = 13
+plt.text(1.7, 0.03, "Loeub et al.2020", fontsize=fontsize)
+plt.text(0.38, 0.013, "Ours", fontsize=fontsize)
 plt.savefig(join(output_dir,f"{scene}_loss_both.pdf"), bbox_inches='tight')
 plt.show()
 

@@ -40,6 +40,7 @@ beta_air = 0.004 / 1000
 _, bbox = read_binary_grid3d(join("data","smoke.vol"))
 # edge_x, edge_z, edge_y  = bbox[:,1] - bbox[:,0]
 beta_cloud = loadmat(join("data", "smoke.mat"))["data"] * 10
+print(beta_cloud.max())
 beta_cloud = np.ascontiguousarray(np.rot90(beta_cloud, axes=(2,1)))
 beta_cloud =np.roll(beta_cloud, axis=0, shift=-20)
 # beta_cloud *= 0.1[

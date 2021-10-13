@@ -141,9 +141,9 @@ for i in range(N):
 # unit = ys[1] - ys[0]
 # skew = (unit - 0.2)/2
 # skew = 0.02
-for y in ys:
-    line = plt.Line2D([y+skew,y+skew], [0,1], transform=fig.transFigure, color="black")
-    fig.add_artist(line)
+y = ys[-1]
+line = plt.Line2D([y+skew,y+skew], [0,1], transform=fig.transFigure, color="black")
+fig.add_artist(line)
 
 
 

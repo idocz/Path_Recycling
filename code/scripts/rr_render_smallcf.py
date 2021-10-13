@@ -41,6 +41,7 @@ beta_air = 0.004
 
 
 beta_cloud = loadmat(join("data","small_cloud_field.mat"))["beta_smallcf"]
+print(beta_cloud.max())
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
 edge_z = z_size * beta_cloud.shape[2]

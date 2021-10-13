@@ -40,6 +40,7 @@ beta_air = 0.004
 
 
 beta_cloud = np.load(join("data","jpl_ext.npy"))
+print(beta_cloud.max())
 savemat("jpl_ext.mat", {"vol":beta_cloud})
 edge_x = x_size * beta_cloud.shape[0]
 edge_y = y_size * beta_cloud.shape[1]
