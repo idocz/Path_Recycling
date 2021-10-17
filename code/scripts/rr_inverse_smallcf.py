@@ -16,7 +16,7 @@ from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
 # gpu = int(input("enter gpu index: "))
-cuda.select_device(2)
+cuda.select_device(0)
 
 
 ########################
@@ -197,7 +197,7 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = beta_mean
+beta_init[volume.cloud_mask] = 8.5
 # beta_init[volume.cloud_mask] = beta_scalar_init
 # beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0

@@ -15,7 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(0)
+cuda.select_device(3)
 
 
 ########################
@@ -95,10 +95,11 @@ spp = 100000
 
 # Simulation parameters
 Np_gt = int(5e7)
-Np_max = int(5e7)
+Np_max = int(5e6)
 Np = int(1e6)
 resample_freq = 10
-step_size = 7e5
+step_size = 1e10
+
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.05
@@ -128,6 +129,7 @@ plt.show()
 print("Calculating Cloud Mask")
 cloud_mask = scene_rr.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
 mask_grader(cloud_mask, beta_gt>0.1, beta_gt)
+# cloud_mask = beta_cloud > 0.1
 scene_rr.set_cloud_mask(cloud_mask)
 # beta_scalar_init = scene_rr.find_best_initialization(beta_gt, I_gt,0,30,10,Np_gt,True)
 
@@ -189,9 +191,9 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-# beta_init[volume.cloud_mask] = beta_mean
+beta_init[volume.cloud_mask] = 35
 # beta_init[volume.cloud_mask] = beta_scalar_init
-beta_init[volume.cloud_mask] = 28
+# beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0
 volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud
@@ -205,7 +207,7 @@ for iter in range(iterations):
     max_dist = np.max(abs_dist)
     rel_dist1 = relative_distance(beta_cloud, beta_opt)
 
-    print(f"rel_dist1={rel_dist1}, loss={loss} max_dist={max_dist}, Np={Np:.2e}, ps={ps} counter={non_min_couter}")
+    print(f"rel_dist1={rel_dist1}, loss={loss} beta_mean={beta_mean}, beta_opt={beta_opt.max()} Np={Np:.2e}, ps={ps} counter={non_min_couter}")
 
     if iter % resample_freq == 0:
         if non_min_couter >= win_size and iter > start_iter:
@@ -217,7 +219,7 @@ for iter in range(iterations):
                 if Np > Np_max:
                     Np = Np_max
 
-            if ps < ps_max:
+            if ps < 30:
                 upscaling_counter += 1
                 # photon_scale = (ps / ps_gt) ** 2
                 ps = pss[upscaling_counter]
@@ -246,12 +248,12 @@ for iter in range(iterations):
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta
-    # beta_opt -= step_size*total_grad
-    # beta_opt[beta_opt >= beta_max] = beta_mean
-    # beta_opt[beta_opt < 0] = 0
+    beta_opt[cloud_mask] -= step_size*np.mean(total_grad)
+    beta_opt[beta_opt >= beta_max] = beta_max
+    beta_opt[beta_opt < 0] = 0
     # loss calculation
     start = time()
-    optimizer.step(total_grad)
+    # optimizer.step(np.mean(total_grad))
     # print("gradient step took:",time()-start)
     loss = 0.5 * np.sum(dif * dif)
     # loss = 0.5 * np.sum(np.abs(dif))

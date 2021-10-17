@@ -15,6 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
+# gpu = int(input("enter gpu index: "))
 cuda.select_device(0)
 
 
@@ -27,7 +28,7 @@ sun_angles = np.array([180, 0]) * (np.pi / 180)
 # Volume parameters #
 #####################
 # construct betas
-beta_cloud = np.load(join("data","jpl_ext.npy"))
+beta_cloud = loadmat(join("data","small_cloud_field.mat"))["beta_smallcf"]
 beta_cloud = beta_cloud.astype(float_reg)
 # Grid parameters #
 # bounding box
@@ -63,20 +64,19 @@ beta_gt = np.copy(beta_cloud)
 height_factor = 2
 
 focal_length = 50e-3
-sensor_size = np.array((50e-3, 50e-3)) / height_factor
-ps_max = 76
+sensor_size = np.array((120e-3, 120e-3)) / height_factor
+ps_max = 86
 
 pixels = np.array((ps_max, ps_max))
 
 N_cams = 9
 cameras = []
-# volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.7
-volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.7
+volume_center = (bbox[:, 1] - bbox[:, 0]) / 2.1
 R = height_factor * edge_z
 
 cam_deg = 360 // (N_cams-1)
 for cam_ind in range(N_cams-1):
-    theta = 29
+    theta = 33
     theta_rad = theta * (np.pi/180)
     phi = (-(N_cams//2) + cam_ind) * cam_deg
     phi_rad = phi * (np.pi/180)
@@ -88,22 +88,24 @@ t = R * theta_phi_to_direction(0,0) + volume_center
 euler_angles = np.array((180, 0, -90))
 cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].sensor_size, cameras[0].pixels))
 
-# mask parameters
-image_threshold = 0.15
+
+#mask parameters
+load_mask = False
+image_threshold = 0.08
 hit_threshold = 0.9
 spp = 100000
+print("image_threshold:",image_threshold)
 
 # Simulation parameters
 Np_gt = int(5e7)
 Np_max = int(5e7)
 Np = int(1e6)
 resample_freq = 10
-step_size = 7e5
+step_size = 1e11
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.05
 iterations = 10000000
-to_mask = True
 tensorboard = True
 tensorboard_freq = 10
 beta_max = beta_cloud.max()
@@ -125,12 +127,18 @@ max_val = np.max(I_gt, axis=(1,2))
 visual.plot_images(I_gt, "GT")
 plt.show()
 
-print("Calculating Cloud Mask")
-cloud_mask = scene_rr.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
+
+if not load_mask:
+    print("Calculating Cloud Mask")
+    cloud_mask = scene_rr.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
+else:
+    cloud_mask = np.load(join("data","cloud_mask.npy"))
+
 mask_grader(cloud_mask, beta_gt>0.1, beta_gt)
 scene_rr.set_cloud_mask(cloud_mask)
-# beta_scalar_init = scene_rr.find_best_initialization(beta_gt, I_gt,0,30,10,Np_gt,True)
 
+# beta_scalar_init = scene_rr.find_best_initialization(beta_gt, I_gt,0,beta_gt.max(),10,Np_gt,True)
+# print(f"initialize with beta={beta_scalar_init} ")
 scene_rr.init_cuda_param(Np)
 alpha = 0.9
 beta1 = 0.9
@@ -189,9 +197,9 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-# beta_init[volume.cloud_mask] = beta_mean
+beta_init[volume.cloud_mask] = 10
 # beta_init[volume.cloud_mask] = beta_scalar_init
-beta_init[volume.cloud_mask] = 28
+# beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0
 volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud
@@ -205,7 +213,7 @@ for iter in range(iterations):
     max_dist = np.max(abs_dist)
     rel_dist1 = relative_distance(beta_cloud, beta_opt)
 
-    print(f"rel_dist1={rel_dist1}, loss={loss} max_dist={max_dist}, Np={Np:.2e}, ps={ps} counter={non_min_couter}")
+    print(f"rel_dist1={rel_dist1}, loss={loss} beta_mean={beta_mean}, beta_opt={beta_opt.max()} Np={Np:.2e}, ps={ps} counter={non_min_couter}")
 
     if iter % resample_freq == 0:
         if non_min_couter >= win_size and iter > start_iter:
@@ -246,12 +254,12 @@ for iter in range(iterations):
     grad_norm = np.linalg.norm(total_grad)
 
     # updating beta
-    # beta_opt -= step_size*total_grad
-    # beta_opt[beta_opt >= beta_max] = beta_mean
-    # beta_opt[beta_opt < 0] = 0
+    beta_opt -= step_size*np.mean(total_grad)
+    beta_opt[beta_opt >= beta_max] = beta_max
+    beta_opt[beta_opt < 0] = 0
     # loss calculation
     start = time()
-    optimizer.step(total_grad)
+    # optimizer.step(total_grad)
     # print("gradient step took:",time()-start)
     loss = 0.5 * np.sum(dif * dif)
     # loss = 0.5 * np.sum(np.abs(dif))
