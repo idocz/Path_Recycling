@@ -11,8 +11,8 @@ def generate_theta(samples_num, g):
     ps = np.random.rand(samples_num)
     return (1 / (2 * g)) * (1 + g**2 - ((1 - g**2)/(1 - g + 2*g*ps))**2)
 
-N = 100
-g = 0.844
+N = 100000
+g = 0.9
 thetas = np.linspace(0,np.pi,N)
 cos_thetas = np.linspace(-1,1,N)
 # f = HG(thetas, g)
