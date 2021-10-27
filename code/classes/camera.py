@@ -58,5 +58,10 @@ class Camera(object):
 
 
 
-
+class AirMSPICamera(object):
+    def __init__(self, resolution, t, P):
+        self.pixels = resolution
+        self.t = t
+        self.P = P
+        # self.camera_array_list = camera_array_list
 

@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from utils import add_camera_to_ax
 from matplotlib import cm
 
-
 class Visual_wrapper(object):
     def __init__(self, grid):
         self.grid = grid
@@ -81,6 +80,34 @@ class Visual_wrapper(object):
             ax.axis("off")
             ax.imshow(I_total[i].T, cmap="gray")#, vmin=0, vmax=max_val[i])
 
+        plt.suptitle(title)
+
+    def plot_images_airmspi(self, I_total, resolutions, title, downscale=1):
+        N_cams = len(I_total)
+        fig = plt.figure()
+
+        N_ax = int(np.ceil(np.sqrt(N_cams)))
+        for i in range(N_cams):
+            ax = plt.subplot(N_ax, N_ax, i + 1)
+            ax.set_title(f"camera {i}")
+            ax.axis("off")
+            ax.imshow(I_total[i][:resolutions[i][0]//downscale, :resolutions[i][1]//downscale], cmap="gray")  # , vmin=0, vmax=max_val[i])
+        plt.tight_layout()
+        plt.suptitle(title)
+
+    def plot_images_airmspi_side_by_side(self, I_total, I_gt, resolutions, title, downscale=1):
+        N_cams = len(I_total)
+        fig = plt.figure()
+
+        N_ax = int(np.ceil(np.sqrt(N_cams)))
+        for i in range(N_cams):
+            I_show = np.concatenate([I_total[i][:resolutions[i][0]//downscale, :resolutions[i][1]//downscale],
+                                     I_gt[i][:resolutions[i][0]//downscale, :resolutions[i][1]//downscale]], axis=1)
+            ax = plt.subplot(N_ax, N_ax, i + 1)
+            ax.set_title(f"camera {i}")
+            ax.axis("off")
+            ax.imshow(I_show, cmap="gray")  # , vmin=0, vmax=max_val[i])
+        plt.tight_layout()
         plt.suptitle(title)
 
     def scatter_plot_comparison(self, signal1, signal2, title):

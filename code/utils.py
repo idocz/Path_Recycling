@@ -296,3 +296,43 @@ def read_binary_grid3d(filename):
             return np.reshape(values, (size0, size1, size2)), bbox
         else:
             return np.reshape(values, (size0, size1, size2, channels)), bbox
+
+def calc_bbox_sample_range(sun_direction, grid):
+    if sun_direction[2] == -1:
+        return grid.bbox[:2,:]
+    sun_temp = sun_direction.copy()
+    sun_temp[0] = 0
+    sun_temp /= np.linalg.norm(sun_temp)
+    sun_y = np.arccos(np.dot(sun_temp, np.array([0, 0, -1])))
+    sun_temp = sun_direction.copy()
+    sun_temp[1] = 0
+    sun_temp /= np.linalg.norm(sun_temp)
+    sun_x = np.arccos(np.dot(sun_temp, np.array([0, 0, -1])))
+
+    if sun_direction[0] < 0:
+        sign_x = 1
+    else:
+        sign_x = -1
+    delta_x = sign_x * np.tan(sun_x) * grid.bbox_size[2]
+
+    if sun_direction[1] < 0:
+        sign_y = 1
+    else:
+        sign_y = -1
+    delta_y = sign_y * np.tan(sun_y) * grid.bbox_size[2]
+    sample_range = np.zeros((2,2), dtype=float)
+    if delta_x >= 0:
+        sample_range[0,0] = grid.bbox[0,0]
+        sample_range[0,1] = grid.bbox[0, 1] + delta_x
+    else:
+        sample_range[0,0] = grid.bbox[0,0] + delta_x
+        sample_range[0,1] = grid.bbox[0, 1]
+
+    if delta_y >= 0:
+        sample_range[1,0] = grid.bbox[1,0]
+        sample_range[1,1] = grid.bbox[1, 1] + delta_y
+    else:
+        sample_range[1,0] = grid.bbox[1,0] + delta_y
+        sample_range[1,1] = grid.bbox[1, 1]
+
+    return sample_range

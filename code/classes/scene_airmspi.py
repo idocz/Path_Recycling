@@ -8,22 +8,27 @@ from time import time
 from scipy.ndimage import binary_dilation
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
+from utils import calc_bbox_sample_range
 threadsperblock = 256
+sea_albedo = 0.5
 
-
-class SceneRR(object):
-    def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob):
+class SceneAirMSPI(object):
+    def __init__(self, volume: Volume, cameras, sun_direction, sun_intensity, g_cloud, rr_depth, rr_stop_prob, downscale=1):
         self.rr_depth = rr_depth
         self.rr_stop_prob = rr_stop_prob
+        self.downscale = downscale
         rr_factor = 1.0 / (1.0 - self.rr_stop_prob)
         self.rr_factor = rr_factor
         self.Np = 0
         self.volume = volume
-        self.sun_angles = sun_angles
-        self.sun_direction = theta_phi_to_direction(*sun_angles)
-        self.sun_direction += 1e-6
+        # self.sun_angles = sun_angles
+        # self.sun_direction = theta_phi_to_direction(*sun_angles)
+        self.sun_direction = sun_direction
+        self.sample_range = calc_bbox_sample_range(sun_direction, volume.grid)
+        # self.sun_direction += 1e-6
         self.sun_direction /= np.linalg.norm(self.sun_direction)
+
+        self.sun_intensity = sun_intensity
         # self.sun_direction[np.abs(self.sun_direction) < 1e-6] = 0
         self.cameras = cameras
         self.g_cloud = g_cloud
@@ -34,29 +39,34 @@ class SceneRR(object):
             self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
 
         N_cams = self.N_cams
-        self.pixels_shape = self.cameras[0].pixels
+        max_pix_i = np.max([cam.pixels[0] for cam in self.cameras])
+        max_pix_j = np.max([cam.pixels[1] for cam in self.cameras])
+        self.pixels_shape = np.array([max_pix_i, max_pix_j])
+        self.pixels_shape_downscaled = (np.ceil(self.pixels_shape/downscale)).astype(int)
         ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
         self.Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
 
         # gpu array
         self.dbeta_cloud = cuda.device_array(self.volume.beta_cloud.shape, dtype=float_reg)
         self.dbeta_zero = cuda.device_array(self.volume.beta_cloud.shape, dtype=float_reg)
-        self.dI_total = cuda.device_array((N_cams, *self.pixels_shape ), dtype=float_reg)
+        self.dI_total = cuda.device_array((N_cams, *self.pixels_shape_downscaled), dtype=float_reg)
         self.dtotal_grad = cuda.device_array(self.volume.beta_cloud.shape, dtype=float_reg)
         self.dbbox = cuda.to_device(self.volume.grid.bbox)
         self.dbbox_size = cuda.to_device(self.volume.grid.bbox_size)
         self.dvoxel_size = cuda.to_device(self.volume.grid.voxel_size)
+        self.dsample_range = cuda.to_device(self.sample_range)
         self.dsun_direction = cuda.to_device(self.sun_direction)
-        self.dpixels_shape = cuda.to_device(self.cameras[0].pixels)
+        self.dpixels_shape = cuda.to_device(self.pixels_shape)
         self.dts = cuda.to_device(ts)
         self.dPs = cuda.to_device(self.Ps)
         self.dis_in_medium = cuda.to_device(self.is_camera_in_medium)
+
         self.dcloud_mask = None
         self.dpath_contrib = None
         self.dgrad_contrib = None
 
         @cuda.jit()
-        def calc_scatter_sizes(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction,
+        def calc_scatter_sizes(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sample_range, sun_direction,
                                scatter_sizes, rng_states):
 
             tid = cuda.grid(1)
@@ -71,12 +81,13 @@ class SceneRR(object):
                 new_direction = cuda.local.array(3, dtype=float_precis)
                 assign_3d(direction, sun_direction)
                 # sample entering point
-                starting_point[0] = bbox_size[0] * sample_uniform(rng_states, tid) + bbox[0, 0]
-
-                starting_point[1] = bbox_size[1] * sample_uniform(rng_states, tid) + bbox[1, 0]
-
-                starting_point[2] = bbox[2, 1]
-
+                intersected = False
+                while not intersected:
+                    starting_point[0] = (sample_range[0,1] - sample_range[0,0]) * sample_uniform(rng_states, tid) + sample_range[0,0]
+                    starting_point[1] = (sample_range[1,1] - sample_range[1,0]) * sample_uniform(rng_states, tid) + sample_range[1,0]
+                    starting_point[2] = bbox[2, 1]
+                    intersected = get_intersection_with_bbox(starting_point, direction, bbox)
+                    # exit()
                 assign_3d(current_point, starting_point)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
 
@@ -99,6 +110,9 @@ class SceneRR(object):
                         beta = beta_c + beta_air
                         length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
                                                          next_voxel)
+                        # if current_point[2] < 1e-6:
+                        #     sample_hemisphere_cuda(direction, rng_states, tid)
+                        #     continue
                         current_tau += length * beta
                         if current_tau >= tau_rand:
                             step_back = (current_tau - tau_rand) / beta
@@ -128,7 +142,7 @@ class SceneRR(object):
                 scatter_sizes[tid] = seg
 
         @cuda.jit()
-        def generate_paths(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction, starting_points,
+        def generate_paths(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sample_range, sun_direction, starting_points,
                            scatter_points, starting_inds, scatter_inds, rng_states):
 
             tid = cuda.grid(1)
@@ -145,11 +159,12 @@ class SceneRR(object):
                 new_direction = cuda.local.array(3, dtype=float_precis)
                 assign_3d(direction, sun_direction)
                 # sample entering point
-                starting_point[0] = bbox_size[0] * sample_uniform(rng_states, tid) + bbox[0, 0]
-
-                starting_point[1] = bbox_size[1] * sample_uniform(rng_states, tid) + bbox[1, 0]
-
-                starting_point[2] = bbox[2, 1]
+                intersected = False
+                while not intersected:
+                    starting_point[0] = (sample_range[0, 1] - sample_range[0, 0]) * sample_uniform(rng_states, tid) + sample_range[0, 0]
+                    starting_point[1] = (sample_range[1, 1] - sample_range[1, 0]) * sample_uniform(rng_states, tid) + sample_range[1, 0]
+                    starting_point[2] = bbox[2, 1]
+                    intersected = get_intersection_with_bbox(starting_point, direction, bbox)
                 assign_3d(current_point, starting_point)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
                 # for seg in range(Ns):
@@ -225,7 +240,7 @@ class SceneRR(object):
 
         @cuda.jit()
         def render_cuda(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, N_cams,
-                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,I_total, path_contrib):
+                        ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,I_total, path_contrib, downscale):
 
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
@@ -244,7 +259,7 @@ class SceneRR(object):
                 cam_direction = cuda.local.array(3, dtype=float_precis)
 
                 # dest = cuda.local.array(3, dtype=float_precis)
-                pixel = cuda.local.array(2, dtype=np.uint8)
+                pixel = cuda.local.array(2, dtype=np.uint16)
                 assign_3d(current_point, starting_points[:, tid])
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
 
@@ -306,13 +321,14 @@ class SceneRR(object):
                     if seg >= rr_depth:
                         attenuation *= rr_factor
                     for k in range(N_cams):
-                        project_point(current_point, Ps[k], pixel_shape, pixel)
-                        # pixel[0] = pixel_mat[0, k, seg_ind]
-                        if pixel[0] != 255:
+                        project_point_pushbroom(current_point, Ps[k], pixel_shape, pixel)
+                        if pixel[0] != 65535:
+                            # print("succ")
                             # pixel[1] = pixel_mat[1, k, seg_ind]
                             assign_3d(camera_voxel, current_voxel)
                             assign_3d(camera_point, current_point)
                             distance_to_camera = distance_and_direction(camera_point, ts[k], cam_direction)
+                            # distance_to_camera = 1
                             cos_theta = dot_3d(direction, cam_direction)
                             le_pdf = cloud_prob_scat * HG_pdf(cos_theta, g_cloud) \
                                      + (1-cloud_prob_scat) * rayleigh_pdf(cos_theta)
@@ -355,17 +371,18 @@ class SceneRR(object):
                             pc *= math.exp(-tau)
                             path_contrib[k,seg_ind] = pc
                             # if seg != 0:
-                            cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
+                            # print(pc)
+                            cuda.atomic.add(I_total, (k, pixel[0]//downscale, pixel[1]//downscale), pc)
 
                     assign_3d(cam_direction, direction) #using cam direction as temp direction
                 # cuda.atomic.add(counter, 0, ps_counter)
 
 
         @cuda.jit()
-        def calc_gradient_contribution(scatter_points, path_contrib, I_diff, Ps, pixel_shape, scatter_inds, grad_contrib):
+        def calc_gradient_contribution(scatter_points, path_contrib, I_diff, Ps, pixel_shape, scatter_inds, grad_contrib, downscale):
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
-                pixel = cuda.local.array(2, dtype=np.uint8)
+                pixel = cuda.local.array(2, dtype=np.uint16)
                 scatter_ind = scatter_inds[tid]
                 N_seg = scatter_inds[tid + 1] - scatter_ind
                 for seg in range(N_seg):
@@ -375,15 +392,15 @@ class SceneRR(object):
                         sub_seg_ind = sub_seg + scatter_ind
                         for k in range(path_contrib.shape[0]):
                             # assign_3d(current_point, scatter_points[:,sub_seg_ind])
-                            project_point(scatter_points[:,sub_seg_ind], Ps[k], pixel_shape, pixel)
-                            if pixel[0] != 255:
-                                grad_contrib[seg_ind] += path_contrib[k, sub_seg_ind] * I_diff[k,pixel[0],pixel[1]]
+                            project_point_pushbroom(scatter_points[:,sub_seg_ind], Ps[k], pixel_shape, pixel)
+                            if pixel[0] != 65535:
+                                grad_contrib[seg_ind] += path_contrib[k, sub_seg_ind] * I_diff[k,pixel[0]//downscale,pixel[1]//downscale]
 
 
         @cuda.jit()
         def render_differentiable_cuda(beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, N_cams,
                         ts, Ps, pixel_shape, is_in_medium, starting_points, scatter_points, scatter_inds,
-                                       I_diff, path_contrib, grad_contrib, cloud_mask, total_grad):
+                                       I_diff, path_contrib, grad_contrib, cloud_mask, total_grad, downscale):
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
                 scatter_ind = scatter_inds[tid]
@@ -400,7 +417,7 @@ class SceneRR(object):
                 next_point = cuda.local.array(3, dtype=float_precis)
                 direction = cuda.local.array(3, dtype=float_precis)
                 cam_direction = cuda.local.array(3, dtype=float_precis)
-                pixel = cuda.local.array(2, dtype=np.uint8)
+                pixel = cuda.local.array(2, dtype=np.uint16)
                 assign_3d(current_point, starting_points[:, tid])
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
 
@@ -455,8 +472,8 @@ class SceneRR(object):
                     # le_contrib -= w0_cloud / (omega_beta_c + w0_air * beta_air)
                     # le_contrib -= 1 / (beta_c + beta_air)
                     for k in range(N_cams):
-                        project_point(current_point, Ps[k], pixel_shape, pixel)
-                        if pixel[0] != 255:
+                        project_point_pushbroom(current_point, Ps[k], pixel_shape, pixel)
+                        if pixel[0] != 65535:
                             assign_3d(camera_voxel, current_voxel)
                             assign_3d(camera_point, current_point)
                             distance_and_direction(camera_point, ts[k], cam_direction)
@@ -469,7 +486,7 @@ class SceneRR(object):
                             get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
                             path_size = estimate_voxels_size(dest_voxel, current_voxel)
 
-                            grad_temp = path_contrib[k, seg_ind] * I_diff[k, pixel[0], pixel[1]]
+                            grad_temp = path_contrib[k, seg_ind] * I_diff[k, pixel[0]//downscale, pixel[1]//downscale]
                             # GRAD CALCULATION (LOCAL ESTIMATION DERIVATIVE)
                             if cloud_mask[camera_voxel[0], camera_voxel[1], camera_voxel[2]]:
                                 # seg_contrib = le_contrib + (beta_c + (rayleigh_pdf(cos_theta) / HG_pdf(cos_theta, g_cloud)) * beta_air) ** (-1)
@@ -509,48 +526,43 @@ class SceneRR(object):
 
 
         @cuda.jit()
-        def space_curving_cuda(pixels_mat, spp, RKs_inv, ts, bbox, bbox_size, voxel_size, grid_shape, rng_states,
+        def space_curving_cuda(pixels_mat, spp, camera_array_list, bbox, bbox_size, voxel_size, grid_shape, rng_states,
                                grid_counter):
             tid = cuda.grid(1)
             if tid < pixels_mat.shape[1]:
-                cam_ind, j, i = pixels_mat[:,tid]
-                pixel = cuda.local.array(3, dtype=float_precis)
+                cam_ind, i, j = pixels_mat[:,tid]
                 current_point = cuda.local.array(3, dtype=float_precis)
                 dest_point = cuda.local.array(3, dtype=float_precis)
+                direction = cuda.local.array(3, dtype=float_precis)
                 current_voxel = cuda.local.array(3, dtype=np.uint8)
                 dest_voxel = cuda.local.array(3, dtype=np.uint8)
-                direction = cuda.local.array(3, dtype=float_precis)
-                pixel[2] = 1
+                assign_3d(direction, camera_array_list[cam_ind, i, j, 3:6])
+                assign_3d(current_point, camera_array_list[cam_ind, i, j, :3])
 
-                for s in range(spp):
-                    assign_3d(current_point, ts[cam_ind])
-                    pixel[0] = j + sample_uniform(rng_states, tid)
-                    pixel[1] = i + sample_uniform(rng_states, tid)
-                    mat_dot_vec(RKs_inv[cam_ind], pixel, direction)
-                    norm_3d(direction)
-                    intersected = get_intersection_with_bbox(current_point, direction, bbox)
-                    if intersected:
-                        get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
-                        get_intersection_with_borders(current_point, direction, bbox, dest_point)
-                        # print2_3d(current_point, dest_point)
-                        get_voxel_of_point(dest_point, grid_shape, bbox, bbox_size, dest_voxel)
-                        path_size = estimate_voxels_size(dest_voxel, current_voxel)
-                        for ps in range(path_size):
-                            if not is_voxel_valid(current_voxel, grid_shape):
-                                print("bug")
-                            # cuda.atomic.add(grid_counter,
-                            #                 (current_voxel[0], current_voxel[1], current_voxel[2], cam_ind), True)
-                            grid_counter[current_voxel[0], current_voxel[1], current_voxel[2], cam_ind] = True
-                            border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
-                            border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
-                            border_z = (current_voxel[2] + (direction[2] > 0)) * voxel_size[2]
-                            t_x = (border_x - current_point[0]) / direction[0]
-                            t_y = (border_y - current_point[1]) / direction[1]
-                            t_z = (border_z - current_point[2]) / direction[2]
-                            length, border_ind = argmin(t_x, t_y, t_z)
-                            # if ps < path_size - 1:
-                            current_voxel[border_ind] += sign(direction[border_ind])
-                            step_in_direction(current_point, direction, length)
+
+                intersected = get_intersection_with_bbox(current_point, direction, bbox)
+                if intersected:
+                    get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
+                    get_intersection_with_borders(current_point, direction, bbox, dest_point)
+                    # print2_3d(current_point, dest_point)
+                    get_voxel_of_point(dest_point, grid_shape, bbox, bbox_size, dest_voxel)
+                    path_size = estimate_voxels_size(dest_voxel, current_voxel)
+                    for ps in range(path_size):
+                        if not is_voxel_valid(current_voxel, grid_shape):
+                            print("bug")
+                        # cuda.atomic.add(grid_counter,
+                        #                 (current_voxel[0], current_voxel[1], current_voxel[2], cam_ind), True)
+                        grid_counter[current_voxel[0], current_voxel[1], current_voxel[2], cam_ind] = True
+                        border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
+                        border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
+                        border_z = (current_voxel[2] + (direction[2] > 0)) * voxel_size[2]
+                        t_x = (border_x - current_point[0]) / direction[0]
+                        t_y = (border_y - current_point[1]) / direction[1]
+                        t_z = (border_z - current_point[2]) / direction[2]
+                        length, border_ind = argmin(t_x, t_y, t_z)
+                        # if ps < path_size - 1:
+                        current_voxel[border_ind] += sign(direction[border_ind])
+                        step_in_direction(current_point, direction, length)
 
 
 
@@ -593,7 +605,7 @@ class SceneRR(object):
         drng_states = cuda.to_device(self.rng_states.copy_to_host())
         self.calc_scatter_sizes[blockspergrid, threadsperblock]\
             (Np, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
-             self.dvoxel_size,self.dsun_direction, dscatter_sizes, self.rng_states)
+             self.dvoxel_size, self.dsample_range, self.dsun_direction, dscatter_sizes, self.rng_states)
 
         cuda.synchronize()
         if to_print:
@@ -616,7 +628,7 @@ class SceneRR(object):
 
         start = time()
         self.generate_paths[blockspergrid, threadsperblock] \
-            (Np, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
+            (Np, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size, self.dsample_range,
              self.dsun_direction, dstarting_points, dscatter_points, dstarting_inds, dscatter_inds, drng_states)
 
         cuda.synchronize()
@@ -689,7 +701,7 @@ class SceneRR(object):
         # east declerations
         Np_nonan = self.Np_nonan
         N_cams = len(self.cameras)
-        pixels_shape = self.cameras[0].pixels
+        pixels_shape = self.pixels_shape
         beta_air = self.volume.beta_air
         w0_cloud = self.volume.w0_cloud
         w0_air = self.volume.w0_air
@@ -698,7 +710,7 @@ class SceneRR(object):
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
         self.dbeta_cloud.copy_to_device(self.volume.beta_cloud)
-        self.dI_total.copy_to_device(np.zeros((N_cams, pixels_shape[0], pixels_shape[1]), dtype=float_reg))
+        self.dI_total.copy_to_device(np.zeros((N_cams, *self.pixels_shape_downscaled), dtype=float_reg))
         start = time()
 
         # dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
@@ -707,12 +719,12 @@ class SceneRR(object):
         self.render_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths,self.dI_total,
-             self.dpath_contrib)
+             self.dpath_contrib, self.downscale)
 
         cuda.synchronize()
         # print("voxel counter",dcounter.copy_to_host())
         I_total = self.dI_total.copy_to_host()
-        I_total /= self.Np
+        I_total *= (self.sun_intensity/self.Np)
         if to_print:
             print("render_cuda took:",time() - start)
         # return I_total
@@ -728,7 +740,7 @@ class SceneRR(object):
         # dgrad_contrib = cuda.to_device(np.zeros(self.total_num_of_scatter, dtype=float_reg))
         start = time()
         self.calc_gradient_contribution[blockspergrid, threadsperblock]\
-            (cuda_paths[1], self.dpath_contrib, self.dI_total, self.dPs, self.dpixels_shape,cuda_paths[2], self.dgrad_contrib)
+            (cuda_paths[1], self.dpath_contrib, self.dI_total, self.dPs, self.dpixels_shape,cuda_paths[2], self.dgrad_contrib, self.downscale)
 
         cuda.synchronize()
         if to_print:
@@ -737,7 +749,7 @@ class SceneRR(object):
         self.render_differentiable_cuda[blockspergrid, threadsperblock]\
             (self.dbeta_cloud, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size, self.dvoxel_size,
                                        N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, *cuda_paths, self.dI_total, self.dpath_contrib,
-             self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad)
+             self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad, self.downscale)
 
         cuda.synchronize()
         if to_print:
@@ -747,13 +759,14 @@ class SceneRR(object):
         total_grad /= (self.Np * N_cams)
         return I_total, total_grad
 
-    def space_curving(self, I_total, image_threshold, hit_threshold, spp):
+    def space_curving(self, I_total, image_threshold, hit_threshold, camera_array_list, spp):
         shape = self.volume.grid.shape
-        pixels = self.cameras[0].pixels
+        pixels = self.pixels_shape
         I_mask = np.zeros(I_total.shape, dtype=bool)
         I_total_norm = (I_total-I_total.min())/(I_total.max()-I_total.min())
         # I_mask[I_total/np.mean(I_total) > image_threshold] = True
-        I_mask[I_total_norm > image_threshold] = True
+        for k in range(self.N_cams):
+            I_mask[k][I_total_norm[k] > image_threshold[k]] = True
         plt.figure(figsize=(I_total.shape[0],2))
         for k in range(self.N_cams):
             img_and_mask = np.vstack([I_total[k]/np.max(I_total[k]), I_mask[k]])
@@ -764,8 +777,7 @@ class SceneRR(object):
         plt.tight_layout()
         plt.show()
         dgrid_counter = cuda.to_device(np.zeros((*shape, self.N_cams), dtype=np.bool))
-        RKs_inv = np.concatenate([(cam.R @ cam.K_inv).reshape(1,3,3) for cam in self.cameras])
-        dRKs_inv = cuda.to_device(RKs_inv)
+        dcamera_array_list = cuda.to_device(camera_array_list)
 
         grid_shape = self.volume.beta_cloud.shape
         dgrid_shape = cuda.to_device(grid_shape)
@@ -778,11 +790,11 @@ class SceneRR(object):
         pixel_mat = np.vstack([kk, jj, ii])
         dpixel_mat = cuda.to_device(pixel_mat)
         print(pixel_mat.shape[1])
-        self.init_cuda_param(pixel_mat.shape[1])
+        self.init_cuda_param(pixel_mat.shape[1], init=True)
         threadsperblock = self.threadsperblock
         blockspergrid = self.blockspergrid
         self.space_curving_cuda[blockspergrid, threadsperblock] \
-        (dpixel_mat, spp, dRKs_inv, self.dts,self.dbbox, self.dbbox_size, self.dvoxel_size, dgrid_shape, self.rng_states, dgrid_counter)
+        (dpixel_mat, spp, dcamera_array_list, self.dbbox, self.dbbox_size, self.dvoxel_size, dgrid_shape, self.rng_states, dgrid_counter)
         grid_counter = dgrid_counter.copy_to_host()
         grid_counter = grid_counter.astype(np.bool)
         grid_mean = np.mean(grid_counter, axis=-1)
@@ -830,9 +842,11 @@ class SceneRR(object):
     def set_cameras(self, cameras):
         self.cameras = cameras
         self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
+        max_pix_i = np.max([cam.pixels[0] for cam in self.cameras])
+        max_pix_j = np.max([cam.pixels[1] for cam in self.cameras])
+        self.pixels_shape = np.array([max_pix_i, max_pix_j])
         for k in range(self.N_cams):
             self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
-        self.pixels_shape = self.cameras[0].pixels
         ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
         Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
         self.dts.copy_to_device(ts)
@@ -843,12 +857,14 @@ class SceneRR(object):
         self.N_cams = len(cameras)
         self.N_pixels = cameras[0].pixels
         self.is_camera_in_medium = np.zeros(self.N_cams, dtype=np.bool)
+        max_pix_i = np.max([cam.pixels[0] for cam in self.cameras])
+        max_pix_j = np.max([cam.pixels[1] for cam in self.cameras])
+        self.pixels_shape = np.array([max_pix_i, max_pix_j])
         for k in range(self.N_cams):
             self.is_camera_in_medium[k] = self.volume.grid.is_in_bbox(self.cameras[k].t)
-        self.pixels_shape = self.cameras[0].pixels
         ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
         self.Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
-        self.dpixels_shape = cuda.to_device(self.cameras[0].pixels)
+        self.dpixels_shape = cuda.to_device(self.pixels_shape)
         self.dts = cuda.to_device(ts)
         self.dPs = cuda.to_device(self.Ps)
         self.dis_in_medium = cuda.to_device(self.is_camera_in_medium)

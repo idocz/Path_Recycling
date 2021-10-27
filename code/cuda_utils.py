@@ -314,10 +314,13 @@ def get_intersection_with_bbox(point, direction, bbox):
     # print(tmin, tmax)
     # ray (line) is intersecting AABB, but the whole AABB is behind us or the ray does not intersect
     if tmax < 0 or tmin>tmax:
-      return False
+        # print(tmin > tmax)
+        return False
 
     # tmin += 1e-6
     step_in_direction(point, direction, tmin)
+    # if tmin == 0:
+    #     print("tmin = 0")
     return True
 
 
@@ -362,6 +365,18 @@ def project_point(point, P, pixels_shape, res):
     if x >= 0 and x <= pixels_shape[0] and y >= 0 and y <= pixels_shape[1]:
         res[0] = np.uint8(x)
         res[1] = np.uint8(y)
+
+@cuda.jit(device=True)
+def project_point_pushbroom(point, P, pixels_shape, res):
+    res[0] = 65535
+    z = point[0]*P[2,0] + point[1]*P[2,1] + point[2]*P[2,2] + P[2,3]
+    y = (point[0]*P[0,0] + point[1]*P[0,1] + point[2]*P[0,2] + P[0,3])
+    x = (point[0]*P[1,0] + point[1]*P[1,1] + point[2]*P[1,2] + P[1,3]) / z
+    # print(pixels_shape[0], pixels_shape[1])
+    if x >= 0 and x <= pixels_shape[0] and y >= 0 and y <= pixels_shape[1]:
+        res[0] = np.uint8(x)
+        res[1] = np.uint8(y)
+    # print(x, y, z)
 
 
 #### PHASE FUNCTION FUNCTIONS ####
@@ -421,6 +436,18 @@ def HG_sample_direction(old_direction, g, new_direction, rng_states, tid):
         new_direction[1] = (sin_theta * (old_direction[1] * z_cos_phi + old_direction[0] * sin_phi) / denom) + old_direction[1] * cos_theta
         new_direction[2] = old_direction[2] * cos_theta - denom * sin_theta * cos_phi
     return cos_theta
+
+@cuda.jit(device=True)
+def sample_hemisphere_cuda(new_direction, rng_states, tid):
+    u1 = sample_uniform(rng_states, tid)
+    u2 = sample_uniform(rng_states, tid)
+    cosa = u1 ** (1/2)
+    sina = math.sqrt(1 - cosa**2)
+    phi = 2 * np.pi * u2
+    new_direction[0] = sina * math.cos(phi)
+    new_direction[1] = sina * math.sin(phi)
+    new_direction[2] = cosa
+    return cosa
 
 #### UTILS FUNCTIONS ###
 

@@ -18,10 +18,11 @@ class TensorBoardWrapper(object):
         self.writer = SummaryWriter(log_dir=f"checkpoints/{self.train_id}")
         self.folder = join("checkpoints", self.train_id)
         os.mkdir(join("checkpoints", self.train_id, "data"))
-
-        np.savez(join("checkpoints",self.train_id,"data","gt"), betas=betas_gt, images=I_gt,
-                 min_val=self.min_val, max_val=self.max_val)
-        I_gt_norm = transform(np.copy(I_gt), self.min_val, self.max_val)
+        if betas_gt is not None:
+            np.savez(join("checkpoints",self.train_id,"data","gt"), betas=betas_gt, images=I_gt,
+                     min_val=self.min_val, max_val=self.max_val)
+        # I_gt_norm = transform(np.copy(I_gt), self.min_val, self.max_val)
+        I_gt_norm = transform(np.copy(I_gt), self.min_val.min(), self.max_val.max())
         for i in range(I_gt.shape[0]):
             self.writer.add_image(f"ground_truth/{i}", I_gt_norm[i][None, :, :], global_step=0)
 
@@ -35,13 +36,16 @@ class TensorBoardWrapper(object):
         time = np.array(time)
         if iter % (100) ==0:
             np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt, time=time)#, images=I_opt)
-        I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
+        # I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
+        I_opt_norm = transform(np.copy(I_opt), I_opt.min(), I_opt.max())
         for i in range(I_opt.shape[0]):
             self.writer.add_image(f"simulated_images/{i}", I_opt_norm[i][None, :, :],
                              global_step=iter)
         self.writer.add_scalar("loss", loss, global_step=iter)
-        self.writer.add_scalar("max_dist", max_dist, global_step=iter)
-        self.writer.add_scalar("relative_dist1", rel_dist1, global_step=iter)
+        if max_dist is not None:
+            self.writer.add_scalar("max_dist", max_dist, global_step=iter)
+        if rel_dist1 is not None:
+            self.writer.add_scalar("relative_dist1", rel_dist1, global_step=iter)
         self.writer.add_scalar("Np", Np, global_step=iter)
 
     def update_gt(self, I_gt):
