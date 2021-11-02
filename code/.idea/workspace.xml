@@ -27,6 +27,9 @@
   <component name="ChangeListManager">
     <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="one image optimization works on backward airmspi">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/optimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/optimizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_airmspi_backward.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -342,7 +345,7 @@
       <workItem from="1635524167585" duration="50372000" />
       <workItem from="1635707525231" duration="25057000" />
       <workItem from="1635786539193" duration="10882000" />
-      <workItem from="1635843851267" duration="6505000" />
+      <workItem from="1635843851267" duration="29692000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -512,7 +515,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635848731531</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="one image optimization works on backward airmspi">
+      <created>1635850423866</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1635850423866</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -673,28 +683,33 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward.py</url>
-          <line>557</line>
+          <line>638</line>
           <option name="timeStamp" value="91" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward.py</url>
-          <line>112</line>
+          <line>116</line>
           <option name="timeStamp" value="94" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward.py</url>
-          <line>563</line>
+          <line>643</line>
           <option name="timeStamp" value="96" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward.py</url>
-          <line>38</line>
+          <line>42</line>
           <option name="timeStamp" value="98" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward.py</url>
-          <line>370</line>
+          <line>445</line>
           <option name="timeStamp" value="99" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward.py</url>
+          <line>737</line>
+          <option name="timeStamp" value="100" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

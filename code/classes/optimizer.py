@@ -103,6 +103,8 @@ class ADAM(object):
         self.m = self.beta1 * self.m + (1 - self.beta1) * grads[mask]
         m_hat = self.m / (1 - self.beta1**(self.iter+1))
         if self.iter >= self.start_iter:
+            # if self.iter == self.start_iter:
+            #     self.step_size *= np.linalg.norm(np.sqrt(self.v)) * 10
             v_hat = self.v / (1 - self.beta2 ** (self.iter+1))
             delta = -(self.step_size * m_hat) / (np.sqrt((v_hat) + self.eps))
         else:
