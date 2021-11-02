@@ -26,9 +26,9 @@ dir_x = -(np.sin(zenith)*np.cos(azimuth))
 dir_y = -(np.sin(zenith)*np.sin(azimuth))
 dir_z = -np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
-downscale = 1
+downscale = 8
 # sun_intensity = 1e1/7
-sun_intensity = 1
+sun_intensity = 5e0
 
 #####################
 # grid parameters #
@@ -66,22 +66,22 @@ g_cloud = 0.85
 resolutions = airmspi_data["resolution"]#[:3]
 I_gt = airmspi_data["images"]#[:3]
 camera_array_list = airmspi_data["camera_array_list"]#[:1]
-# camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale, :6]) for camera_array in camera_array_list]
-camera_array_list = [np.ascontiguousarray(camera_array[:, :, :6]) for camera_array in camera_array_list]
+camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale, :6]) for camera_array in camera_array_list]
+# camera_array_list = [np.ascontiguousarray(camera_array[:, :, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
 Np_max = int(5e8)
-Np = int(1e8)
+Np = int(5e6)
 resample_freq = 1
-step_size = 1e5
+step_size = 5e2
 # Ns = 15
-rr_depth = 10
+rr_depth = 20
 rr_stop_prob = 0.1
 iterations = 10000000
 to_mask = True
 tensorboard = False
 tensorboard_freq = 10
-beta_max = 60
+beta_max = 100
 win_size = 40
 
 scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, g_cloud, rr_depth, rr_stop_prob)
@@ -143,13 +143,13 @@ min_loss = 1000#
 beta_opt = volume.beta_cloud
 loss = 1000
 start_loop = time()
-cam_ind = 1
+cam_ind = 0
 
 pixel_shape = scene_airmspi.pixels_shapes[cam_ind]
 scene_airmspi.init_cuda_param(Np, init=True)
 
-# I_gt_downscaled = I_gt[cam_ind][::downscale, ::downscale]
-I_gt_downscaled = I_gt[cam_ind]
+I_gt_downscaled = I_gt[cam_ind][::downscale, ::downscale]
+# I_gt_downscaled = I_gt[cam_ind]
 plt.figure()
 plt.imshow(I_gt_downscaled, cmap="gray")
 plt.title("GT")

@@ -25,26 +25,9 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="adding sea">
-      <change afterPath="$PROJECT_DIR$/classes/scene_airmspi_backward.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/scene_airmspi_periodic.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/deprecated/cuda_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/drafts/miepython_draft.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/airmspi_render_backward.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_render_jplext_multiple_distances.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="one image optimization works on backward airmspi">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cuda_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/cuda_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/HG_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/HG_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/airMSPI_data_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/airMSPI_data_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/estimating_cam_mat_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/estimating_cam_mat_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -359,7 +342,7 @@
       <workItem from="1635524167585" duration="50372000" />
       <workItem from="1635707525231" duration="25057000" />
       <workItem from="1635786539193" duration="10882000" />
-      <workItem from="1635843851267" duration="4609000" />
+      <workItem from="1635843851267" duration="6505000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -522,7 +505,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635319281738</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="one image optimization works on backward airmspi">
+      <created>1635848731531</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1635848731531</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -575,7 +565,8 @@
     <MESSAGE value="init finder for jpl and smallcf has been added" />
     <MESSAGE value="commit before merge" />
     <MESSAGE value="adding sea" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding sea" />
+    <MESSAGE value="one image optimization works on backward airmspi" />
+    <option name="LAST_COMMIT_MESSAGE" value="one image optimization works on backward airmspi" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
