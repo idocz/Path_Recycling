@@ -4,8 +4,12 @@ import pickle
 from grid import Grid
 from visual import Visual_wrapper
 import numpy as np
+from utils import zentih_azimuth_to_direction
+
 a_file = open(join("data", "airmspi_data.pkl"), "rb")
 airmspi_data = pickle.load(a_file)
+
+
 
 
 xs = airmspi_data["x"]
@@ -28,9 +32,13 @@ for k in range(N_cams):
     z = zs[offset: offset+pixel_num].reshape(cam_shape,order='F')
     zenith = zeniths[offset: offset+pixel_num]
     azimuth = azimuths[offset: offset+pixel_num]
-    dir_x = -(np.sin(zenith)*np.cos(azimuth)).reshape(cam_shape,order='F')
-    dir_y = -(np.sin(zenith)*np.sin(azimuth)).reshape(cam_shape,order='F')
-    dir_z = -np.cos(zenith).reshape(cam_shape,order='F')
+    # dir_x = -(np.sin(zenith)*np.cos(azimuth)).reshape(cam_shape,order='F')
+    # dir_y = -(np.sin(zenith)*np.sin(azimuth)).reshape(cam_shape,order='F')
+    # dir_z = -np.cos(zenith).reshape(cam_shape,order='F')
+    # dir_x = (np.sin(zenith)*np.sin(azimuth)).reshape(cam_shape,order='F')
+    # dir_y = (np.sin(zenith)*np.cos(azimuth)).reshape(cam_shape,order='F')
+    # dir_z = -np.cos(zenith).reshape(cam_shape,order='F')
+    dir_x, dir_y, dir_z = zentih_azimuth_to_direction(zenith, azimuth, cam_shape)
     camera_array = np.concatenate([x,y,z,dir_x, dir_y, dir_z,images[k][:,:,None]], axis=-1)
     camera_array_list.append(camera_array)
     offset += pixel_num
@@ -48,6 +56,7 @@ mean_point = np.mean(cloud_points, axis=0)
 print("mean_point", mean_point)
 
 visual = Visual_wrapper(grid)
+# visual.create_grid()
 
 k = 0
 for i in range(1, resolutions[k][0]-1):
@@ -67,23 +76,30 @@ if plot_pixels_rows:
     visual.ax.set_xlabel("x")
     visual.ax.set_ylabel("y")
     visual.ax.set_zlabel("z")
+    axis = 1
+    scale = 10
     for k in range(9):
-
         visual.ax.scatter(*ts[k], s=5)
         resolution = resolutions[k]
-        for i in range(0, resolution[0], 10):# range(0, resolution[1], 10):
-            x, y, z, dir_x, dir_y, dir_z = camera_array_list[k][i, :, :-1].T
+        for i in range(0, resolution[axis], 100):# range(0, resolution[1], 10):
+            if axis == 0:
+                x, y, z, dir_x, dir_y, dir_z = camera_array_list[k][i, :, :-1].T
+            elif axis == 1:
+                x, y, z, dir_x, dir_y, dir_z = camera_array_list[k][:, i, :-1].T
+            else:
+                assert "axis must be 1 or 0"
             # x, y, z, dir_x, dir_y, dir_z = camera_array_list[k][:, i, :-1].T
             visual.ax.scatter(x, y, z, s=5)
             if i in [0]:
-                scale = 100
-                visual.ax.quiver(x, y, z, scale*dir_x, scale*dir_y, scale*dir_z, color="orange", linewidth=0.1,arrow_length_ratio=0)
-                break
-                # visual.ax.quiver(x, y, z, -scale*dir_x, -scale*dir_y, -scale*dir_z, color="red", linewidth=0.1, arrow_length_ratio=0)
+                dir_scaled = scale * np.array([dir_x, dir_y, dir_z])
+                visual.ax.quiver(x, y, z, *dir_scaled, color="orange", linewidth=0.1,arrow_length_ratio=0)
+                #     break
+                visual.ax.quiver(x, y, z, *-dir_scaled, color="red", linewidth=0.1, arrow_length_ratio=0)
                 # visual.ax.quiver(x[0], y[0], z[0], -scale*dir_x[0], -scale*dir_y[0], -scale*dir_z[0], color="red", linewidth=1, arrow_length_ratio=0)
                 # visual.ax.quiver(x[-1], y[-1], z[-1], -scale*dir_x[-1], -scale*dir_y[-1], -scale*dir_z[-1], color="red", linewidth=1, arrow_length_ratio=0)
                 # visual.ax.quiver(x[140], y[140], z[140], -scale*dir_x[-1], -scale*dir_y[-1], -scale*dir_z[-1], color="blue", linewidth=1, arrow_length_ratio=0)
-
+        # visual.ax.quiver(x, y, z, -scale * dir_x, -scale * dir_y, -scale * dir_z, color="red", linewidth=0.1,
+        #                  arrow_length_ratio=0)
     if not plot_cloud:
         plt.show()
 
@@ -116,4 +132,3 @@ for k in range(N_cams):
         lengths_list.extend(lengths)
     cam_velocities[k] = np.mean(lengths_list)
 
-v

@@ -55,6 +55,58 @@ def is_voxel_valid(voxel, grid_shape):
 
 
 @cuda.jit(device=True)
+def check_voxel_status(voxel, point, grid_shape, bbox, seg):
+    # sea hit
+    if voxel[2] == 255:
+        voxel[2] = 0
+        point[2] = 0
+        return True, False
+    # sky hit
+    elif voxel[2] == grid_shape[2]:
+        return False, True
+
+    # leftmost first dimension periodic hit
+    elif voxel[0] == 255:
+        # if seg == 0:
+        #     return False, False
+        # voxel[0] = grid_shape[0]
+        # point[0] = bbox[0,1]
+        return False, False
+    # rightmost first dimension periodic hit
+    elif voxel[0] == grid_shape[0]:
+        # if seg == 0:
+        #     return False, False
+        # voxel[0] = 0
+        # point[0] = bbox[0, 0]
+        return False, False
+
+    # leftmost second dimension periodic hit
+    elif voxel[1] == 255:
+        # if seg == 0:
+        #     return False, False
+        # voxel[1] = grid_shape[1]
+        # point[1] = bbox[1, 1]
+        return False, False
+    # leftmost second dimension periodic hit
+    elif voxel[1] == grid_shape[1]:
+        # if seg == 0:
+        #     return False, False
+        # voxel[1] = 0
+        # point[1] = bbox[1, 0]
+        return False, False
+
+    # no bbox hit
+    else:
+        return True, True
+
+
+
+@cuda.jit(device=True)
+def is_on_sea(voxel, grid_shape):
+    return (not (voxel[0] >= grid_shape[0] or voxel[1] >= grid_shape[1])) and (voxel[2] == 255)
+
+
+@cuda.jit(device=True)
 def travel_to_voxels_border_fast(current_point, current_voxel, direction, voxel_size):
     t_x = 20.1
     t_y = 20.2
@@ -88,44 +140,6 @@ def travel_to_voxels_border_fast(current_point, current_voxel, direction, voxel_
         # current_point[2] = border_z
         return t_z, border_z, 2
 
-
-@cuda.jit(device=True)
-def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel):
-    t_x = 20.1
-    t_y = 20.2
-    t_z = 20.3
-    border_x = (current_voxel[0] + (direction[0] > 0)) * voxel_size[0]
-    border_y = (current_voxel[1] + (direction[1] > 0)) * voxel_size[1]
-    border_z = (current_voxel[2] + (direction[2] > 0)) * voxel_size[2]
-    if direction[0] != 0:
-        t_x = (border_x - current_point[0]) / direction[0]
-    if direction[1] != 0:
-        t_y = (border_y - current_point[1]) / direction[1]
-    if direction[2] != 0:
-        t_z = (border_z - current_point[2]) / direction[2]
-
-    assign_3d(next_voxel, current_voxel)
-    if t_x <= t_y and t_x <= t_z:
-        # collision with x
-        next_voxel[0] += sign(direction[0])
-        current_point[0] = border_x
-        current_point[1] = current_point[1] + t_x * direction[1]
-        current_point[2] = current_point[2] + t_x * direction[2]
-        return t_x
-    elif t_y <= t_z:
-        # collision with y
-        next_voxel[1] += sign(direction[1])
-        current_point[0] = current_point[0] + t_y * direction[0]
-        current_point[1] = border_y
-        current_point[2] = current_point[2] + t_y * direction[2]
-        return t_y
-    else:
-        # collision with z
-        next_voxel[2] += sign(direction[2])
-        current_point[0] = current_point[0] + t_z * direction[0]
-        current_point[1] = current_point[1] + t_z * direction[1]
-        current_point[2] = border_z
-        return t_z
 
 
 @cuda.jit(device=True)
@@ -167,111 +181,6 @@ def travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
         return t_z
 
 
-
-
-@cuda.jit(device=True)
-def travel_to_voxels_border_old(current_point, current_voxel, direction, voxel_size, next_voxel):
-    inc_x = sign(direction[0])
-    inc_y = sign(direction[1])
-    inc_z = sign(direction[2])
-    t_x = 2.1
-    t_y = 2.2
-    t_z = 2.3
-    if direction[0] != 0:
-        t_x = (((current_voxel[0] + 1 + (inc_x - 1) / 2) * voxel_size[0]) - current_point[0]) / direction[0]
-    if direction[1] != 0:
-        t_y = (((current_voxel[1] + 1 + (inc_y - 1) / 2) * voxel_size[1]) - current_point[1]) / direction[1]
-    if direction[2] != 0:
-        t_z = (((current_voxel[2] + 1 + (inc_z - 1) / 2) * voxel_size[2]) - current_point[2]) / direction[2]
-
-    assign_3d(next_voxel, current_voxel)
-    if t_x <= t_y and t_x <= t_z:
-        # collision with x
-        next_voxel[0] += inc_x
-        current_point[0] = (current_voxel[0] + 1 + (inc_x - 1) / 2) * voxel_size[0]
-        current_point[1] = current_point[1] + t_x * direction[1]
-        current_point[2] = current_point[2] + t_x * direction[2]
-        return t_x
-        # t_min = t_x
-            # t_min = t_x
-        # else:
-        #     # collision with z
-        #     next_voxel[2] += inc_z
-        #     current_point[0] = current_point[0] + t_z * direction[0]
-        #     current_point[1] = current_point[1] + t_z * direction[1]
-        #     current_point[2] = (current_voxel[2] + 1 + (inc_z - 1) / 2) * voxel_size[2]
-        #     # t_min = t_z
-    elif t_y <= t_z:
-        # collision with y
-        next_voxel[1] += inc_y
-        current_point[0] = current_point[0] + t_y * direction[0]
-        current_point[1] = (current_voxel[1] + 1 + (inc_y - 1) / 2) * voxel_size[1]
-        current_point[2] = current_point[2] + t_y * direction[2]
-        return t_y
-        # t_min = t_y
-    else:
-        # collision with z
-        next_voxel[2] += inc_z
-        current_point[0] = current_point[0] + t_z * direction[0]
-        current_point[1] = current_point[1] + t_z * direction[1]
-        current_point[2] = (current_voxel[2] + 1 + (inc_z - 1) / 2) * voxel_size[2]
-        return t_z
-        # t_min = t_z
-    # current_point[0] = current_point[0] + t_min * direction[0]
-    # current_point[1] = current_point[1] + t_min * direction[1]
-    # current_point[2] = current_point[2] + t_min * direction[2]
-    # return t_min
-
-    # if t_min < 0:
-    #     print("bugg in t_min", t_min)
-
-
-    # return t_min
-
-
-@cuda.jit(device=True)
-def travel_to_voxels_border_old(current_point, current_voxel, direction, voxel_size, next_voxel):
-    inc_x = sign(direction[0])
-    inc_y = sign(direction[1])
-    inc_z = sign(direction[2])
-    voxel_fix_x = (inc_x - 1) / 2
-    voxel_fix_y = (inc_y - 1) / 2
-    voxel_fix_z = (inc_z - 1) / 2
-    t_x = 2.1
-    t_y = 2.2
-    t_z = 2.3
-    if direction[0] != 0:
-        t_x = (((current_voxel[0] + 1 + voxel_fix_x) * voxel_size[0]) - current_point[0]) / direction[0]
-    if direction[1] != 0:
-        t_y = (((current_voxel[1] + 1 + voxel_fix_y) * voxel_size[1]) - current_point[1]) / direction[1]
-    if direction[2] != 0:
-        t_z = (((current_voxel[2] + 1 + voxel_fix_z) * voxel_size[2]) - current_point[2]) / direction[2]
-
-    t_min = min_3d(t_x, t_y, t_z)
-    assign_3d(next_voxel, current_voxel)
-    if t_min == t_x:
-        next_voxel[0] += inc_x
-        current_point[0] = (current_voxel[0] + 1 + voxel_fix_x) * voxel_size[0]
-        current_point[1] = current_point[1] + t_min * direction[1]
-        current_point[2] = current_point[2] + t_min * direction[2]
-    elif t_min == t_y:
-        next_voxel[1] += inc_y
-        current_point[1] = (current_voxel[1] + 1 + voxel_fix_y) * voxel_size[1]
-        current_point[0] = current_point[0] + t_min * direction[0]
-        current_point[2] = current_point[2] + t_min * direction[2]
-
-
-    elif t_min == t_z:
-        next_voxel[2] += inc_z
-        current_point[2] = (current_voxel[2] + 1 + voxel_fix_z) * voxel_size[2]
-        current_point[0] = current_point[0] + t_min * direction[0]
-        current_point[1] = current_point[1] + t_min * direction[1]
-
-    if t_min < 0:
-        print("bugg in t_min", t_min)
-
-
-    return t_min
 
 
 @cuda.jit(device=True)
@@ -448,6 +357,10 @@ def sample_hemisphere_cuda(new_direction, rng_states, tid):
     new_direction[1] = sina * math.sin(phi)
     new_direction[2] = cosa
     return cosa
+
+
+
+
 
 #### UTILS FUNCTIONS ###
 

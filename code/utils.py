@@ -336,3 +336,26 @@ def calc_bbox_sample_range(sun_direction, grid):
         sample_range[1,1] = grid.bbox[1, 1]
 
     return sample_range
+
+def zentih_azimuth_to_direction(zenith, azimuth, cam_shape):
+    mu = -np.cos(zenith)
+    phi = np.pi + azimuth
+    u = (np.sqrt(1 - mu*mu) * np.cos(phi)).reshape(cam_shape,order='F')
+    v = (np.sqrt(1 - mu*mu) * np.sin(phi)).reshape(cam_shape,order='F')
+    w = mu.reshape(cam_shape,order='F')
+    return u,v,w
+
+
+
+def plank(llambda=660, T=5800):
+    h = 6.62607004e-34  # Planck constant
+    c = 3.0e8
+    k = 1.38064852e-23  # Boltzmann constant
+    # https://en.wikipedia.org/wiki/Planck%27s_law
+    a = 2.0 * h * (c ** 2)
+    b = (h * c) / (llambda * k * T)
+    spectral_radiance = a / ((llambda ** 5) * (np.exp(b) - 1.0))
+    return spectral_radiance
+
+def norm_image(img):
+    return (img - img.min())/(img.max() - img.min())

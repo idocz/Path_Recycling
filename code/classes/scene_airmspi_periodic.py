@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from utils import calc_bbox_sample_range
 threadsperblock = 256
-sea_albedo = 0.02
+sea_albedo = 0.01
 exclude_ind =  20
 # consider_ground = False
 class SceneAirMSPI(object):
@@ -103,18 +103,12 @@ class SceneAirMSPI(object):
                     ###########################################################
                     ############## voxel_traversal_algorithm_save #############
                     current_tau = 0.0
-                    # volumetric_scattering = True
+                    volumetric_scattering = True
                     while True:
-                        # if is_on_sea(current_voxel, grid_shape): # diffusive scattering
-                        #     current_voxel[2] = 0
-                        #     current_point[2] = 0
-                        #     volumetric_scattering = False
-                        #     in_medium = True
-                        #     break
-
-                        if not is_voxel_valid(current_voxel, grid_shape):
-                            in_medium = False
+                        in_medium, volumetric_scattering = check_voxel_status(current_voxel, current_point, grid_shape, bbox, seg)
+                        if not volumetric_scattering or not in_medium:
                             break
+
                         beta_c = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]]
                         beta = beta_c + beta_air
                         length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size,
@@ -132,21 +126,24 @@ class SceneAirMSPI(object):
 
                     ######################## voxel_traversal_algorithm_save ###################
                     ###########################################################################
-                    if in_medium == False:
+                    if not in_medium and volumetric_scattering:
                         break
 
                     seg+=1
 
-                    # sampling new direction
-                    # if volumetric_scattering:
-                    cloud_prob_scat = w0_cloud * beta_c / (w0_cloud * beta_c + w0_air * beta_air)
+                    if not in_medium:
+                        break
 
-                    if sample_uniform(rng_states, tid) <= cloud_prob_scat:
-                        HG_sample_direction(direction, g_cloud, new_direction, rng_states, tid)
+                    # sampling new direction
+                    if volumetric_scattering:
+                        cloud_prob_scat = w0_cloud * beta_c / (w0_cloud * beta_c + w0_air * beta_air)
+
+                        if sample_uniform(rng_states, tid) <= cloud_prob_scat:
+                            HG_sample_direction(direction, g_cloud, new_direction, rng_states, tid)
+                        else:
+                            rayleigh_sample_direction(direction, new_direction, rng_states, tid)
                     else:
-                        rayleigh_sample_direction(direction, new_direction, rng_states, tid)
-                    # else:
-                    #     sample_hemisphere_cuda(new_direction, rng_states, tid)
+                        sample_hemisphere_cuda(new_direction, rng_states, tid)
 
                     assign_3d(direction, new_direction)
 
@@ -191,17 +188,13 @@ class SceneAirMSPI(object):
                     ###########################################################
                     ############## voxel_traversal_algorithm_save #############
                     current_tau = 0.0
-                    # volumetric_scattering = True
+                    volumetric_scattering = True
                     while True:
-                        # if is_on_sea(current_voxel, grid_shape):
-                        #     volumetric_scattering = False
-                        #     current_voxel[2] = 0
-                        #     current_point[2] = 0
-                        #     in_medium = True
-                        #     break
-                        if not is_voxel_valid(current_voxel, grid_shape):
-                            in_medium = False
+                        in_medium, volumetric_scattering = check_voxel_status(current_voxel, current_point, grid_shape, bbox, seg)
+                        if not volumetric_scattering or not in_medium:
                             break
+
+
                         beta_c = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]]
                         beta = beta_c + beta_air
                         length = travel_to_voxels_border(current_point, current_voxel, direction, voxel_size, next_voxel)
@@ -217,7 +210,7 @@ class SceneAirMSPI(object):
 
                     ######################## voxel_traversal_algorithm_save ###################
                     ###########################################################################
-                    if in_medium == False:
+                    if not in_medium and volumetric_scattering:
                         break
                     # keeping track of scatter points
                     seg += 1
@@ -225,16 +218,20 @@ class SceneAirMSPI(object):
                     scatter_points[0, seg_ind] = current_point[0]
                     scatter_points[1, seg_ind] = current_point[1]
                     scatter_points[2, seg_ind] = current_point[2]
-                    # sampling new direction
-                    # if volumetric_scattering:
-                    cloud_prob_scat =  w0_cloud*beta_c / (w0_cloud*beta_c + w0_air*beta_air)
 
-                    if sample_uniform(rng_states, tid) <= cloud_prob_scat:
-                        HG_sample_direction(direction, g_cloud, new_direction, rng_states, tid)
+                    if not in_medium:
+                        break
+
+                    # sampling new direction
+                    if volumetric_scattering:
+                        cloud_prob_scat =  w0_cloud*beta_c / (w0_cloud*beta_c + w0_air*beta_air)
+
+                        if sample_uniform(rng_states, tid) <= cloud_prob_scat:
+                            HG_sample_direction(direction, g_cloud, new_direction, rng_states, tid)
+                        else:
+                            rayleigh_sample_direction(direction, new_direction, rng_states, tid)
                     else:
-                        rayleigh_sample_direction(direction, new_direction, rng_states, tid)
-                    # else:
-                    #     sample_hemisphere_cuda(new_direction, rng_states, tid)
+                        sample_hemisphere_cuda(new_direction, rng_states, tid)
 
                     assign_3d(direction, new_direction)
 
@@ -300,11 +297,11 @@ class SceneAirMSPI(object):
                         cos_theta = dot_3d(cam_direction, direction)
                         cloud_prob_scat0 = (w0_cloud*beta0_c)/(w0_cloud*beta0_c + w0_air*beta_air)
                         # angle pdf
-                        # if volumetric_scattering:
-                        IS *=  cloud_prob_scat * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob_scat) * rayleigh_pdf(cos_theta)
-                        IS /=  cloud_prob_scat0 * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob_scat0) * rayleigh_pdf(cos_theta)
-                        # else:
-                        #     IS *= sea_albedo
+                        if volumetric_scattering:
+                            IS *=  cloud_prob_scat * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob_scat) * rayleigh_pdf(cos_theta)
+                            IS /=  cloud_prob_scat0 * HG_pdf(cos_theta, g_cloud) + (1-cloud_prob_scat0) * rayleigh_pdf(cos_theta)
+                        else:
+                            IS *= sea_albedo
                     ###########################################################
                     ############## voxel_fixed traversal_algorithm_save #############
 
@@ -330,6 +327,7 @@ class SceneAirMSPI(object):
                         current_voxel[border_ind] += sign(direction[border_ind])
                         step_in_direction(current_point, direction, length)
 
+
                     # last step
                     length = calc_distance(current_point, next_point)
                     beta_c = beta_cloud[current_voxel[0], current_voxel[1], current_voxel[2]]
@@ -340,22 +338,22 @@ class SceneAirMSPI(object):
                     assign_3d(current_point, next_point)
 
 
+
                     ######################## voxel_fixed_traversal_algorithm_save ###################
-                    ###########################################################################
+                    ###########################################################################n
                     IS *= ((beta/beta0) * math.exp(-tau)) # length pdf
-                    # beta_c = beta - beta_air
-                    # if current_point[2] == 0:
-                    #     volumetric_scattering = False
-                    # else:
-                    #     volumetric_scattering = True
+                    in_medium, volumetric_scattering = check_voxel_status(current_voxel, current_point, grid_shape, bbox, seg)
+
 
                     # local estimation
-                    # if volumetric_scattering:
-                    cloud_prob = 1 - (beta_air / beta)
-                    cloud_prob_scat = (w0_cloud*beta_c)/(w0_cloud*beta_c + w0_air*beta_air)
-                    attenuation *= cloud_prob * w0_cloud + (1-cloud_prob) * w0_air
-                    # else:
-                    #     attenuation = 1
+                    if volumetric_scattering:
+                        cloud_prob = 1 - (beta_air / beta)
+                        cloud_prob_scat = (w0_cloud*beta_c)/(w0_cloud*beta_c + w0_air*beta_air)
+                        attenuation *= cloud_prob * w0_cloud + (1-cloud_prob) * w0_air
+                    else:
+                        attenuation = 1
+                        if not in_medium: # find sea collision
+
                     if seg >= rr_depth:
                         attenuation *= rr_factor
                     for k in range(N_cams):
@@ -380,7 +378,7 @@ class SceneAirMSPI(object):
                             if is_in_medium[k]:
                                 assign_3d(next_point, ts[k])
                             else:
-                                get_intersection_with_borders(camera_point, cam_direction, bbox, next_point)
+                                distance_to_border = get_intersection_with_borders(camera_point, cam_direction, bbox, next_point)
 
                             get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
                             path_size = estimate_voxels_size(dest_voxel, current_voxel)
@@ -409,7 +407,7 @@ class SceneAirMSPI(object):
                             # Last Step
                             length = calc_distance(camera_point, next_point)
                             beta_cam = beta_cloud[camera_voxel[0], camera_voxel[1], camera_voxel[2]] + beta_air
-                            tau += beta_cam * length
+                            tau += beta_cam * length + beta_air*(distance_to_camera - distance_to_border)
                             ######################## local estimation save ############################
                             ###########################################################################
                             pc *= math.exp(-tau)

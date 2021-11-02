@@ -4,6 +4,7 @@ import pickle
 from grid import Grid
 from visual import Visual_wrapper
 import numpy as np
+from utils import zentih_azimuth_to_direction
 a_file = open(join("data", "airmspi_data.pkl"), "rb")
 airmspi_data = pickle.load(a_file)
 
@@ -27,9 +28,10 @@ for k in range(N_cams):
     z = zs[offset: offset+pixel_num].reshape(cam_shape,order='F')
     zenith = zeniths[offset: offset+pixel_num]
     azimuth = azimuths[offset: offset+pixel_num]
-    dir_x = -(np.sin(zenith)*np.cos(azimuth)).reshape(cam_shape,order='F')
-    dir_y = -(np.sin(zenith)*np.sin(azimuth)).reshape(cam_shape,order='F')
-    dir_z = -np.cos(zenith).reshape(cam_shape,order='F')
+    # dir_x = -(np.sin(zenith)*np.cos(azimuth)).reshape(cam_shape,order='F')
+    # dir_y = -(np.sin(zenith)*np.sin(azimuth)).reshape(cam_shape,order='F')
+    # dir_z = -np.cos(zenith).reshape(cam_shape,order='F')
+    dir_x, dir_y, dir_z = zentih_azimuth_to_direction(zenith, azimuth, cam_shape)
     camera_array = np.concatenate([x,y,z,dir_x, dir_y, dir_z,images[k][:,:,None]], axis=-1)
     camera_array_list.append(camera_array)
     offset += pixel_num
@@ -51,13 +53,20 @@ for k in range(N_cams):
     row_list_j = []
     i_list = []
     j_list = []
+    move = np.array([0,0.5,1])
     for i in range(resolution[0]):
         for j in range(resolution[1]):
             # if np.random.rand() < 0.99:
             #     continue
             x, y, z, dir_x, dir_y, dir_z = camera_array_list[k][i, j, :-1]
+            # if k == 1:
+            # scale = 7
+            # x += move[0] * scale
+            # y += move[1] * scale
+            # z += move[2] * scale
             # length = np.random.rand()*10 + 100
             length = np.sqrt((x-mean_point[0])**2 + (y-mean_point[1])**2 + (z-mean_point[2])**2)
+            # length *= 0.1*np.random.rand() + 0.9
             X = x + dir_x * length
             Y = y + dir_y * length
             Z = z + dir_z * length
@@ -115,21 +124,24 @@ for k in range(N_cams):
         for j in range(grid.shape[1]):
             for l in range(grid.shape[2]):
                 if cloud_mask[i,j,l]:
-                    for _ in range(300):
+                    for _ in range(10):
                         x_noise, y_noise, z_noise = np.random.rand(3)
+                        x_noise, y_noise, z_noise = (0,0,0)
                     # x_noise, y_noise, z_noise = [0,0,0]
                         cloud_point = np.array([(i+x_noise)*grid.voxel_size[0], (j+y_noise)*grid.voxel_size[1], (l+z_noise)*grid.voxel_size[2], 1])[:,None]
                         est_j, est_iw, w = Ms[k] @ cloud_point
                         est_i = est_iw / w
                         if est_i < 0 or est_j < 0 or est_i >= resolution[0] or est_j >= resolution[1]:
                             continue
-                        image[int(est_i), int(est_j)] = True
-
-    plt.imshow(image)
+                        image[int(est_i), int(est_j)] =True
+    plt.figure()
+    plt.title(f"image {k}")#, scale {scale}" )
+    plt.imshow(np.concatenate([image,images[k]],axis=1), cmap="gray")
+    plt.imshow(image, cmap="gray")
     plt.show()
 
 airmspi_data["Ps"] = Ms
 airmspi_data["camera_array_list"] = camera_array_list
-a_file = open(join("data","airmspi_data.pkl"), "wb")
+a_file = open(join("data","airmspi_data_modified.pkl"), "wb")
 pickle.dump(airmspi_data, a_file)
 a_file.close()
