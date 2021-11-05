@@ -2,6 +2,7 @@ import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 from classes.scene_airmspi_backward import *
+# from classes.scene_airmspi_backward_recycling import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
@@ -73,8 +74,8 @@ camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale,
 # camera_array_list = [np.ascontiguousarray(camera_array[:, :, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
-Np_max = int(5e8)
-Np = int(2e8)
+Np_max = int(1e9)
+Np = int(1e7)
 resample_freq = 1
 step_size = 5e2
 # Ns = 15
@@ -86,7 +87,7 @@ tensorboard = True
 tensorboard_freq = 10
 beta_max = 100
 win_size = 10
-max_grad_norm = 50
+max_grad_norm = 30
 
 scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, g_cloud, rr_depth, rr_stop_prob)
 pad_shape = scene_airmspi.pixels_shape
@@ -167,16 +168,18 @@ spp_map = (Np*I_gt_pad/np.sum(I_gt_pad)).astype(np.uint32)
 scene_airmspi.create_job_list(spp_map)
 scene_airmspi.init_cuda_param(Np, init=True)
 pix_shape = scene_airmspi.pixels_shape
-compute_spp_map = True
+compute_spp_map = False
+resample = False
 for iter in range(iterations):
     print(f"\niter {iter}")
 
     print(f"loss={loss:.3e}, Np={Np:.2e}, beta_mean={beta_opt[cloud_mask].mean()}, beta_max={beta_opt.max()}, counter={non_min_couter}")
 
-    if iter % resample_freq == 0:
+    if iter % resample_freq == 0 or resample:
+        resample = False
         if non_min_couter >= win_size and iter > start_iter:
-            print("\n\n\n INCREASING NP \n\n\n")
             if Np < Np_max :
+                print("\n\n\n INCREASING NP \n\n\n")
                 Np = int(Np * scaling_factor)
                 # resample_freq = 30
                 non_min_couter = 0
@@ -205,9 +208,10 @@ for iter in range(iterations):
         plt.show()
     dif = (I_opt - I_gt_pad).reshape(1,1,1, N_cams, *pix_shape)
     grad_norm = np.linalg.norm(total_grad)
-    print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, grad_norm:{grad_norm:.2e}")
+    print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, grad_norm:{grad_norm:.2e} step_norm:{grad_norm * step_size}")
     if grad_norm * step_size > max_grad_norm:
         print(f"\n\n\nSTEP SKIPPED DUE TO LARGE GRAD NORM * STEPSIZE (>{max_grad_norm})\n\n\n")
+        resample = True
         continue
 
     # updating beta
