@@ -9,8 +9,10 @@ scene = "smallcf"
 # scene = "jplext"
 if scene == "smallcf":
     tamar_exp = "small coud field res - 6 stages l1 1 l 1 w air and ocean 9 sensors SC mask beta0 2 iter.mat"
-    checkpoint_id = "0808-1822-43"
-    iter = 21800
+    # checkpoint_id = "0808-1822-43"
+    # iter = 21800
+    checkpoint_id = "0711-2025-59"
+    iter = 17840
 
 elif scene == "jplext":
     tamar_exp = "single cloud res - 8stages l1 1 l2 1 w air and ocean 9 sensors SC mask beta0 2_84.mat"
@@ -68,9 +70,9 @@ plt.grid()
 plt.tight_layout()
 plt.xticks(fontsize=tick_size)
 plt.yticks(fontsize=tick_size)
-fontsize = 13
-plt.text(1.7, 0.03, "Loeub et al.2020", fontsize=fontsize)
-plt.text(0.38, 0.013, "Ours", fontsize=fontsize)
+# fontsize = 13
+# plt.text(1.7, 0.03, "Loeub et al.2020", fontsize=fontsize)
+# plt.text(0.38, 0.013, "Ours", fontsize=fontsize)
 plt.savefig(join(output_dir,f"{scene}_loss_both.pdf"), bbox_inches='tight')
 plt.show()
 

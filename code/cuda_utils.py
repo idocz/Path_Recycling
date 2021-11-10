@@ -207,6 +207,11 @@ def get_intersection_with_borders(point, direction, bbox, res):
     return t_min
 
 @cuda.jit(device=True)
+def get_distance_to_TOA(point, direction, TOA):
+    dist = (TOA - point[2]) / direction[2]
+    return dist
+
+@cuda.jit(device=True)
 def get_intersection_with_bbox(point, direction, bbox):
     # print_3d(point)
     # print_3d(direction)
@@ -224,13 +229,13 @@ def get_intersection_with_bbox(point, direction, bbox):
     # ray (line) is intersecting AABB, but the whole AABB is behind us or the ray does not intersect
     if tmax < 0 or tmin>tmax:
         # print(tmin > tmax)
-        return False
+        return 0
 
     # tmin += 1e-6
     step_in_direction(point, direction, tmin)
     # if tmin == 0:
     #     print("tmin = 0")
-    return True
+    return tmin
 
 
 @cuda.jit(device=True)

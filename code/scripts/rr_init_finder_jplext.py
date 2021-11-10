@@ -15,7 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(3)
+cuda.select_device(0)
 
 
 ########################
@@ -95,7 +95,7 @@ spp = 100000
 
 # Simulation parameters
 Np_gt = int(5e7)
-Np_max = int(5e6)
+Np_max = int(5e7)
 Np = int(1e6)
 resample_freq = 10
 step_size = 1e10
@@ -191,7 +191,7 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = 35
+beta_init[volume.cloud_mask] = 10
 # beta_init[volume.cloud_mask] = beta_scalar_init
 # beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0
@@ -219,7 +219,7 @@ for iter in range(iterations):
                 if Np > Np_max:
                     Np = Np_max
 
-            if ps < 30:
+            if ps < ps_max:
                 upscaling_counter += 1
                 # photon_scale = (ps / ps_gt) ** 2
                 ps = pss[upscaling_counter]

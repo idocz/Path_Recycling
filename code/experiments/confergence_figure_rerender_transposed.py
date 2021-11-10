@@ -9,7 +9,8 @@ from utils import *
 import pickle
 from classes.camera import Camera
 from tqdm import tqdm
-
+from numba import cuda
+cuda.select_device(2)
 
 def transfrom_image(img, gamma):
     img = (img-img.min())/(img.max()-img.min())
@@ -18,7 +19,8 @@ def transfrom_image(img, gamma):
 exp_name = "2907-1847-02"
 exp_dir = join("checkpoints",exp_name)
 
-scene_name = "smoke"
+# scene_name = "smoke"
+scene_name = "smallcf"
 
 cp = pickle.load(open(join(exp_dir,"data","checkpoint_loader"), "rb" ))
 scene_rr = cp.recreate_scene()
@@ -28,7 +30,8 @@ scene_rr = cp.recreate_scene()
 bbox = scene_rr.volume.grid.bbox
 if scene_name == "smoke":
     ## smoke ##
-    steps = [0,5000,10000,26000] # for smoke
+    # steps = [0,5000,10000,26000] # for smoke
+    steps = [0,5000,26000] # for smoke
     views = [3,7]
     focal_factor = 1.9
     volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.65
@@ -40,6 +43,8 @@ elif scene_name == "cloud1":
     views = [3,7]
     focal_factor = 0.8
     volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.8
+
+
 
 betas_gt = np.load(join(exp_dir,"data","gt.npz"))["betas"]
 betas_list = [np.load(join(exp_dir,"data",f"opt_{step}.npz"))["betas"] for step in steps]
@@ -75,7 +80,7 @@ N = len(cameras)
 M = len(steps) + 1
 image_list = np.empty((N,M), dtype=np.object)
 # Np_gt = cp.Np_gt
-Np_gt = int(8e7)
+Np_gt = int(2e7)
 
 for j in tqdm(range(M)):
     scene_rr.volume.beta_cloud = betas_list[j]

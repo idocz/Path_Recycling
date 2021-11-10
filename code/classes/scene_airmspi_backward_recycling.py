@@ -4,7 +4,7 @@ from numba.cuda.random import create_xoroshiro128p_states
 from cuda_utils import *
 import matplotlib.pyplot as plt
 class SceneAirMSPI(object):
-    def __init__(self, volume: Volume, camera_array_list, sun_direction, sun_intensity, g_cloud, rr_depth, rr_stop_prob):
+    def __init__(self, volume: Volume, camera_array_list, sun_direction, sun_intensity, TOA, background, g_cloud, rr_depth, rr_stop_prob):
         self.rr_depth = rr_depth
         self.rr_stop_prob = rr_stop_prob
         rr_factor = 1.0 / (1.0 - self.rr_stop_prob)
@@ -14,6 +14,8 @@ class SceneAirMSPI(object):
         self.sun_direction /= np.linalg.norm(self.sun_direction)
         self.sun_direction *= -1
         self.sun_intensity = sun_intensity
+        self.TOA = TOA
+        self.background = background
         self.camera_array_list = camera_array_list
         self.g_cloud = g_cloud
         self.total_cam_num = len(camera_array_list)
@@ -42,6 +44,57 @@ class SceneAirMSPI(object):
         self.spp_map = None
         self.dpath_contrib = None
         self.dgrad_contrib = None
+
+        @cuda.jit()
+        def render_background_cuda(job_list, camera_array_list, beta_air, w0_air, bbox,
+                        bbox_size, voxel_size, sun_direction, ocean_albedo, rng_states, I_total):
+            tid = cuda.grid(1)
+            # tid = camera_array.shape[0] * camera_array.shape[1] * s + camera_array.shape[1] * i + j
+            if tid < job_list.shape[0] - 1:
+                cam_ind, i, j = job_list[tid]
+                # local memory
+                current_point = cuda.local.array(3, dtype=float_precis)
+                direction = cuda.local.array(3, dtype=float_precis)
+                new_direction = cuda.local.array(3, dtype=float_precis)
+                assign_3d(current_point, camera_array_list[cam_ind, i, j, :3])
+                assign_3d(direction, camera_array_list[cam_ind, i, j, 3:6])
+                attenuation = 1
+                seg = 0
+                while True:
+                    # Russian Roulette
+                    if seg >= rr_depth:
+                        if sample_uniform(rng_states, tid) <= rr_stop_prob:
+                            break
+                        else:
+                            attenuation *= rr_factor
+
+                    distance_rand = -math.log(1 - sample_uniform(rng_states, tid))/beta_air
+                    next_z = current_point[2] + distance_rand * direction[2]
+                    surface_hit = next_z <= 0
+                    if surface_hit:
+                        distance_rand -= next_z/direction[2]
+                    step_in_direction(current_point, direction, distance_rand)
+
+                    if surface_hit:
+                        cos_theta = sun_direction[2]
+                        le_pdf = (ocean_albedo*cos_theta)/np.pi
+                        sample_hemisphere_cuda(new_direction, rng_states, tid)
+                    else:
+                        if current_point[2] >= TOA:
+                            break
+                        attenuation *= w0_air
+                        # Local estimation to the sun
+                        cos_theta = dot_3d(direction, sun_direction)
+                        le_pdf = rayleigh_pdf(cos_theta)
+                        rayleigh_sample_direction(direction, new_direction, rng_states, tid)
+
+
+                    distance_to_TOA = get_distance_to_TOA(current_point, sun_direction, TOA)
+                    pc = le_pdf * attenuation * math.exp(-distance_to_TOA * beta_air)
+                    cuda.atomic.add(I_total, (cam_ind, i, j), pc)
+                    seg += 1
+                    assign_3d(direction, new_direction)
+
 
         @cuda.jit()
         def calc_scatter_sizes(job_list, camera_array_list, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size,
@@ -135,9 +188,9 @@ class SceneAirMSPI(object):
                 new_direction = cuda.local.array(3, dtype=float_precis)
                 assign_3d(current_point, camera_array_list[cam_ind, i, j, :3])
                 assign_3d(direction, camera_array_list[cam_ind, i, j, 3:6])
-                intersected = get_intersection_with_bbox(current_point, direction, bbox)
+                distance_to_bbox = get_intersection_with_bbox(current_point, direction, bbox)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
-                attenuation = 1.0
+                attenuation = math.exp(-distance_to_bbox*beta_air)
                 IS = 1.0
                 beta_c = 1.0
                 beta = 1.0
@@ -147,7 +200,7 @@ class SceneAirMSPI(object):
                 cloud_prob_scat = 1.0
                 cloud_prob_scat0 = 1.0
                 cos_theta_scatter = 0.0
-                while intersected:
+                while distance_to_bbox:
                     seg_ind = seg + scatter_ind
                     # Russian Roulette
                     if seg >= rr_depth:
@@ -212,11 +265,12 @@ class SceneAirMSPI(object):
                     cos_theta = dot_3d(direction, sun_direction)
                     le_pdf = cloud_prob_scat * HG_pdf(cos_theta, g_cloud) \
                              + (1 - cloud_prob_scat) * rayleigh_pdf(cos_theta)
-
-                    pc = le_pdf * attenuation * IS
+                    distance_to_TOA = get_distance_to_TOA(current_point, sun_direction, TOA)
+                    pc = le_pdf * attenuation * IS * math.exp(-distance_to_TOA * beta_air)
                     get_intersection_with_borders(le_point, sun_direction, bbox, next_point)
                     get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
                     path_size = estimate_voxels_size(dest_voxel, current_voxel)
+
                     ###########################################################################
                     ######################## local estimation save ############################
                     tau = 0
@@ -282,13 +336,13 @@ class SceneAirMSPI(object):
                 new_direction = cuda.local.array(3, dtype=float_precis)
                 assign_3d(current_point, camera_array_list[cam_ind, i, j, :3])
                 assign_3d(direction, camera_array_list[cam_ind, i, j, 3:6])
-                intersected = get_intersection_with_bbox(current_point, direction, bbox)
+                distance_to_bbox = get_intersection_with_bbox(current_point, direction, bbox)
                 get_voxel_of_point(current_point, grid_shape, bbox, bbox_size, current_voxel)
                 beta_c = 1.0
                 beta = 1.0
                 seg = 0
                 cos_theta_scatter = 0.0
-                while intersected:
+                while distance_to_bbox:
                     seg_ind = seg + scatter_ind
                     pc = path_contrib[seg_ind]
                     # Russian Roulette
@@ -579,6 +633,7 @@ class SceneAirMSPI(object):
         self.render_differentiable_cuda = render_differentiable_cuda
         self.space_curving_cuda = space_curving_cuda
         self.compute_std_map_cuda = compute_std_map_cuda
+        self.render_background_cuda = render_background_cuda
 
     def init_cuda_param(self, Np, init=False, seed=None):
         # width, height = self.camera_array_list[cam_ind].shape[:2]
@@ -605,11 +660,13 @@ class SceneAirMSPI(object):
             del(self.dgrad_contrib)
             del(self.dscatter_inds)
             del(self.djob_list)
+            if not init_cuda:
+                self.rng_states = self.drng_states.copy_to_host()
 
         self.dbeta_zero.copy_to_device(self.volume.beta_cloud)
         # self.dbeta_cloud.copy_to_device(self.volume.beta_cloud)
         if cam_inds is None:
-            cam_inds = np.arange(self.N_cams)
+            self.cam_inds = np.arange(self.N_cams)
 
 
         self.cam_inds = cam_inds
@@ -619,7 +676,7 @@ class SceneAirMSPI(object):
         w0_air = self.volume.w0_air
         g_cloud = self.g_cloud
         if self.spp_map is None:
-            spp_map = np.zeros((self.N_cams, *self.pixels_shape), dtype=np.uint32)
+            spp_map = np.zeros((self.total_cam_num, *self.pixels_shape), dtype=np.uint32)
             for cam_ind in self.cam_inds:
                 width, height = self.pixels_shapes[cam_ind]
                 spp_map[cam_ind, :width, :height] = 1
@@ -642,6 +699,7 @@ class SceneAirMSPI(object):
         cond = scatter_sizes != 0
         scatter_sizes = scatter_sizes[cond]
         job_list_mod = self.job_list[cond]
+        self.drng_states = drng_states
         self.rng_states_mod = self.rng_states[:self.Np][cond]
         self.Np_nonan = np.sum(cond)
         scatter_inds = np.concatenate([np.array([0]), scatter_sizes])
@@ -663,7 +721,7 @@ class SceneAirMSPI(object):
         g_cloud = self.g_cloud
 
         blockspergrid, threadsperblock = self.blockspergrid, self.threadsperblock
-        dI_total = cuda.to_device(np.zeros((self.N_cams, *self.pixels_shape), dtype=float_reg))
+        dI_total = cuda.to_device(np.zeros((self.total_cam_num, *self.pixels_shape), dtype=float_reg))
         drng_states = cuda.to_device(self.rng_states_mod)
         self.render_cuda[blockspergrid, threadsperblock](self.djob_list, self.dcamera_array_list, self.dbeta_cloud,
                                                          self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dbbox,
@@ -674,7 +732,9 @@ class SceneAirMSPI(object):
 
         I_total = dI_total.copy_to_host()
         cond = self.spp_map!=0
-        I_total[cond] *= (self.sun_intensity / self.spp_map[cond])
+        I_total[cond] *= (1 / self.spp_map[cond])
+        I_total += self.background
+        I_total *= self.sun_intensity
         if I_gt is None:
             return I_total
 
@@ -744,7 +804,6 @@ class SceneAirMSPI(object):
         grid_mean = np.mean(grid_counter, axis=-1)
         cloud_mask = np.zeros(grid_shape, dtype=bool)
         cloud_mask[grid_mean > hit_threshold] = True
-
         return cloud_mask
 
 
@@ -767,6 +826,32 @@ class SceneAirMSPI(object):
         self.volume.set_mask(cloud_mask)
         self.dcloud_mask.copy_to_device(cloud_mask)
 
+    def render_background(self, Np, ocean_albedo, init_cuda=True):
+        beta_air = self.volume.beta_air
+        w0_cloud = self.volume.w0_cloud
+        w0_air = self.volume.w0_air
+        g_cloud = self.g_cloud
+        spp_map = np.zeros((self.total_cam_num, *self.pixels_shape), dtype=np.uint32)
+        for cam_ind in self.cam_inds:
+            width, height = self.pixels_shapes[cam_ind]
+            spp_map[cam_ind, :width, :height] = 1
+        spp_map = spp_map * int((Np // np.sum(spp_map)))
+        self.create_job_list(spp_map)
+
+        self.init_cuda_param(self.Np, init_cuda)
+        blockspergrid, threadsperblock = self.blockspergrid, self.threadsperblock
+        djob_list = cuda.to_device(self.job_list)
+        drng_states = cuda.to_device(self.rng_states)
+        dI_total = cuda.to_device(np.zeros((self.total_cam_num, *self.pixels_shape), dtype=float_reg))
+        self.render_background_cuda[blockspergrid, threadsperblock](djob_list, self.dcamera_array_list, beta_air,
+                                                                w0_air, self.dbbox,
+                                                                self.dbbox_size, self.dvoxel_size, self.dsun_direction,
+                                                                ocean_albedo, drng_states, dI_total)
+        cuda.synchronize()
+        I_total = dI_total.copy_to_host()
+        cond = self.spp_map != 0
+        I_total[cond] *= (self.sun_intensity / self.spp_map[cond])
+        return I_total
 
     def render_old(self,  Np, cam_ind, spp_map=None,init_cuda=True):
         self.cam_ind = cam_ind

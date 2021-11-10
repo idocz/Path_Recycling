@@ -1,8 +1,8 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from classes.scene_airmspi_backward import *
-# from classes.scene_airmspi_backward_recycling import *
+# from classes.scene_airmspi_backward import *
+from classes.scene_airmspi_backward_recycling import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
@@ -28,9 +28,11 @@ dir_y = -(np.sin(zenith)*np.sin(azimuth))
 dir_z = -np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
 downscale = 4
-
 # sun_intensity = 1e1/7
-sun_intensity = 5e0
+sun_intensity = 0.3
+TOA = 20
+ocean_albedo = 0.01
+background = np.load(join("data",f"background_{str(ocean_albedo).split('.')[-1]}_{downscale}_9.npy"))
 
 #####################
 # grid parameters #
@@ -62,7 +64,12 @@ g_cloud = 0.85
 #######################
 # Cameras declaration #
 #######################
-cam_inds = np.arange(9)
+exclude_index = 7
+cam_inds = np.arange(9).tolist()
+cam_inds.remove(exclude_index)
+cam_inds = np.array(cam_inds)
+print(cam_inds)
+# exit()
 N_cams = len(cam_inds)
 
 resolutions = airmspi_data["resolution"]#[:3]
@@ -76,8 +83,8 @@ camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale,
 # Simulation parameters
 Np_max = int(1e9)
 Np = int(1e7)
-resample_freq = 1
-step_size = 5e2
+resample_freq = 5
+step_size = 1e4
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.1
@@ -89,7 +96,7 @@ beta_max = 100
 win_size = 10
 max_grad_norm = 30
 
-scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, g_cloud, rr_depth, rr_stop_prob)
+scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, TOA, background, g_cloud, rr_depth, rr_stop_prob)
 pad_shape = scene_airmspi.pixels_shape
 
 
@@ -118,12 +125,13 @@ if compute_mask:
     cloud_mask = scene_airmspi.space_curving(I_gt_pad, image_threshold=image_threshold, hit_threshold=hit_threshold,
                                              spp=spp)
     print(cloud_mask.mean())
-I_gt_pad = I_gt_pad[cam_inds]
 # exit()
 
+I_gt_pad[exclude_index, :,:] = 0
+scene_airmspi.background[exclude_index, :, :] = 0
 
 scene_airmspi.set_cloud_mask(cloud_mask)
-beta_init[cloud_mask] = 2
+beta_init[cloud_mask] = 10
 volume.set_beta_cloud(beta_init)
 
 
@@ -196,17 +204,17 @@ for iter in range(iterations):
         end = time()
         print(f"building path list took: {end - start}")
 
-    # differentiable forward model
+    # differentiable forward modelI
     start = time()
     print(f"rendering images")
     I_opt, total_grad = scene_airmspi.render(I_gt_pad, compute_spp_map=compute_spp_map)
     end = time()
     print(f"rendering took: {end-start}")
-    if iter % 10 == 0:
-        visual.plot_images(I_opt, f"iter {iter}")
-        visual.plot_images(scene_airmspi.spp_map, f"spp_map iter{iter}")
-        plt.show()
-    dif = (I_opt - I_gt_pad).reshape(1,1,1, N_cams, *pix_shape)
+    # if iter % 10 == 0:
+    #     visual.plot_images(I_opt, f"iter {iter}")
+    #     visual.plot_images(scene_airmspi.spp_map, f"spp_map iter{iter}")
+    #     plt.show()
+    dif = (I_opt - I_gt_pad).reshape(1,1,1, total_num_cam, *pix_shape)
     grad_norm = np.linalg.norm(total_grad)
     print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, grad_norm:{grad_norm:.2e} step_norm:{grad_norm * step_size}")
     if grad_norm * step_size > max_grad_norm:

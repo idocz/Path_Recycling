@@ -197,7 +197,7 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = 10
+beta_init[volume.cloud_mask] = 20
 # beta_init[volume.cloud_mask] = beta_scalar_init
 # beta_init[volume.cloud_mask] = 2
 # beta_init[volume.cloud_mask] = 0

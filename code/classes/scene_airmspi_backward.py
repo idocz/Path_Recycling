@@ -590,7 +590,7 @@ class SceneAirMSPI(object):
             del(self.djob_list)
 
         if cam_inds is None:
-            cam_inds = np.arange(self.N_cams)
+            cam_inds = np.arange(self.total_cam_num)
         self.cam_inds = cam_inds
         self.N_cams = len(cam_inds)
         self.dbeta_cloud.copy_to_device(self.volume.beta_cloud)
@@ -599,7 +599,7 @@ class SceneAirMSPI(object):
         w0_air = self.volume.w0_air
         g_cloud = self.g_cloud
         if self.spp_map is None:
-            spp_map = np.zeros((self.N_cams, *self.pixels_shape), dtype=np.uint32)
+            spp_map = np.zeros((self.total_cam_num, *self.pixels_shape), dtype=np.uint32)
             for cam_ind in self.cam_inds:
                 width, height = self.pixels_shapes[cam_ind]
                 spp_map[cam_ind, :width, :height] = 1
@@ -643,7 +643,7 @@ class SceneAirMSPI(object):
 
         self.init_cuda_param(self.Np_nonan, False)
         blockspergrid, threadsperblock = self.blockspergrid, self.threadsperblock
-        dI_total = cuda.to_device(np.zeros((self.N_cams, *self.pixels_shape), dtype=float_reg))
+        dI_total = cuda.to_device(np.zeros((self.total_cam_num, *self.pixels_shape), dtype=float_reg))
         drng_states = cuda.to_device(self.rng_states_mod)
         self.render_cuda[blockspergrid, threadsperblock](self.djob_list, self.dcamera_array_list, self.dbeta_cloud, beta_air,
                                                         g_cloud, w0_cloud, w0_air, self.dbbox,
@@ -732,7 +732,7 @@ class SceneAirMSPI(object):
         self.Np = int(np.sum(spp_map))
         job_list = np.zeros((self.Np, 3), dtype=np.uint16)
         counter = 0
-        for cam_ind in range(self.total_cam_num):
+        for cam_ind in range(self.cam_inds):
             for i in range(spp_map.shape[1]):
                 for j in range(spp_map.shape[2]):
                     job_list[counter:counter+spp_map[cam_ind, i,j], 0] = cam_ind
