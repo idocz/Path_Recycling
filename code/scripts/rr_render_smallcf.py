@@ -11,7 +11,7 @@ from time import time
 from utils import *
 from cuda_utils import *
 # gpu = int(input("enter gpu index: "))
-cuda.select_device(0)
+cuda.select_device(1)
 
 
 ###################
@@ -71,7 +71,7 @@ height_factor = 2
 
 focal_length = 50e-3
 sensor_size = np.array((120e-3, 120e-3)) / height_factor
-ps = 86
+ps = 150
 
 pixels = np.array((ps, ps))
 
@@ -90,7 +90,7 @@ R = height_factor * edge_z
 #     cameras.append(camera)
 cam_deg = 360 // (N_cams-1)
 for cam_ind in range(N_cams-1):
-    theta = 33
+    theta = 90
     theta_rad = theta * (np.pi/180)
     phi = (-(N_cams//2) + cam_ind) * cam_deg
     phi_rad = phi * (np.pi/180)
@@ -101,11 +101,11 @@ for cam_ind in range(N_cams-1):
 t = R * theta_phi_to_direction(0,0) + volume_center
 euler_angles = np.array((180, 0, -90))
 cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].sensor_size, cameras[0].pixels))
-
+cameras = [cameras[4]]
 
 # cameras = [cameras[0]]
 # Np = int(5e7)ג
-Np = int(5e7)
+Np = int(5e8)
 # Np = int(1e8)
 Ns = 15
 rr_depth = 20
@@ -117,7 +117,7 @@ scene_hybrid = SceneHybridGpu(volume, cameras, sun_angles, g_cloud, Ns)
 
 scene_rr.set_cloud_mask(volume.cloud_mask)
 scene_hybrid.set_cloud_mask(volume.cloud_mask)
-visual = Visual_wrapper(scene_rr)
+visual = Visual_wrapper(grid)
 
 # visual.create_grid()
 # visual.plot_cameras()
@@ -152,9 +152,9 @@ if run_rr:
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
     visual.plot_images(I_total_rr, f"GPU Rusian Roulette rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
-    cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.1, hit_threshold=0.9, spp=100000)
-    mask_grader(cloud_mask, beta_cloud>0 ,beta_cloud)
-    np.save(join("data","cloud_mask.npy"), cloud_mask)
+    # cloud_mask = scene_rr.space_curving(I_total_rr, image_threshold=0.1, hit_threshold=0.9, spp=100000)
+    # mask_grader(cloud_mask, beta_cloud>0 ,beta_cloud)
+    # np.save(join("data","cloud_mask.npy"), cloud_mask)
     # visual.scatter_plot_comparison(grad_lowmem, grad_lowmem2, "GRAD: lowmem vs lowmem")
     # plt.show()
     # visual.scatter_plot_comparison(I_total_lowmem, I_total_lowmem2, "lowmem vs lowmem")

@@ -89,10 +89,15 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 rr_depth = 10
 rr_stop_prob = 0.05
 
-scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
+# scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 
-visual = Visual_wrapper(scene_rr)
-visual.create_bbox()
-visual.plot_cameras()
+visual = Visual_wrapper(grid)
+visual.create_3d_plot()
+visual.plot_cameras(cameras)
+t_R = cameras[-1].t
+direction = volume_center - t_R
+direction /= np.linalg.norm(direction)
+visual.ax.quiver(*t_R, *direction)
+visual.ax.set_zlim(grid.bbox[2,0], grid.bbox[2,1])
 plt.savefig(join(output_dir, f"camera_setting.pdf"), bbox_inches='tight')
 plt.show()

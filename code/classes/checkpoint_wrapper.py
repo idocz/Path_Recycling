@@ -46,3 +46,40 @@ class CheckpointWrapper(object):
                     f"  \ntensorboard_freq={self.tensorboard_freq}  \nOptimizer:  \n{str(self.optimizer)}  " \
                     f"  \nimage_threshold={self.image_threshold}  \nhit_threshold={self.hit_threshold}  \nspp={self.spp}"
         return str(self.scene_str) + opti_desc
+
+
+
+class CheckpointWrapperAirMSPI(object):
+    def __init__(self, scene, optimizer, Np, Np_max, downscale, rr_depth, rr_stop_prob, resample_freq, step_size,
+                 iterations, start_iter, tensorboard_freq, image_threshold, hit_threshold, spp, max_update,
+                 beta_init_scalar):
+        self.optimizer = optimizer
+        # Scene
+        # self.Ns = Ns
+        self.rr_depth = rr_depth
+        self.rr_stop_prob = rr_stop_prob
+        self.volume = scene.volume
+        self.g_cloud = scene.g_cloud
+        self.scene_str = str(scene)
+        self.downscale = downscale
+        self.Np = Np
+        self.Np_max = Np_max
+        self.beta_init_scalar =beta_init_scalar
+        self.max_update = max_update
+        self.resample_freq = resample_freq
+        self.step_size = step_size
+        self.iterations = iterations
+        self.start_iter = start_iter
+        self.tensorboard_freq = tensorboard_freq
+        self.image_threshold = image_threshold
+        self.hit_threshold = hit_threshold
+        self.spp = spp
+
+
+
+    def __str__(self):
+        opti_desc = f"Simualtion Parameters:  \nNp={self.Np:.2e}  \nNp_max={self.Np_max} \ndownscale={self.downscale} \nbeta_init={self.beta_init_scalar}\n max_update={self.max_update} \nrr_depth={self.rr_depth} \nrr_stop_prob={self.rr_stop_prob}" \
+                    f"  \niterations={self.iterations} \nstart_iter={self.start_iter}  \nnstep_size={self.step_size:.2e}  \nresample_freq={self.resample_freq}" \
+                    f"  \ntensorboard_freq={self.tensorboard_freq}  \nOptimizer:  \n{str(self.optimizer)}  " \
+                    f"  \nimage_threshold={self.image_threshold}  \nhit_threshold={self.hit_threshold}  \nspp={self.spp}"
+        return str(self.scene_str) + opti_desc

@@ -3,6 +3,8 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from os.path import join
 from datetime import datetime
+import matplotlib.pyplot as plt
+from utils import relative_distance, relative_bias
 import pickle
 
 class TensorBoardWrapper(object):
@@ -37,6 +39,7 @@ class TensorBoardWrapper(object):
         if iter % (100) ==0:
             np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt, time=time)#, images=I_opt)
         # I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
+        # I_opt_norm[I_opt_norm<0]=0
         I_opt_norm = transform(np.copy(I_opt), I_opt.min(), I_opt.max())
         for i in range(I_opt.shape[0]):
             self.writer.add_image(f"simulated_images/{i}", I_opt_norm[i][None, :, :],
@@ -56,9 +59,31 @@ class TensorBoardWrapper(object):
             self.writer.add_image(f"ground_truth/{i}", I_gt_norm[i][None, :, :], global_step=self.gt_counter)
         self.gt_counter += 1
 
+    def add_scatter_plot(self, I_gt, I_opt, step):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        X = I_gt.reshape(-1)
+        Y = I_opt.reshape(-1)
+        mask = X != 0
+        X = X[mask]
+        Y = Y[mask]
+        N = 0.1
+        N = int(Y.shape[0] * N)
+        rand_inds = np.random.randint(0, X.shape[0], N)
+        max_val = np.max([X.max(), Y.max()])
+        min_val = np.min([X.min(), Y.min()])
+        rel_err = relative_distance(X, Y)
+        rel_bias = relative_bias(X, Y)
+        ax.scatter(X[rand_inds], Y[rand_inds])
+        # ax.scatter(X, Y)
+        ax.plot([min_val, max_val], [min_val, max_val], color="red")
+        fig.tight_layout()
+        self.writer.add_figure("I_gt vs I_opt", fig, global_step=step, close=True)
+        self.writer.add_scalar("rel_dist_img", rel_err, global_step=step)
+        self.writer.add_scalar("rel_bias_img", rel_bias, global_step=step)
 
 
 def transform(I_opt, min_val, max_val):
-    I_opt_norm = (I_opt - min_val) / (max_val - min_val)
+    I_opt_norm = (I_opt - min_val) / max_val - min_val
     I_opt_norm *= 255
     return I_opt_norm.astype("uint8")

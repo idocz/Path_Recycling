@@ -359,3 +359,13 @@ def plank(llambda=660, T=5800):
 
 def norm_image(img):
     return (img - img.min())/(img.max() - img.min())
+
+
+def imgs2grid(I_total):
+    I1 = [I_total[0], I_total[1], I_total[2]]
+    I2 = [I_total[3], I_total[4], I_total[5]]
+    I3 = [I_total[6], I_total[7], I_total[8]]
+    I1 = np.concatenate(I1, axis=1)
+    I2 = np.concatenate(I2, axis=1)
+    I3 = np.concatenate(I3, axis=1)
+    return np.concatenate([I1,I2,I3], axis=0)

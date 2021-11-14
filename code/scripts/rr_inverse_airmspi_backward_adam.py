@@ -10,12 +10,12 @@ from cuda_utils import *
 import matplotlib.pyplot as plt
 from classes.tensorboard_wrapper import TensorBoardWrapper
 import pickle
-from classes.checkpoint_wrapper import CheckpointWrapper
+from classes.checkpoint_wrapper import CheckpointWrapperAirMSPI
 from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(1)
+cuda.select_device(2)
 
 
 a_file = open(join("data", "airmspi_data_modified.pkl"), "rb")
@@ -29,7 +29,7 @@ dir_y = (np.sin(zenith)*np.sin(azimuth))
 dir_z = np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
 print("sun direction:", sun_direction)
-downscale = 4
+downscale = 2
 # sun_intensity = 1e1/7
 sun_intensity = -1/np.cos(zenith)
 print("sun intensity:",sun_intensity)
@@ -87,21 +87,35 @@ camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale,
 # camera_array_list = [np.ascontiguousarray(camera_array[:, :, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
-Np_max = int(3e8)
-Np = int(1e7)
-resample_freq = 5
-step_size = 4e11
+Np_max = int(7e8)
+Np = int(5e7)
+resample_freq = 10
+step_size = 3e12
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.1
 iterations = 10000000
 to_mask = True
-tensorboard = False
-tensorboard_freq = 10
-beta_max = 35
-update_max = 0.5
-win_size = 10
+beta_max = 20
+win_size = 20
 max_grad_norm = 30
+beta_init_scalar = 7.5
+
+tensorboard = True
+tensorboard_freq = 5
+#optimizer parameters
+alpha = 0.9
+beta1 = 0.9
+beta2 = 0.999
+start_iter = iterations
+scaling_factor = 1.5
+max_update = 1
+
+# loop parameters
+find_initialization = False
+compute_spp = False
+covergence_goal = 5
+convergence_counter = 0
 
 scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, TOA, background, g_cloud, rr_depth, rr_stop_prob)
 pad_shape = scene_airmspi.pixels_shape
@@ -114,21 +128,23 @@ for cam_ind in range(total_num_cam):
     pix_shape = scene_airmspi.pixels_shapes[cam_ind]
     I_gt_pad[cam_ind,:pix_shape[0],:pix_shape[1]] = I_gt[cam_ind][::downscale, ::downscale]
 
+
+image_threshold = np.ones(total_num_cam, dtype=float_reg) * 0.25
+image_threshold[0] = 0.35
+image_threshold[1] = 0.25
+image_threshold[2] = 0.2
+image_threshold[3] = 0.18
+image_threshold[4] = 0.22
+image_threshold[5] = 0.23
+image_threshold[6] = 0.23
+image_threshold[7] = 0.35
+image_threshold[8] = 0.4
+hit_threshold = 0.9
+spp = 1000
 compute_mask = True
 if compute_mask:
     print("Calculating Cloud Mask")
-    image_threshold = np.ones(total_num_cam, dtype=float_reg) * 0.25
-    image_threshold[0] = 0.35
-    image_threshold[1] = 0.25
-    image_threshold[2] = 0.2
-    image_threshold[3] = 0.18
-    image_threshold[4] = 0.22
-    image_threshold[5] = 0.23
-    image_threshold[6] = 0.23
-    image_threshold[7] = 0.35
-    image_threshold[8] = 0.4
-    hit_threshold = 0.9
-    spp = 1000
+
     cloud_mask = scene_airmspi.space_curving(I_gt_pad, image_threshold=image_threshold, hit_threshold=hit_threshold,
                                              spp=spp)
     print(cloud_mask.mean())
@@ -138,7 +154,7 @@ I_gt_pad[exclude_index, :,:] = 0
 
 
 scene_airmspi.set_cloud_mask(cloud_mask)
-beta_init[cloud_mask] = 7
+beta_init[cloud_mask] = beta_init_scalar
 volume.set_beta_cloud(beta_init)
 
 
@@ -149,12 +165,17 @@ visual = Visual_wrapper(grid)
 # visual.plot_images_airmspi(I_gt_pad, resolutions, "GT", downscale)
 plt.show()
 
-scaling_factor = 1.5
 
+optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_max, beta_max, 1)
 
-
+exp_id = "no id"
 if tensorboard:
     tb = TensorBoardWrapper(I_gt_pad, None)
+    cp = CheckpointWrapperAirMSPI(scene_airmspi, optimizer, Np, Np_max, downscale, rr_depth, rr_stop_prob, resample_freq,
+                             step_size, iterations, start_iter, tensorboard_freq, image_threshold, hit_threshold, spp,
+                                  max_update,beta_init_scalar)
+    tb.add_scene_text(str(cp))
+    exp_id = tb.train_id
     print("Tensorboard wrapper was initiated")
 
 
@@ -181,16 +202,17 @@ scene_airmspi.init_cuda_param(Np, init=True)
 pix_shape = scene_airmspi.pixels_shape
 resample = False
 init_cuda = True
-find_initialization = False
-compute_spp = False
+
 for iter in range(iterations):
-    print(f"\niter {iter}")
+    print(f"\niter {iter} ({exp_id})")
     rel_dist = relative_distance(beta_shdom, beta_opt)
     print(f"loss={loss:.3e}, Np={Np:.2e}, rel_dist={rel_dist:.4f}, beta_mean={beta_opt[cloud_mask].mean()}, beta_max={beta_opt.max()}, counter={non_min_couter}")
-
+    if iter == start_iter:
+        print("STARTING ADAM")
+        optimizer.step_size = 1e9
     if iter % resample_freq == 0 or resample:
         resample = False
-        if non_min_couter >= win_size and iter > start_iter:
+        if non_min_couter >= win_size:
             if Np < Np_max :
                 print("\n\n\n INCREASING NP \n\n\n")
                 Np = int(Np * scaling_factor)
@@ -203,6 +225,13 @@ for iter in range(iterations):
                 scene_airmspi.create_job_list(spp_map)
                 init_cuda = True
                 compute_spp = True
+            else:
+                if convergence_counter == covergence_goal:
+                    print("\n\n\n Optimization has converged!! \n\n\n")
+                    break
+                convergence_counter += 1
+                non_min_couter = 0
+                print("\nConvergence counter has increased\n")
 
         print("RESAMPLING PATHS ")
         start = time()
@@ -220,41 +249,43 @@ for iter in range(iterations):
     end = time()
     print(f"rendering took: {end-start}")
     dif = (I_opt - I_gt_pad).reshape(1,1,1, total_num_cam, *pix_shape)
-    grad_norm = np.linalg.norm(total_grad[cloud_mask])
-    grad_mean = np.mean(total_grad[cloud_mask])
-
-    update = -step_size*total_grad
-    cond = np.abs(update)>update_max
-    print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, step_violation:{np.mean(cond[cloud_mask])}, step_mean:{update[cloud_mask].mean():.4f}, step_norm:{np.linalg.norm(update):.4f}, imgs_max:{I_gt_pad.max():.4f},{I_opt.max():.4f}")
-    update[cond] = update_max * np.sign(update[cond])
-    if np.linalg.norm(update) > max_grad_norm:
-        print(f"\n\n\nSTEP SKIPPED DUE TO LARGE GRAD NORM * STEPSIZE (>{max_grad_norm})\n\n\n")
-        resample = True
-        plt.figure()
-        plt.hist(total_grad[cloud_mask]*step_size)
-        plt.title(f"iter:{iter}")
-        plt.show()
-        continue
+    step_norm = np.linalg.norm(total_grad[cloud_mask]) * step_size
+    step_mean = np.mean(total_grad[cloud_mask]) * step_size
+    cond = np.abs(total_grad) > max_update/step_size
+    total_grad[cond] = (max_update/step_size) * np.sign(total_grad[cond])
+    print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, , step_mean:{step_mean:.4f}, step_norm:{step_norm:.4f}, imgs_max:{I_gt_pad.max():.4f},{I_opt.max():.4f}")
+    # if np.linalg.norm(update) > max_grad_norm:
+    #     print(f"\n\n\nSTEP SKIPPED DUE TO LARGE GRAD NORM * STEPSIZE (>{max_grad_norm})\n\n\n")
+    #     resample = True
+    #     plt.figure()
+    #     plt.hist(total_grad[cloud_mask]*step_size)
+    #     plt.title(f"iter:{iter}")
+    #     plt.show()
+    #     continue
 
     # updating beta
     if find_initialization:
         total_grad[cloud_mask] = np.mean(total_grad[cloud_mask])
 
-    beta_opt += update
-    beta_opt[beta_opt >= beta_max] = beta_max
-    beta_opt[beta_opt < 0] = 0
+
     # loss calculation
+    start = time()
+    optimizer.step(total_grad)
+    print("gradient step took:",time()-start)
     loss = 0.5 * np.mean(dif * dif)
+    # loss = 0.5 * np.sum(np.abs(dif))
     if loss < min_loss:
         min_loss = loss
         non_min_couter = 0
+        convergence_counter = 0
     else:
         non_min_couter += 1
+    # print(f"loss = {loss}, grad_norm={grad_norm}, max_grad={np.max(total_grad)}")
 
     # Writing scalar and images to tensorboard
     if tensorboard and iter % tensorboard_freq == 0:
         tb.update(beta_opt, I_opt, loss, None, rel_dist, Np, iter, time()-start_loop)
-
+        tb.add_scatter_plot(I_gt_pad, I_opt, iter)
 
 
 

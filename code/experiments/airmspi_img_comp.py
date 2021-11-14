@@ -6,13 +6,14 @@ from cuda_utils import *
 import pickle
 from classes.optimizer import *
 from os.path import join
-cuda.select_device(2)
+cuda.select_device(0)
 plt.rcParams['font.family'] = 'DeJavu Serif'
 plt.rcParams['font.serif'] = ['Times New Roman']
 
 
-checkpoint_id = "0911-1105-08"
-iter = 1600
+# checkpoint_id = "1211-2016-37"
+checkpoint_id = "1311-1602-58"
+iter = 700
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))
 beta_cloud = dict["betas"]
 a_file = open(join("data", "airmspi_data_modified.pkl"), "rb")
@@ -23,16 +24,16 @@ dir_to_save = join("data","res",f"{checkpoint_id}_{iter}_airmspi.mat")
 savemat(dir_to_save, {"vol": beta_cloud})
 
 
-zenith = airmspi_data["sun_zenith"]
-azimuth = airmspi_data["sun_azimuth"]
-dir_x = -(np.sin(zenith)*np.cos(azimuth))
-dir_y = -(np.sin(zenith)*np.sin(azimuth))
-dir_z = -np.cos(zenith)
+zenith = np.deg2rad(airmspi_data["sun_zenith"])
+azimuth = np.deg2rad(airmspi_data["sun_azimuth"])
+dir_x = np.sin(zenith)*np.cos(azimuth)
+dir_y = np.sin(zenith)*np.sin(azimuth)
+dir_z = np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
 downscale = 1
 
-# sun_intensity = 1e1/7
-sun_intensity = 5e0
+
+sun_intensity = -1/np.cos(zenith)
 TOA = 20
 #####################
 # grid parameters #
@@ -77,7 +78,7 @@ total_num_cam = len(camera_array_list)
 camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
-Np = int(1e9)
+Np = int(5e8)
 resample_freq = 1
 step_size = 5e2
 # Ns = 15
@@ -91,7 +92,7 @@ beta_max = 100
 win_size = 10
 max_grad_norm = 30
 
-scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, TOA, g_cloud, rr_depth, rr_stop_prob)
+scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, TOA, 0, g_cloud, rr_depth, rr_stop_prob)
 pad_shape = scene_airmspi.pixels_shape
 
 I_gt_pad = np.zeros((total_num_cam, *scene_airmspi.pixels_shape), dtype=float_reg)
@@ -124,17 +125,19 @@ plt.savefig(join("experiments","plots",f"{checkpoint_id}_{iter}_images_airmspi.p
 plt.show()
 
 
-N=0.1
+
 gt = I_gt_pad[exclude_index,:ex_pix[0],:ex_pix[1]]
 print(f"relative error = {relative_distance(gt,I_opt)}")
 print(f"relative bias = {relative_bias(gt,I_opt)}")
 
 mask = I_opt !=0
-Y = gt[mask].reshape(-1)
-X = I_opt[mask].reshape(-1)
+X = gt[mask]
+Y = I_opt[mask]
 max_val = np.max([X.max(), Y.max()])
-N = int(Y.shape[0] * N)
-
+# N = int(Y.shape[0] * N)
+N = 1500
+relative_point_num = N/Y.shape[0]
+print("N=",N)
 print()
 rand_inds = np.random.randint(0,X.shape[0],N)
 fig = plt.figure(figsize=(5,5))
@@ -149,7 +152,7 @@ plt.xlabel("Estimated", fontsize=fs)
 # plt.title(f"iter: {iter}")
 plt.xticks([])
 plt.yticks([])
-plt.axes().set_aspect('equal')
+# plt.axes().set_aspect('equal')
 plt.tight_layout()
 plt.savefig(join("experiments","plots",f"{checkpoint_id}_{iter}_airmspi_scatter_plot.pdf"))
 plt.show()
