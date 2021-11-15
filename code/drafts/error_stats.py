@@ -3,17 +3,17 @@ from os.path import join
 import matplotlib.pyplot as plt
 from utils import relative_distance,relative_bias
 from scipy.io import loadmat, savemat
-checkpoint_id = "0108-1031-34"
-iter = 12500
-
-# dir_to_save = join("data","vol3d","betas.mat")
+# checkpoint_id = "0108-1031-34"
+# iter = 12500
+checkpoint_id = "0811-1013-46"
+iter = 6600
+dir_to_save = join("data","res",f"{checkpoint_id}_{iter}.mat")
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))
 betas = dict["betas"]
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"gt.npz"))
 # betas_gt = loadmat(join("data", "rico.mat"))["beta"]
 betas_gt = dict["betas"]
-# betas_gt = loadmat(join("data", "rico2.mat"))["vol"]
-# savemat(dir_to_save, {"vol": dict["betas"]})
+savemat(dir_to_save, {"vol": dict["betas"]})
 
 print(f"relative error = {relative_distance(betas_gt,betas)}")
 print(f"relative bias = {relative_bias(betas_gt,betas)}")

@@ -369,3 +369,9 @@ def imgs2grid(I_total):
     I2 = np.concatenate(I2, axis=1)
     I3 = np.concatenate(I3, axis=1)
     return np.concatenate([I1,I2,I3], axis=0)
+
+def imgs2rows(img1, img2):
+    concat1 = np.concatenate([img for img in img1], axis=1)
+    concat2 = np.concatenate([img for img in img2], axis=1)
+    all = np.concatenate([concat1, concat2], axis=0)
+    return all

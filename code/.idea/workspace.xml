@@ -25,20 +25,19 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="airmspi works with exlusion and background. next goal: sorting">
-      <change afterPath="$PROJECT_DIR$/classes/scene_rr_seed.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox">
+      <change afterPath="$PROJECT_DIR$/scripts/bbox_estimator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/shdom_constant_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/shdom_constant_finder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/camera_setting.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/camera_setting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/airmspi_render_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_render_backward.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/comparison_with_tamar.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/comparison_with_tamar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/error_scatter_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/error_scatter_plot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/airmspi_render_background.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_render_background.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -97,7 +96,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/classes" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/scripts" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
   </component>
@@ -110,8 +109,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts" />
+      <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\experiments" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\scripts" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\classes" />
@@ -120,7 +119,7 @@
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts\deprecated" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.airmspi_background_finder">
+  <component name="RunManager" selected="Python.airmspi_img_comp">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -143,26 +142,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="airmspi_background_finder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/airmspi_background_finder.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="airmspi_img_comp" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="airmspi_img_comp" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -173,6 +153,63 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/airmspi_img_comp.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="airmspi_render_background" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/airmspi_render_background.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="cloud_checkpoint_extractor" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="comparison_with_tamar" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/comparison_with_tamar.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -203,6 +240,44 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="error_scatter_plot" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/error_scatter_plot.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="error_stats" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/error_stats.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="gpu_inverse_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -225,6 +300,25 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="rr_inverse_airmspi_backward" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="rr_inverse_airmspi_backward_adam" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -236,25 +330,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="rr_render_smallcf" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_render_smallcf.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -283,21 +358,25 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.error_scatter_plot" />
+      <item itemvalue="Python.error_stats" />
+      <item itemvalue="Python.cloud_checkpoint_extractor" />
       <item itemvalue="Python.down_up_sample" />
       <item itemvalue="Python.gpu_inverse_script" />
-      <item itemvalue="Python.scene_airmspi_backward_recycling" />
-      <item itemvalue="Python.rr_inverse_airmspi_backward_adam" />
-      <item itemvalue="Python.rr_render_smallcf" />
       <item itemvalue="Python.airmspi_img_comp" />
-      <item itemvalue="Python.airmspi_background_finder" />
+      <item itemvalue="Python.rr_inverse_airmspi_backward_adam" />
+      <item itemvalue="Python.airmspi_render_background" />
+      <item itemvalue="Python.rr_inverse_airmspi_backward" />
+      <item itemvalue="Python.comparison_with_tamar" />
+      <item itemvalue="Python.scene_airmspi_backward_recycling" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.airmspi_background_finder" />
-        <item itemvalue="Python.airmspi_img_comp" />
+        <item itemvalue="Python.comparison_with_tamar" />
         <item itemvalue="Python.rr_inverse_airmspi_backward_adam" />
-        <item itemvalue="Python.rr_render_smallcf" />
         <item itemvalue="Python.scene_airmspi_backward_recycling" />
+        <item itemvalue="Python.rr_inverse_airmspi_backward" />
+        <item itemvalue="Python.airmspi_render_background" />
       </list>
     </recent_temporary>
   </component>
@@ -346,7 +425,7 @@
       <workItem from="1636208800875" duration="1613000" />
       <workItem from="1636271062920" duration="594000" />
       <workItem from="1636306211552" duration="94187000" />
-      <workItem from="1636674481029" duration="53399000" />
+      <workItem from="1636674481029" duration="89390000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -537,7 +616,14 @@
       <option name="project" value="LOCAL" />
       <updated>1636539677840</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox">
+      <created>1636884558645</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1636884558645</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -568,7 +654,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="points changed from float32 to float64" />
     <MESSAGE value="float 32 problem has beed solved with grad mask (no clue why). GPU implementation of part 1 and 2 is working as expected. next goal: dual phase function" />
     <MESSAGE value="GPU work with mask. next goal: fix non mask bug and implement non-active photon removal" />
     <MESSAGE value="non-active has implemented" />
@@ -593,7 +678,8 @@
     <MESSAGE value="one image optimization works on backward airmspi" />
     <MESSAGE value="compute spp_map still problematic." />
     <MESSAGE value="airmspi works with exlusion and background. next goal: sorting" />
-    <option name="LAST_COMMIT_MESSAGE" value="airmspi works with exlusion and background. next goal: sorting" />
+    <MESSAGE value="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox" />
+    <option name="LAST_COMMIT_MESSAGE" value="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -730,7 +816,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py</url>
-          <line>576</line>
+          <line>578</line>
           <option name="timeStamp" value="103" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -755,7 +841,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py</url>
-          <line>569</line>
+          <line>571</line>
           <option name="timeStamp" value="109" />
         </line-breakpoint>
       </breakpoints>

@@ -15,24 +15,24 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(0)
+cuda.select_device(1)
 
 beta_cloud = loadmat(join("data", "FINAL_3D_extinction.mat"))["estimated_extinction"][:,:,:,0]
 a_file = open(join("data", "airmspi_data_modified.pkl"), "rb")
 airmspi_data = pickle.load(a_file)
 
-zenith = airmspi_data["sun_zenith"]
-azimuth = airmspi_data["sun_azimuth"]
-dir_x = -(np.sin(zenith)*np.cos(azimuth))
-dir_y = -(np.sin(zenith)*np.sin(azimuth))
-dir_z = -np.cos(zenith)
+zenith = np.deg2rad(airmspi_data["sun_zenith"])
+azimuth = np.deg2rad(airmspi_data["sun_azimuth"])
+dir_x = np.sin(zenith)*np.cos(azimuth)
+dir_y = np.sin(zenith)*np.sin(azimuth)
+dir_z = np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
-downscale = 4
+downscale = 2
 
-# sun_intensity = 1e1/7
-sun_intensity = 1
+sun_intensity = -1/np.cos(zenith)
 TOA = 20
-#####################
+
+######
 # grid parameters #
 #####################
 # grid = Grid(airmspi_data["bbox"], airmspi_data["grid_shape"])
@@ -83,16 +83,10 @@ Np = int(1 * 10 **(logNp))
 resample_freq = 1
 step_size = 5e2
 # Ns = 15
-rr_depth = 5
-rr_stop_prob = 0.5
-iterations = 10000000
-to_mask = True
-tensorboard = True
-tensorboard_freq = 10
-beta_max = 100
-win_size = 10
-max_grad_norm = 30
-ocean_albedo = 0.01
+rr_depth = 20
+rr_stop_prob = 0.1
+
+ocean_albedo = 0.05
 background = 0
 scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, TOA, background, g_cloud, rr_depth, rr_stop_prob)
 pad_shape = scene_airmspi.pixels_shape

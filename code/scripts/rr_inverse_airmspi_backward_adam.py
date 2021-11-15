@@ -15,13 +15,15 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(2)
+cuda.select_device(0)
 
 
 a_file = open(join("data", "airmspi_data_modified.pkl"), "rb")
 beta_shdom = loadmat(join("data","shdom_exp","FINAL_3D_extinction.mat"))['estimated_extinction'][:,:,:,0]
+
 airmspi_data = pickle.load(a_file)
 
+bbox = airmspi_data["bbox"]
 zenith = np.deg2rad(airmspi_data["sun_zenith"])
 azimuth = np.deg2rad(airmspi_data["sun_azimuth"])
 dir_x = (np.sin(zenith)*np.cos(azimuth))
@@ -29,25 +31,29 @@ dir_y = (np.sin(zenith)*np.sin(azimuth))
 dir_z = np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
 print("sun direction:", sun_direction)
-downscale = 2
+downscale = 1
 # sun_intensity = 1e1/7
 sun_intensity = -1/np.cos(zenith)
 print("sun intensity:",sun_intensity)
 # sun_intensity = 1
 TOA = 20
-ocean_albedo = 0.01
+ocean_albedo = 0.05
 exclude_index = 7
-# background = np.load(join("data",f"background_{str(ocean_albedo).split('.')[-1]}_{downscale}_9.npy"))
+background = np.load(join("data",f"background_{str(ocean_albedo).split('.')[-1]}_{downscale}_9.npy"))
 # background[exlude_index,:,:] = 0
-background = 0
+# background = 0
 #####################
 # grid parameters #
 #####################
 # grid = Grid(airmspi_data["bbox"], airmspi_data["grid_shape"])
-grid = Grid(airmspi_data["bbox"], np.array([50, 50, 50]))
+voxel_size = np.array([0.04,0.04,0.04])
+grid_shape = ((bbox[:,1]-bbox[:,0])//voxel_size).astype(np.uint16)
+grid = Grid(bbox, grid_shape)
+beta_shdom = np.ones(grid.shape, dtype=float_reg)
 # grid = Grid(airmspi_data["bbox"], beta_cloud.shape)
-print(grid.bbox)
-
+print("bbox", grid.bbox)
+print("shape", grid.shape)
+print("voxel_size", grid.voxel_size)
 
 
 
@@ -99,7 +105,7 @@ to_mask = True
 beta_max = 20
 win_size = 20
 max_grad_norm = 30
-beta_init_scalar = 7.5
+beta_init_scalar = 1
 
 tensorboard = True
 tensorboard_freq = 5
@@ -284,7 +290,7 @@ for iter in range(iterations):
 
     # Writing scalar and images to tensorboard
     if tensorboard and iter % tensorboard_freq == 0:
-        tb.update(beta_opt, I_opt, loss, None, rel_dist, Np, iter, time()-start_loop)
+        tb.update(beta_opt, I_opt, loss, None, None, Np, iter, time()-start_loop)
         tb.add_scatter_plot(I_gt_pad, I_opt, iter)
 
 

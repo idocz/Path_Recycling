@@ -696,6 +696,7 @@ class SceneAirMSPI(object):
         # I_mask[I_total/np.mean(I_total) > image_threshold] = True
         for k in range(self.total_cam_num):
             I_mask[k][I_total_norm[k] > image_threshold[k]] = True
+        np.save("I_mask.npy", I_mask)
         plt.figure(figsize=(I_total.shape[0], 2))
         for k in range(self.total_cam_num):
             img_and_mask = np.vstack([I_total[k] / np.max(I_total[k]), I_mask[k]])

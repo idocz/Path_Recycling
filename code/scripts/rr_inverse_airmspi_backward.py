@@ -15,7 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(1)
+cuda.select_device(0)
 
 
 a_file = open(join("data", "airmspi_data_modified.pkl"), "rb")
@@ -29,17 +29,17 @@ dir_y = (np.sin(zenith)*np.sin(azimuth))
 dir_z = np.cos(zenith)
 sun_direction = np.array([dir_x, dir_y, dir_z])
 print("sun direction:", sun_direction)
-downscale = 4
+downscale = 1
 # sun_intensity = 1e1/7
 sun_intensity = -1/np.cos(zenith)
 print("sun intensity:",sun_intensity)
 # sun_intensity = 1
 TOA = 20
-ocean_albedo = 0.01
+ocean_albedo = 0.05
 exclude_index = 7
-# background = np.load(join("data",f"background_{str(ocean_albedo).split('.')[-1]}_{downscale}_9.npy"))
+background = np.load(join("data",f"background_{str(ocean_albedo).split('.')[-1]}_{downscale}_9.npy"))
 # background[exlude_index,:,:] = 0
-background = 0
+# background = 0
 #####################
 # grid parameters #
 #####################
@@ -87,10 +87,10 @@ camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale,
 # camera_array_list = [np.ascontiguousarray(camera_array[:, :, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
-Np_max = int(3e8)
-Np = int(1e7)
+Np_max = int(5e8)
+Np = int(5e7)
 resample_freq = 5
-step_size = 4e11
+step_size = 5e11
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.1
@@ -138,7 +138,7 @@ I_gt_pad[exclude_index, :,:] = 0
 
 
 scene_airmspi.set_cloud_mask(cloud_mask)
-beta_init[cloud_mask] = 7
+beta_init[cloud_mask] = 1
 volume.set_beta_cloud(beta_init)
 
 
@@ -181,7 +181,7 @@ scene_airmspi.init_cuda_param(Np, init=True)
 pix_shape = scene_airmspi.pixels_shape
 resample = False
 init_cuda = True
-find_initialization = False
+find_initialization = True
 compute_spp = False
 for iter in range(iterations):
     print(f"\niter {iter}")
@@ -190,7 +190,7 @@ for iter in range(iterations):
 
     if iter % resample_freq == 0 or resample:
         resample = False
-        if non_min_couter >= win_size and iter > start_iter:
+        if non_min_couter >= win_size :
             if Np < Np_max :
                 print("\n\n\n INCREASING NP \n\n\n")
                 Np = int(Np * scaling_factor)
@@ -226,7 +226,7 @@ for iter in range(iterations):
     update = -step_size*total_grad
     cond = np.abs(update)>update_max
     print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, step_violation:{np.mean(cond[cloud_mask])}, step_mean:{update[cloud_mask].mean():.4f}, step_norm:{np.linalg.norm(update):.4f}, imgs_max:{I_gt_pad.max():.4f},{I_opt.max():.4f}")
-    update[cond] = update_max * np.sign(update[cond])
+    # update[cond] = update_max * np.sign(update[cond])
     if np.linalg.norm(update) > max_grad_norm:
         print(f"\n\n\nSTEP SKIPPED DUE TO LARGE GRAD NORM * STEPSIZE (>{max_grad_norm})\n\n\n")
         resample = True
