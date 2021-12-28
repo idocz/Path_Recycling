@@ -15,8 +15,8 @@ plt.rcParams['font.serif'] = ['Times New Roman']
 # checkpoint_id = "1311-1602-58"
 # checkpoint_id = "1411-1314-38"
 # checkpoint_id = "1411-1654-05"
-checkpoint_id = "1411-1807-40"
-# checkpoint_id = "1511-1750-31"
+# checkpoint_id = "1411-1807-40"
+checkpoint_id = "1511-1750-31"
 iter = 700
 # checkpoint_id = "1411-1335-03"
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))
@@ -45,7 +45,7 @@ TOA = 20
 # grid parameters #
 #####################
 # grid = Grid(airmspi_data["bbox"], airmspi_data["grid_shape"])
-grid = Grid(airmspi_data["bbox"], np.array([50, 50, 50]))
+grid = Grid(airmspi_data["bbox"],beta_cloud.shape)
 # grid = Grid(airmspi_data["bbox"], beta_cloud.shape)
 print(grid.bbox)
 
@@ -94,8 +94,10 @@ for cam_ind in range(total_num_cam):
     pix_shape = scene_airmspi.pixels_shapes[cam_ind]
     I_gt_pad[cam_ind, :pix_shape[0], :pix_shape[1]] = I_gt[cam_ind][::downscale, ::downscale]
 
+N_repeat = 10
+scene_airmspi.init_cuda_param(Np, init=True)
 for cam_ind in tqdm(np.arange(N_cams)):
-# for cam_ind in tqdm([exclude_index]):
+    # for cam_ind in tqdm([exclude_index]):
     cam_inds = np.array([cam_ind])
     spp_map = np.copy(I_gt_pad)
     for cam_ind2 in range(total_num_cam):
@@ -104,12 +106,13 @@ for cam_ind in tqdm(np.arange(N_cams)):
     spp_map = (Np * spp_map / np.sum(spp_map)).astype(np.uint32)
 
     scene_airmspi.create_job_list(spp_map)
-    scene_airmspi.init_cuda_param(Np, init=True)
-    scene_airmspi.build_path_list(Np, cam_inds, False)
-    ex_pix = scene_airmspi.pixels_shapes[cam_ind]
-    I_opt = scene_airmspi.render()
+    I_opt = np.zeros_like(I_gt_pad)
+    for _ in range(N_repeat):
+        scene_airmspi.build_path_list(Np, cam_inds, False)
+        ex_pix = scene_airmspi.pixels_shapes[cam_ind]
+        I_opt += scene_airmspi.render()
     # I_concat = np.concatenate([I_opt, I_gt_pad[exclude_index,:ex_pix[0],:ex_pix[1]]], axis=1)
-
+    I_opt /= N_repeat
     I_opt_norm = I_opt[cam_ind,:ex_pix[0], :ex_pix[1]]
     I_gt_norm = I_gt_pad[cam_ind,:ex_pix[0],:ex_pix[1]]
     min_val = np.min([np.min(I_opt_norm), np.min(I_gt_norm)])

@@ -108,7 +108,7 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 # Np = int(5e7)
 Np = int(5e7)
 Ns = 15
-rr_depth = 20
+rr_depth = 10
 rr_stop_prob = 0.05
 
 volume.set_mask(beta_cloud>0)

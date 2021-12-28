@@ -15,7 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(3)
+cuda.select_device(0)
 
 
 ########################

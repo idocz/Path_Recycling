@@ -2,8 +2,8 @@ import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 # from classes.scene_airmspi_backward import *
-# from classes.scene_airmspi_backward_recycling import *
-from classes.scene_airmspi_backward_norecycling import *
+from classes.scene_airmspi_backward_recycling import *
+# from classes.scene_airmspi_backward_norecycling import *
 from classes.camera import *
 from classes.visual import *
 from utils import *
@@ -16,7 +16,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(0)
+cuda.select_device(2)
 
 
 a_file = open(join("data", "airmspi_data_modified.pkl"), "rb")
@@ -56,7 +56,8 @@ print("bbox", grid.bbox)
 print("shape", grid.shape)
 print("voxel_size", grid.voxel_size)
 
-exit()
+
+
 #####################
 # Volume parameters #
 #####################
@@ -93,28 +94,28 @@ camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale,
 # camera_array_list = [np.ascontiguousarray(camera_array[:, :, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
-Np_max = int(5e8)
-Np = Np_max
-resample_freq = 10
-step_size = (3e12) * 5
+Np_max = int(7e8)
+Np = int(5e7)
+resample_freq = 1
+step_size = (3e12)*5
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.1
 iterations = 10000000
 to_mask = True
 beta_max = 20
-win_size = 5
+win_size = 20
 max_grad_norm = 30
 beta_init_scalar = 1
 
 tensorboard = True
-tensorboard_freq = 1
+tensorboard_freq = 5
 #optimizer parameters
 alpha = 0.9
 beta1 = 0.9
 beta2 = 0.999
 start_iter = iterations
-scaling_factor = 15
+scaling_factor = 1.5
 max_update = 1
 
 # loop parameters
@@ -133,6 +134,7 @@ I_gt_pad = np.zeros((total_num_cam, *scene_airmspi.pixels_shape), dtype=float_re
 for cam_ind in range(total_num_cam):
     pix_shape = scene_airmspi.pixels_shapes[cam_ind]
     I_gt_pad[cam_ind,:pix_shape[0],:pix_shape[1]] = I_gt[cam_ind][::downscale, ::downscale]
+
 
 image_threshold = np.ones(total_num_cam, dtype=float_reg) * 0.25
 image_threshold[0] = 0.35
@@ -241,7 +243,8 @@ for iter in range(iterations):
         print("RESAMPLING PATHS ")
         start = time()
         compute_spp = (Np > 7e7 and iter % spp_map_freq == 0) and False
-        scene_airmspi.build_path_list(Np, cam_inds, init_cuda, sort=resample_freq!=1, compute_spp_map=compute_spp)
+        scene_airmspi.build_path_list(Np, cam_inds, init_cuda, sort=True, compute_spp_map=compute_spp)
+        I_opt, total_grad = scene_airmspi.render(I_gt_pad)
         compute_spp = False
         init_cuda = False
         end = time()
@@ -250,14 +253,14 @@ for iter in range(iterations):
     # differentiable forward modelI
     start = time()
     print(f"rendering images")
-    I_opt, total_grad = scene_airmspi.render(I_gt_pad)
+
     end = time()
     print(f"rendering took: {end-start}")
     dif = (I_opt - I_gt_pad).reshape(1,1,1, total_num_cam, *pix_shape)
     step_norm = np.linalg.norm(total_grad[cloud_mask]) * step_size
     step_mean = np.mean(total_grad[cloud_mask]) * step_size
     cond = np.abs(total_grad) > max_update/step_size
-    # total_grad[cond] = (max_update/step_size) * np.sign(total_grad[cond])
+    total_grad[cond] = (max_update/step_size) * np.sign(total_grad[cond])
     print(f"I_gt_mean:{I_gt_pad[I_gt_pad!=0].mean()}, I_opt_mean:{I_opt[I_opt!=0].mean()}, , step_mean:{step_mean:.4f}, step_norm:{step_norm:.4f}, imgs_max:{I_gt_pad.max():.4f},{I_opt.max():.4f}")
     # if np.linalg.norm(update) > max_grad_norm:
     #     print(f"\n\n\nSTEP SKIPPED DUE TO LARGE GRAD NORM * STEPSIZE (>{max_grad_norm})\n\n\n")

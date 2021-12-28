@@ -4,10 +4,9 @@ from numba.cuda.random import create_xoroshiro128p_states, init_xoroshiro128p_st
 from cuda_utils import *
 import matplotlib.pyplot as plt
 from utils import imgs2grid
-
+from time import time
 beta_air_TOA = 0.00070777
 # beta_air_TOA = 0
-from time import  time
 class SceneAirMSPI(object):
     def __init__(self, volume: Volume, camera_array_list, sun_direction, sun_intensity, TOA, background, g_cloud, rr_depth, rr_stop_prob):
         self.rr_depth = rr_depth
@@ -296,7 +295,7 @@ class SceneAirMSPI(object):
                     le_pdf = cloud_prob_scat * HG_pdf(cos_theta, g_cloud) \
                              + (1 - cloud_prob_scat) * rayleigh_pdf(cos_theta)
 
-                    pc = le_pdf * attenuation * IS
+                    pc = le_pdf * attenuation
                     get_intersection_with_borders(le_point, sun_direction, bbox, next_point)
                     get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
                     path_size = estimate_voxels_size(dest_voxel, current_voxel)

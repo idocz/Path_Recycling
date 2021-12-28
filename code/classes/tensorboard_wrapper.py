@@ -36,7 +36,7 @@ class TensorBoardWrapper(object):
 
     def update(self, beta_opt, I_opt, loss, max_dist, rel_dist1, Np, iter, time):
         time = np.array(time)
-        if iter % (100) ==0:
+        if iter % (10) ==0:
             np.savez(join("checkpoints", self.train_id, "data", f"opt_{iter}"), betas=beta_opt, time=time)#, images=I_opt)
         # I_opt_norm = transform(np.copy(I_opt), self.min_val, self.max_val)
         # I_opt_norm[I_opt_norm<0]=0

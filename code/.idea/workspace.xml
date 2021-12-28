@@ -25,20 +25,31 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox">
-      <change afterPath="$PROJECT_DIR$/scripts/bbox_estimator.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="AirMSPI works!! another bottle of wine tonight :)">
+      <change afterPath="$PROJECT_DIR$/classes/arg_wrapper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes/scene_airmspi_backward_norecycling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes/scene_rr_norecyling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drafts/argparse_draft.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/abblation_study.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/abblation_study_loss.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/abblation_study_loss_SUP.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/abblation_study_rel_dist.npz.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/abblation_study_rel_dist_SUP.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/shdom_loss_comp.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/noise_test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam_norecycling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_roi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/comparison_with_tamar.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/comparison_with_tamar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/error_scatter_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/error_scatter_plot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/airmspi_render_background.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_render_background.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_render_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_jplext.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,8 +121,8 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts" />
-      <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\experiments" />
+      <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\scripts" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\classes" />
     </key>
@@ -119,7 +130,7 @@
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts\deprecated" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.airmspi_img_comp">
+  <component name="RunManager" selected="Python.rr_inverse_jplext_roi">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -142,10 +153,57 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="abblation_study_loss_SUP" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/abblation_study_loss_SUP.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="abblation_study_rel_dist.npz" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/abblation_study_rel_dist.npz.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="airmspi_img_comp" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -161,29 +219,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="airmspi_render_background" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/airmspi_render_background.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="cloud_checkpoint_extractor" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -203,6 +245,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -244,6 +289,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -263,6 +311,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -300,7 +351,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rr_inverse_airmspi_backward" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="noise_test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/noise_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="rr_inverse_jplext_roi" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -310,7 +383,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_jplext_roi.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -319,7 +392,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rr_inverse_airmspi_backward_adam" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="rr_inverse_smoke_sunabove" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -329,7 +402,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -338,17 +411,17 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="scene_airmspi_backward_recycling" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="rr_render_jplext" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/classes" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_render_jplext.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -358,25 +431,27 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.abblation_study_rel_dist.npz" />
+      <item itemvalue="Python.noise_test" />
       <item itemvalue="Python.error_scatter_plot" />
       <item itemvalue="Python.error_stats" />
       <item itemvalue="Python.cloud_checkpoint_extractor" />
       <item itemvalue="Python.down_up_sample" />
       <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.airmspi_img_comp" />
-      <item itemvalue="Python.rr_inverse_airmspi_backward_adam" />
-      <item itemvalue="Python.airmspi_render_background" />
-      <item itemvalue="Python.rr_inverse_airmspi_backward" />
+      <item itemvalue="Python.abblation_study_loss_SUP" />
       <item itemvalue="Python.comparison_with_tamar" />
-      <item itemvalue="Python.scene_airmspi_backward_recycling" />
+      <item itemvalue="Python.rr_render_jplext" />
+      <item itemvalue="Python.rr_inverse_jplext_roi" />
+      <item itemvalue="Python.rr_inverse_smoke_sunabove" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.rr_inverse_jplext_roi" />
+        <item itemvalue="Python.rr_inverse_smoke_sunabove" />
+        <item itemvalue="Python.rr_render_jplext" />
         <item itemvalue="Python.comparison_with_tamar" />
-        <item itemvalue="Python.rr_inverse_airmspi_backward_adam" />
-        <item itemvalue="Python.scene_airmspi_backward_recycling" />
-        <item itemvalue="Python.rr_inverse_airmspi_backward" />
-        <item itemvalue="Python.airmspi_render_background" />
+        <item itemvalue="Python.abblation_study_loss_SUP" />
       </list>
     </recent_temporary>
   </component>
@@ -425,7 +500,11 @@
       <workItem from="1636208800875" duration="1613000" />
       <workItem from="1636271062920" duration="594000" />
       <workItem from="1636306211552" duration="94187000" />
-      <workItem from="1636674481029" duration="89390000" />
+      <workItem from="1636674481029" duration="113341000" />
+      <workItem from="1637090482437" duration="44806000" />
+      <workItem from="1638784058823" duration="60699000" />
+      <workItem from="1639749419060" duration="2402000" />
+      <workItem from="1640693406078" duration="6184000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -623,7 +702,14 @@
       <option name="project" value="LOCAL" />
       <updated>1636884558645</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="AirMSPI works!!">
+      <created>1637011913845</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1637011913845</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -654,7 +740,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="float 32 problem has beed solved with grad mask (no clue why). GPU implementation of part 1 and 2 is working as expected. next goal: dual phase function" />
     <MESSAGE value="GPU work with mask. next goal: fix non mask bug and implement non-active photon removal" />
     <MESSAGE value="non-active has implemented" />
     <MESSAGE value="commit before eff_scatter branch" />
@@ -679,7 +764,8 @@
     <MESSAGE value="compute spp_map still problematic." />
     <MESSAGE value="airmspi works with exlusion and background. next goal: sorting" />
     <MESSAGE value="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox" />
-    <option name="LAST_COMMIT_MESSAGE" value="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox" />
+    <MESSAGE value="AirMSPI works!!" />
+    <option name="LAST_COMMIT_MESSAGE" value="AirMSPI works!!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -816,7 +902,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py</url>
-          <line>578</line>
+          <line>579</line>
           <option name="timeStamp" value="103" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -841,8 +927,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py</url>
-          <line>571</line>
+          <line>572</line>
           <option name="timeStamp" value="109" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py</url>
+          <line>26</line>
+          <option name="timeStamp" value="110" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -862,6 +953,7 @@
     <SUITE FILE_PATH="coverage/code$lowmem_inverse_smoke.coverage" NAME="lowmem_inverse_smoke Coverage Results" MODIFIED="1619624281724" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$camera_setting.coverage" NAME="camera_setting Coverage Results" MODIFIED="1630416715782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$estimating_cam_mat_airmspi.coverage" NAME="estimating_cam_mat_airmspi Coverage Results" MODIFIED="1634807541895" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$abblation_study_rel_dist_npz.coverage" NAME="abblation_study_rel_dist.npz Coverage Results" MODIFIED="1637240841666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$rr_inverse_cloud1.coverage" NAME="rr_inverse_cloud1 Coverage Results" MODIFIED="1627660733288" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$rel_dist_loss_plot.coverage" NAME="rel_dist_loss_plot Coverage Results" MODIFIED="1627554144131" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$HG_draft.coverage" NAME="HG_draft Coverage Results" MODIFIED="1613408424016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
@@ -873,6 +965,7 @@
     <SUITE FILE_PATH="coverage/code$space_curving_draft.coverage" NAME="space_curving_draft Coverage Results" MODIFIED="1610613269911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$inverse_lbfgs.coverage" NAME="inverse_lbfgs Coverage Results" MODIFIED="1610613143737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$rr_inverse_airmspi.coverage" NAME="rr_inverse_airmspi Coverage Results" MODIFIED="1635353500852" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$abblation_study.coverage" NAME="abblation_study Coverage Results" MODIFIED="1637182291145" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$airmspi_background_finder.coverage" NAME="airmspi_background_finder Coverage Results" MODIFIED="1636879965253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$rayleigh_draft.coverage" NAME="rayleigh_draft Coverage Results" MODIFIED="1611261898589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/drafts" />
     <SUITE FILE_PATH="coverage/code$ddis_std_script.coverage" NAME="ddis_std_script Coverage Results" MODIFIED="1615102211432" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
@@ -881,7 +974,7 @@
     <SUITE FILE_PATH="coverage/code$airmspi_render_backward.coverage" NAME="airmspi_render_backward Coverage Results" MODIFIED="1635782835916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$shdom_constant_finder.coverage" NAME="shdom_constant_finder Coverage Results" MODIFIED="1636551229543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$airMSPI_data_draft.coverage" NAME="airMSPI_data_draft Coverage Results" MODIFIED="1634735942505" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
-    <SUITE FILE_PATH="coverage/code$rr_inverse_airmspi_backward_adam.coverage" NAME="rr_inverse_airmspi_backward_adam Coverage Results" MODIFIED="1636714777778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$rr_inverse_airmspi_backward_adam.coverage" NAME="rr_inverse_airmspi_backward_adam Coverage Results" MODIFIED="1637249355853" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$rr_render_cloud1.coverage" NAME="rr_render_cloud1 Coverage Results" MODIFIED="1627999787446" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$lowmem_inverse_smoke_upscaling.coverage" NAME="lowmem_inverse_smoke_upscaling Coverage Results" MODIFIED="1620204091836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
   </component>
