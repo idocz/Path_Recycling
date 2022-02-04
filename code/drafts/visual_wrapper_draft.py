@@ -1,5 +1,5 @@
 from classes.visual import *
-from classes.camera import *
+from camera import *
 
 bbox = np.array([[0,1],
                  [0,1],

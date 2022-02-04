@@ -1,8 +1,8 @@
 from classes.deprecated.scene_sparse import *
 from classes.deprecated.scene_numba import *
-from classes.camera import *
+from camera import *
 from classes.visual import *
-from classes.phase_function import HGPhaseFunction
+from deprecated.phase_function import HGPhaseFunction
 from time import time
 import matplotlib.pyplot as plt
 

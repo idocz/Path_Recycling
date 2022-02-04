@@ -1,6 +1,3 @@
-from utils import *
-from classes.scene_gpu import SceneGPU
-from classes.scene_lowmem_gpu import SceneLowMemGPU
 from classes.scene_rr import SceneRR
 
 class CheckpointWrapper(object):

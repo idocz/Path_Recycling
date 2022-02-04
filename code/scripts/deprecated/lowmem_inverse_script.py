@@ -1,9 +1,8 @@
 import os, sys
 my_lib_path = os.path.abspath('../')
 sys.path.append(my_lib_path)
-from classes.scene import *
-from classes.scene_lowmem_gpu import *
-from classes.camera import *
+from deprecated.scene_lowmem_gpu import *
+from camera import *
 from classes.visual import *
 from utils import *
 from cuda_utils import *
@@ -13,7 +12,7 @@ import pickle
 from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
 from classes.optimizer import *
-from scipy.ndimage import zoom
+
 cuda.select_device(0)
 
 

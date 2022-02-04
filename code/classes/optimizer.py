@@ -31,8 +31,13 @@ class MomentumSGD(object):
         self.volume.beta_cloud[self.volume.beta_cloud<0] = 0
         self.volume.beta_cloud[self.volume.beta_cloud>self.beta_max] = self.beta_mean
 
+    def reset(self):
+        self.delta *= 0
+
     def __repr__(self):
         return f"MSGD: alpha={self.alpha:10.0e}"
+
+
 
 
 class AdaGrad(object):

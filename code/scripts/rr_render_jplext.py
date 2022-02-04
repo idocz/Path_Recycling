@@ -3,8 +3,8 @@ import sys
 from os.path import join
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
-from classes.scene_rr import *
-from classes.scene_hybrid_gpu import *
+from classes.scene_rr_noNEgrad import SceneRR_noNE
+from classes.deprecated.scene_hybrid_gpu import *
 from classes.camera import *
 from classes.visual import *
 from time import time
@@ -112,7 +112,7 @@ rr_depth = 10
 rr_stop_prob = 0.05
 
 volume.set_mask(beta_cloud>0)
-scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
+scene_rr = SceneRR_noNE(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 scene_hybrid = SceneHybridGpu(volume, cameras, sun_angles, g_cloud, Ns)
 
 scene_rr.set_cloud_mask(volume.cloud_mask)
@@ -138,15 +138,16 @@ if run_rr:
     _, _ = scene_rr.render(cuda_paths, 0)
     print("finished compliations")
     del(cuda_paths)
-    print("generating paths")
-    start = time()
-    cuda_paths = scene_rr.build_paths_list(Np, to_print=True)
-    end = time()
-    print(f"building paths took: {end - start}")
-    volume.set_beta_cloud(beta_cloud)
-    start = time()
-    I_total_rr, grad_rr = scene_rr.render(cuda_paths, 0, to_print=True)
-    print(f" rendering took: {time() - start}")
+    for i in range(100):
+        print("generating paths")
+        start = time()
+        cuda_paths = scene_rr.build_paths_list(Np, to_print=True)
+        end = time()
+        print(f"building paths took: {end - start}")
+        volume.set_beta_cloud(beta_cloud)
+        start = time()
+        I_total_rr, grad_rr = scene_rr.render(cuda_paths, 0, to_print=True)
+        print(f" rendering took: {time() - start}")
     # del(cuda_paths)
     # cuda_paths = scene_hybrid.build_paths_list(Np, Ns)
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
@@ -168,6 +169,7 @@ if run_hybrid:
     del (cuda_paths)
     I_totals = []
     grads = []
+    I_diff = None
     for i in range(2):
         print("generating paths")
         start = time()

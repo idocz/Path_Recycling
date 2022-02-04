@@ -5,9 +5,7 @@ sys.path.append(my_lib_path)
 import pickle
 from utils import *
 import matplotlib.pyplot as plt
-from classes.tensorboard_wrapper import TensorBoardWrapper
-from numba import cuda
-from classes.path import *
+from deprecated.path import *
 import math
 from classes.visual import Visual_wrapper
 from time import time

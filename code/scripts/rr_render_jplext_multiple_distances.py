@@ -4,8 +4,8 @@ from os.path import join
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
 from classes.scene_rr import *
-from classes.scene_hybrid_gpu import *
-from classes.camera import *
+from deprecated.scene_hybrid_gpu import *
+from camera import *
 from classes.visual import *
 from time import time
 from utils import *

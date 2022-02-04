@@ -1,8 +1,8 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from classes.scene_lowmem_gpu import *
-from classes.camera import *
+from deprecated.scene_lowmem_gpu import *
+from camera import *
 from classes.visual import *
 from utils import *
 from cuda_utils import *

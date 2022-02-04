@@ -1,5 +1,5 @@
 from classes.volume import *
-from classes.path import CudaPaths
+from deprecated.path import CudaPaths
 from utils import  theta_phi_to_direction
 from tqdm import tqdm
 import math

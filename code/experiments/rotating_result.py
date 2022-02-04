@@ -1,11 +1,9 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from utils import get_images_from_TB, animate
 from os.path import join
-from classes.scene_hybrid_gpu import *
-from classes.camera import *
-from classes.visual import *
+from deprecated.scene_hybrid_gpu import *
+from camera import *
 from utils import *
 from cuda_utils import *
 from classes.optimizer import *

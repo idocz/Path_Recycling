@@ -1,13 +1,10 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from utils import get_images_from_TB, animate
 from os.path import join
-import numpy as np
-import matplotlib.pyplot as plt
 from utils import *
 import pickle
-from classes.camera import Camera
+from camera import Camera
 from tqdm import tqdm
 import matplotlib.transforms as mtrans
 

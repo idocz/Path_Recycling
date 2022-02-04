@@ -1,6 +1,5 @@
-from classes.grid import *
 from classes.volume import *
-from classes.path import Path
+from deprecated.path import Path
 from utils import  theta_phi_to_direction
 from tqdm import tqdm
 import math

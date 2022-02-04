@@ -2,12 +2,10 @@
 import sys
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
-from classes.scene_lowmem_gpu import *
-from classes.scene_ddis import *
-from classes.camera import *
+from deprecated.scene_lowmem_gpu import *
+from camera import *
 from classes.visual import *
 from time import time
-from classes.phase_function import *
 from utils import *
 from cuda_utils import *
 cuda.select_device(0)

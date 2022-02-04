@@ -1,19 +1,17 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from classes.scene_airmspi import *
-from classes.camera import *
+from deprecated.scene_airmspi import *
+from camera import *
 from classes.visual import *
-from utils import *
 from cuda_utils import *
 import matplotlib.pyplot as plt
 from classes.tensorboard_wrapper import TensorBoardWrapper
 import pickle
-from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
 from classes.optimizer import *
 from os.path import join
-from tqdm import tqdm
+
 cuda.select_device(0)
 
 

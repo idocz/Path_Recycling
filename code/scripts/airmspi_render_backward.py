@@ -2,9 +2,6 @@ import sys
 from os.path import join
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 from classes.scene_airmspi_backward_recycling import *
-from classes.camera import AirMSPICamera
-from classes.visual import *
-from time import time
 from utils import *
 from cuda_utils import *
 import pickle

@@ -12,8 +12,10 @@ if scene == "smallcf":
     tamar_exp = "small coud field res - 6 stages l1 1 l 1 w air and ocean 9 sensors SC mask beta0 2 iter.mat"
     # checkpoint_id = "0808-1822-43"
     # iter = 21800
-    checkpoint_id = "0711-2025-59"
-    iter = 17840
+    # checkpoint_id = "0711-2025-59"
+    # iter = 17840
+    checkpoint_id = "2901-1933-52_smallcf_Nr=10_ss=2.50e+10"
+    iter = 2670
     # iter = 1000
 
 elif scene == "jplext":
@@ -77,7 +79,7 @@ if scene == "jplext":
 # fontsize = 13
 # plt.text(1.7, 0.03, "Loeub et al.2020", fontsize=fontsize)
 # plt.text(0.38, 0.013, "Ours", fontsize=fontsize)
-plt.savefig(join(output_dir,f"{scene}_loss_both_{scene}.pdf"), bbox_inches='tight')
+# plt.savefig(join(output_dir,f"{scene}_loss_both_{scene}.pdf"), bbox_inches='tight')
 plt.show()
 
 print(np.max(ts_rec))

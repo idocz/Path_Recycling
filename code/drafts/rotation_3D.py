@@ -1,7 +1,6 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from utils import *
-from classes.phase_function import HGPhaseFunction, UniformPhaseFunction
+from deprecated.phase_function import HGPhaseFunction
+
 
 def rot_mat(direction, theta, phi):
     sin_t = np.sin(theta)

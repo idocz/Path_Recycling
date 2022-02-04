@@ -1,9 +1,9 @@
 from classes.deprecated.scene_sparse import *
-from classes.camera import *
+from camera import *
 from classes.visual import *
 from time import time
 import matplotlib.pyplot as plt
-from classes.phase_function import *
+from deprecated.phase_function import *
 def main():
     ###################
     # Grid parameters #

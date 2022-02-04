@@ -3,18 +3,16 @@ my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 # from classes.scene_airmspi_backward import *
 from classes.scene_airmspi_backward_recycling import *
-from classes.camera import *
 from classes.visual import *
 from utils import *
 from cuda_utils import *
 import matplotlib.pyplot as plt
 from classes.tensorboard_wrapper import TensorBoardWrapper
 import pickle
-from classes.checkpoint_wrapper import CheckpointWrapper
 from time import time
 from classes.optimizer import *
 from os.path import join
-from tqdm import tqdm
+
 cuda.select_device(0)
 
 
@@ -101,7 +99,7 @@ tensorboard_freq = 10
 beta_max = 35
 update_max = 0.5
 win_size = 10
-max_grad_norm = 30
+max_grad_norm = np.inf
 
 scene_airmspi = SceneAirMSPI(volume, camera_array_list, sun_direction, sun_intensity, TOA, background, g_cloud, rr_depth, rr_stop_prob)
 pad_shape = scene_airmspi.pixels_shape

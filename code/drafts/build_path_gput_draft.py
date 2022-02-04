@@ -1,6 +1,4 @@
 from numba import cuda
-import numpy as np
-import math
 from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32
 #### SCENE FUNCTIONS ####
 
@@ -488,10 +486,10 @@ my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
 import pickle
 from utils import *
-from classes.path import *
+from deprecated.path import *
 import math
 from time import time
-from classes.camera import *
+from camera import *
 checkpoint_id = "2212-1250-03"
 beta_gt = loadmat(join("data", "rico.mat"))["beta"]
 cp = pickle.load(open(join("checkpoints",checkpoint_id,"data",f"checkpoint_loader"), "rb" ))

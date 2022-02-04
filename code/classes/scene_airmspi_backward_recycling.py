@@ -554,22 +554,14 @@ class SceneAirMSPI(object):
         self.render_background_cuda = render_background_cuda
 
     def init_cuda_param(self, Np, init=False, seed=None):
-        # width, height = self.camera_array_list[cam_ind].shape[:2]
-        # grid_shape = (width, height, spp)
-        # Np = int(np.prod(grid_shape))
-        # print(f"Np = {Np:.2e}")
+
         self.threadsperblock = 256
         self.blockspergrid = (Np + (self.threadsperblock - 1)) // self.threadsperblock
-        # blockspergrid_x = (width + self.threadsperblock[0] - 1) // self.threadsperblock[0]
-        # blockspergrid_y = (height + self.threadsperblock[1] - 1) // self.threadsperblock[1]
-        # blockspergrid_z = (spp + self.threadsperblock[2] - 1) // self.threadsperblock[2]
-        # self.blockspergrid = (blockspergrid_x, blockspergrid_y, blockspergrid_z)
         if init:
             if seed is None:
                 self.seed = np.random.randint(1, int(1e9))
             else:
                 self.seed = seed
-            # self.rng_states = create_xoroshiro128p_states(Np, seed=self.seed).copy_to_host()
             self.rng_states = np.empty(shape=Np, dtype=xoroshiro128p_dtype)
             init_xoroshiro128p_states_cpu(self.rng_states, self.seed, 0)
         self.init_Np = Np

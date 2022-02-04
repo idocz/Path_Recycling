@@ -1,8 +1,8 @@
-from classes.scene import *
+# from classes.scene_rr import *
 import matplotlib.pyplot as plt
 from utils import add_camera_to_ax
 from matplotlib import cm
-
+import numpy as np
 class Visual_wrapper(object):
     def __init__(self, grid):
         self.grid = grid

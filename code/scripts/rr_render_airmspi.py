@@ -2,9 +2,9 @@
 import sys
 from os.path import join
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
-from classes.scene_airmspi_periodic import *
+from deprecated.scene_airmspi_periodic import *
 # from classes.scene_airmspi import *
-from classes.camera import AirMSPICamera
+from camera import AirMSPICamera
 from classes.visual import *
 from time import time
 from utils import *

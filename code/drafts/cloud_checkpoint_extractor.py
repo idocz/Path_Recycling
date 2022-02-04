@@ -7,7 +7,10 @@ from scipy.io import loadmat, savemat
 
 # checkpoint_id = "0808-1822-43"
 # iter = 21800
-checkpoint_id = "0811-1013-46"
+# checkpoint_id = "0811-1013-46"
+# iter = 6600
+
+checkpoint_id = "2601-2149-46"
 iter = 6600
 dir_to_save = join("data","res",f"{checkpoint_id}_{iter}.mat")
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))

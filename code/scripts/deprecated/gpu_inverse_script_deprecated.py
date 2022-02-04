@@ -2,7 +2,7 @@ import os, sys
 my_lib_path = os.path.abspath('../')
 sys.path.append(my_lib_path)
 from classes.deprecated.scene_gpu_deprecated import *
-from classes.camera import *
+from camera import *
 from classes.visual import *
 from utils import *
 import matplotlib.pyplot as plt

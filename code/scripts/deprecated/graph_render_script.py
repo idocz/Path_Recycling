@@ -1,5 +1,5 @@
 from classes.deprecated.scene_graph import *
-from classes.camera import *
+from camera import *
 from classes.visual import *
 from utils import construct_beta
 from time import time

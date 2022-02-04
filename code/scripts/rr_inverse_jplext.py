@@ -1,10 +1,9 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from classes.scene import *
-from classes.scene_rr import *
+from classes.scene_rr_noNEgrad import *
 # from classes.scene_rr_norecyling import *
-from classes.camera import *
+from camera import *
 from classes.visual import *
 from utils import *
 from cuda_utils import *
@@ -16,7 +15,7 @@ from time import time
 from classes.optimizer import *
 from os.path import join
 from tqdm import tqdm
-cuda.select_device(1)
+cuda.select_device(0)
 
 
 ########################
@@ -98,8 +97,8 @@ spp = 100000
 Np_gt = int(5e7)
 Np_max = int(5e7)
 Np = int(1e6)
-resample_freq = 30
-step_size = 7e8
+resample_freq = 5
+step_size = 1e9
 # Ns = 15
 rr_depth = 20
 rr_stop_prob = 0.05
@@ -136,12 +135,12 @@ scene_rr.init_cuda_param(Np)
 alpha = 0.9
 beta1 = 0.9
 beta2 = 0.999
-start_iter = 5000000000
+start_iter = 1
 scaling_factor = 1.5
 # optimizer = SGD(volume,step_size)
 beta_mean = np.mean(beta_cloud[volume.cloud_mask])
-# optimizer = MomentumSGD(volume, step_size, alpha, beta_mean, beta_max)
-optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_mean, beta_max, 1)
+optimizer = MomentumSGD(volume, step_size, alpha, beta_mean, beta_max)
+# optimizer = ADAM(volume,step_size, beta1, beta2, start_iter, beta_mean, beta_max, 1)
 
 ps = 30
 # n = int(np.log(Np_gt/Np)/np.log(1.5))
@@ -186,7 +185,7 @@ upscaling_counter = 0
 tb.update_gt(I_gt)
 # Initialization
 beta_init = np.zeros_like(beta_cloud)
-beta_init[volume.cloud_mask] = 28
+beta_init[volume.cloud_mask] = 10
 volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud
 loss = 1
@@ -205,7 +204,7 @@ for iter in range(iterations):
         if non_min_couter >= win_size and iter > start_iter:
             if Np < Np_max :
                 Np = int(Np * scaling_factor)
-                resample_freq = 30
+                # resample_freq = 30
                 non_min_couter = 0
                 # step_size *= scaling_factor
                 if Np > Np_max:

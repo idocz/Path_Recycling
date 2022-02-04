@@ -1,10 +1,10 @@
 from classes.deprecated.scene_numba import *
-from classes.scene_gpu import *
-from classes.camera import *
+from deprecated.scene_gpu import *
+from camera import *
 from classes.visual import *
 from time import time
 import matplotlib.pyplot as plt
-from classes.phase_function import *
+from deprecated.phase_function import *
 from scipy.io import loadmat
 from os.path import join
 def main():
