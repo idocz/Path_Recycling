@@ -3,29 +3,36 @@ from os.path import join
 import os
 
 
-# scene = "jplext"
-# renderer = "multi"
-scene = "smallcf"
-renderer = "rr"
+scene = "jplext"
+# scene = "smallcf"
+# renderer = "rr"
+renderer = "seed"
 script_name = f"{renderer}_inverse_{scene}_oneStage_loop.py"
 script_path = join("scripts", script_name)
 # Nrs =      [10]
-Nrs =      [10]
-# runtimes = [120, 1,1,1 ,1 ,1]
-runtimes = [1800]*len(Nrs)
-to_sort = 1
+# Nrs =      [1, 2, 5, 10 ,20, 30]
+# Nrs =      [1, 2, 5, 20 ,30]
+Nrs =      [1]
+# Nrs =      [5, 10, 20 ,30]
+# runtimes = [240] * len(Nrs)
+runtimes = [4800] * len(Nrs)
 print("Nrs=",Nrs)
 print("rumtimes=",runtimes)
-print("to_sort=",to_sort)
-for Nr, runtime in zip(Nrs, runtimes):
-    print("###############################")
-    print("###############################")
-    print(f"############Nr={Nr}#################")
-    print("###############################")
-    print("###############################")
-    try:
-        script_command = f"python {script_path} {Nr} {runtime} {to_sort}"
-        print("running:", script_command)
-        os.system(script_command)
-    except KeyboardInterrupt:
-        continue
+
+for to_sort in [0]:
+    for Nr, runtime in zip(Nrs, runtimes):
+        # if Nr  == 1  or (Nr == 10 and to_sort == True) or (Nr == 2 and to_sort == True) or (Nr == 5 and to_sort == True):
+        #     continue
+
+        print("###############################")
+        print("###############################")
+        print(f"############Nr={Nr}#################")
+        print("###############################")
+        print("###############################")
+        print("to_sort=", to_sort)
+        try:
+            script_command = f"python {script_path} {Nr} {runtime} {to_sort}"
+            print("running:", script_command)
+            os.system(script_command)
+        except KeyboardInterrupt:
+            continue

@@ -5,8 +5,8 @@ from utils import relative_distance,relative_bias
 from scipy.io import loadmat, savemat
 # checkpoint_id = "0108-1031-34"
 # iter = 12500
-checkpoint_id = "0811-1013-46"
-iter = 6600
+checkpoint_id = "3101-1529-15_smallcf_Nr=10_ss=5.00e+09"
+iter = 29300
 dir_to_save = join("data","res",f"{checkpoint_id}_{iter}.mat")
 dict = np.load(join("checkpoints",checkpoint_id,"data",f"opt_{iter}.npz"))
 betas = dict["betas"]

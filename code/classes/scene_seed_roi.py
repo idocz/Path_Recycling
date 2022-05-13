@@ -19,7 +19,7 @@ def torch_lexsort(a, dim=-1):
     return torch.argsort(inv)
 
 class SceneSeed(object):
-    def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob):
+    def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob, N_batches=1):
         self.rr_depth = rr_depth
         self.rr_stop_prob = rr_stop_prob
         rr_factor = 1.0 / (1.0 - self.rr_stop_prob)
@@ -44,12 +44,13 @@ class SceneSeed(object):
         ts = np.vstack([cam.t.reshape(1, -1) for cam in self.cameras])
         self.Ps = np.concatenate([cam.P.reshape(1, 3, 4) for cam in self.cameras], axis=0)
 
+        self.N_batches = N_batches
         # gpu array
         self.dbeta_cloud = cuda.device_array(self.volume.beta_cloud.shape, dtype=float_reg)
         self.dbeta_zero = cuda.device_array(self.volume.beta_cloud.shape, dtype=float_reg)
         self.dI_total = cuda.device_array((N_cams, *self.pixels_shape ), dtype=float_reg)
         self.dI_diff = cuda.device_array((N_cams, *self.pixels_shape ), dtype=float_reg)
-        self.dtotal_grad = cuda.device_array(self.volume.beta_cloud.shape, dtype=float_reg)
+        self.dtotal_grad = cuda.device_array((self.N_batches,*self.volume.beta_cloud.shape), dtype=float_reg)
         self.dbbox = cuda.to_device(self.volume.grid.bbox)
         self.dbbox_size = cuda.to_device(self.volume.grid.bbox_size)
         self.dvoxel_size = cuda.to_device(self.volume.grid.voxel_size)
@@ -68,7 +69,7 @@ class SceneSeed(object):
         self.drng_states = None
         @cuda.jit()
         def calc_scatter_sizes(Np, beta_cloud, beta_air, g_cloud, w0_cloud, w0_air, bbox, bbox_size, voxel_size, sun_direction,
-                               scatter_sizes, rng_states, voxel_sizes, cam_voxel_sizes, ts, Ps, pixel_shape,):
+                               scatter_sizes, rng_states):
 
             tid = cuda.grid(1)
             if tid < Np:
@@ -140,15 +141,7 @@ class SceneSeed(object):
                         break
 
                     seg+=1
-                    for k in range(N_cams):
-                        project_point(current_point, Ps[k], pixel_shape, pixel)
-                        if pixel[0] != 255:
-                            assign_3d(next_voxel, current_voxel)
-                            assign_3d(camera_point, current_point)
-                            distance_and_direction(camera_point, ts[k], cam_direction)
-                            get_intersection_with_borders(camera_point, cam_direction, bbox, next_point)
-                            get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, next_voxel)
-                            total_cam_voxel_sizes += estimate_voxels_size(next_voxel, current_voxel)
+
 
 
                     # sampling new direction
@@ -161,10 +154,7 @@ class SceneSeed(object):
 
                 # voxels and scatter sizes for this path (this is not in a loop)
                 scatter_sizes[tid] = seg
-                if seg != 0:
-                    # lengths[tid] = total_length
-                    voxel_sizes[tid] = total_voxel_sizes
-                    cam_voxel_sizes[tid] = total_cam_voxel_sizes
+
 
 
         @cuda.jit()
@@ -639,7 +629,7 @@ class SceneSeed(object):
 
         @cuda.jit()
         def render_differentiable_cuda(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, sun_direction, bbox, bbox_size, voxel_size,
-                         rng_states, scatter_inds ,grad_contrib, cloud_mask, total_grad):
+                         rng_states, scatter_inds ,grad_contrib, cloud_mask, total_grad, N_batches):
             tid = cuda.grid(1)
             if tid < scatter_inds.shape[0] - 1:
                 scatter_ind = scatter_inds[tid]
@@ -666,6 +656,7 @@ class SceneSeed(object):
                 seg = 0
                 cos_theta_scatter = 0.0
                 mask = False
+                grad_batch = tid % N_batches
                 while True:
                     seg_ind = seg + scatter_ind
                     # Russian Roulette
@@ -681,7 +672,7 @@ class SceneSeed(object):
                         seg_contrib = omega_fp_c / \
                                       (beta_c * omega_fp_c + beta_air * w0_air * rayleigh_pdf(
                                           cos_theta_scatter))  # scatter fix
-                        cuda.atomic.add(total_grad, (current_voxel[0], current_voxel[1], current_voxel[2]),
+                        cuda.atomic.add(total_grad, (grad_batch,current_voxel[0], current_voxel[1], current_voxel[2]),
                                         seg_contrib * grad_temp)
 
                     tau_rand = -math.log(1 - sample_uniform(rng_states, tid))
@@ -704,13 +695,13 @@ class SceneSeed(object):
                         mask = cloud_mask[current_voxel[0], current_voxel[1], current_voxel[2]]
                         if current_tau0 < tau_rand:
                             if mask and seg < N_seg:
-                                cuda.atomic.add(total_grad, (current_voxel[0], current_voxel[1], current_voxel[2]), -length * grad_temp)
+                                cuda.atomic.add(total_grad, (grad_batch,current_voxel[0], current_voxel[1], current_voxel[2]), -length * grad_temp)
 
                         else:
                             step_back = (current_tau0 - tau_rand) / beta0
 
                             if mask:
-                                cuda.atomic.add(total_grad, (current_voxel[0], current_voxel[1], current_voxel[2]),
+                                cuda.atomic.add(total_grad, (grad_batch, current_voxel[0], current_voxel[1], current_voxel[2]),
                                                 -(length-step_back) * grad_temp)
                             beta_c += divide_beta_eps
                             current_tau -= step_back * beta
@@ -736,9 +727,6 @@ class SceneSeed(object):
                     cos_theta_scatter = dot_3d(next_direction, direction)
                     assign_3d(direction, next_direction)
                     seg += 1
-
-
-
 
 
 
@@ -835,39 +823,26 @@ class SceneSeed(object):
         # outputs
         dscatter_sizes = cuda.to_device(np.empty(Np, dtype=np.uint8))
         drng_states = cuda.to_device(self.rng_states)
-        dvoxel_sizes = cuda.to_device(np.empty(Np,dtype=np.uint16))
-        dcam_voxel_sizes = cuda.to_device(np.empty(Np,dtype=np.uint16))
         start = time()
         self.calc_scatter_sizes[blockspergrid, threadsperblock]\
             (Np, self.dbeta_zero, beta_air, self.g_cloud, w0_cloud, w0_air, self.dbbox, self.dbbox_size,
-             self.dvoxel_size,self.dsun_direction, dscatter_sizes, drng_states, dvoxel_sizes, dcam_voxel_sizes,self.dts, self.dPs, self.dpixels_shape)
+             self.dvoxel_size,self.dsun_direction, dscatter_sizes, drng_states)
 
         cuda.synchronize()
         if to_print:
             print("calc scatter sizes took:",time()-start)
         scatter_sizes = dscatter_sizes.copy_to_host()
-        voxel_sizes = dvoxel_sizes.copy_to_host()
-        cam_voxel_sizes = dcam_voxel_sizes.copy_to_host()
         self.rng_states_updated = drng_states.copy_to_host()
         del (dscatter_sizes)
         del(drng_states)
-        del(dvoxel_sizes)
-        del(dcam_voxel_sizes)
         cond = scatter_sizes != 0
         Np_nonan = np.sum(cond)
 
         scatter_sizes = scatter_sizes[cond]
-        cam_voxel_sizes = cam_voxel_sizes[cond]
-        voxel_sizes = voxel_sizes[cond]
         self.rng_states_mod = self.rng_states[cond]
         if to_sort:
             start = time()
-            # sorted_inds = np.argsort(cam_voxel_sizes)
-            # sorted_inds = np.lexsort([voxel_sizes,scatter_sizes])
-            sorted_inds = np.lexsort([cam_voxel_sizes,voxel_sizes,scatter_sizes])
-            # sorted_inds = np.lexsort([voxel_sizes,scatter_sizes])
-            # sorted_inds = torch_lexsort(torch.Tensor([cam_voxel_sizes,voxel_sizes,scatter_sizes]))
-            # sorted_inds = np.argsort(scatter_sizes)
+            sorted_inds = np.argsort(scatter_sizes)
             print("lexsort took:", time()-start)
             # sorted_inds = np.lexsort([scatter_sizes,lengths])
             scatter_sizes = scatter_sizes[sorted_inds]
@@ -890,6 +865,7 @@ class SceneSeed(object):
 
 
     def render(self, I_gt=None, to_print=False):
+        assert self.Np % self.N_batches==0, "N_batches must divide Np"
         # east declerations
         N_cams = len(self.cameras)
         pixels_shape = self.cameras[0].pixels
@@ -933,21 +909,23 @@ class SceneSeed(object):
 
 
         ##### differentiable part ####
-        self.dtotal_grad.copy_to_device(np.zeros_like(self.volume.beta_cloud, dtype=float_reg))
+        self.dtotal_grad.copy_to_device(np.zeros((self.N_batches, *self.volume.beta_cloud.shape),dtype=float_reg))
         # precalculating gradient contributions
         start = time()
         self.drng_states.copy_to_device(self.rng_states_mod)
         self.render_differentiable_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dsun_direction, self.dbbox,
              self.dbbox_size, self.dvoxel_size,
-             self.drng_states, self.dscatter_inds, self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad)
+             self.drng_states, self.dscatter_inds, self.dgrad_contrib, self.dcloud_mask, self.dtotal_grad, self.N_batches)
 
         cuda.synchronize()
         if to_print:
             print("render_differentiable_cuda took:", time() - start)
         total_grad = self.dtotal_grad.copy_to_host()
 
-        total_grad /= (self.Np * N_cams)
+        MC_frac = self.N_batches/(self.Np * N_cams)
+        total_grad /= MC_frac
+
         return I_total, total_grad
 
     def render_given_I_diff(self, I_diff=None, to_print=False):

@@ -6,10 +6,8 @@ from scene_rr_noNEgrad import SceneRR_noNE
 
 sys.path.append("/home/idocz/repos/3D_Graph_Renderer/code/")
 # from classes.scene import *
-from classes.scene_rr_noNEgrad import SceneRR_noNE
 from classes.scene_rr import SceneRR
-# from classes.scene_seed_noNEgrad import *
-from classes.scene_seed_roi import *
+from classes.scene_seed_NEgrad import *
 from classes.scene_multi_eff import  SceneMultiEff
 from classes.camera import *
 from classes.visual import *
@@ -108,9 +106,8 @@ rr_depth = 20
 rr_stop_prob = 0.05
 
 volume.set_mask(beta_cloud>0)
-scene_rr = SceneRR_noNE(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
-# scene_seed = SceneSeed(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
-scene_seed = SceneSeed(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob,N_batches=10)
+scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
+scene_seed = SceneSeed(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 scene_multi = SceneMultiEff(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 
 scene_seed.set_cloud_mask(volume.cloud_mask)
@@ -125,7 +122,7 @@ plt.show()
 run_seed = True
 # run_rr = True
 run_multi = False
-run_rr = False
+run_rr = True
 # fake_cloud = np.zeros_like(beta_cloud)
 # fake_cloud[beta_cloud>0] = np.mean(beta_cloud[beta_cloud>0])
 fake_cloud = beta_cloud#*0.7
@@ -157,6 +154,7 @@ if run_seed:
     # I_total_lowmem2, grad_lowmem2 = scene_hybrid.render(cuda_paths, 0)
     visual.plot_images(I_total_seed2, f"GPU Seed rr_depth={rr_depth}, prob={rr_stop_prob}")
     plt.show()
+    del(scene_seed)
 
 if run_rr:
     print("####### GPU Rusian Roulette renderer ########")

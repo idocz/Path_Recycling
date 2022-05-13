@@ -4,10 +4,10 @@ from cuda_utils import *
 import pickle
 from classes.optimizer import *
 from os.path import join
-cuda.select_device(2)
+cuda.select_device(0)
 plt.rcParams['font.family'] = 'DeJavu Serif'
 plt.rcParams['font.serif'] = ['Times New Roman']
-
+from tqdm import tqdm
 
 # checkpoint_id = "1211-2016-37"
 # checkpoint_id = "1311-1602-58"
@@ -79,6 +79,7 @@ total_num_cam = len(camera_array_list)
 camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale, :6]) for camera_array in camera_array_list]
 
 # Simulation parameters
+# Np = int(7e8)
 Np = int(7e8)
 rr_depth = 20
 rr_stop_prob = 0.1
@@ -94,7 +95,14 @@ for cam_ind in range(total_num_cam):
 
 N_repeat = 10
 scene_airmspi.init_cuda_param(Np, init=True)
-for cam_ind in tqdm(np.arange(N_cams)):
+
+only_scatter_plot = True
+if only_scatter_plot:
+    cam_inds = [exclude_index]
+else:
+    cam_inds = np.arange(N_cams)
+
+for cam_ind in tqdm(cam_inds):
     # for cam_ind in tqdm([exclude_index]):
     cam_inds = np.array([cam_ind])
     spp_map = np.copy(I_gt_pad)
@@ -111,12 +119,12 @@ for cam_ind in tqdm(np.arange(N_cams)):
         I_opt += scene_airmspi.render()
     # I_concat = np.concatenate([I_opt, I_gt_pad[exclude_index,:ex_pix[0],:ex_pix[1]]], axis=1)
     I_opt /= N_repeat
-    I_opt_norm = I_opt[cam_ind,:ex_pix[0], :ex_pix[1]]
-    I_gt_norm = I_gt_pad[cam_ind,:ex_pix[0],:ex_pix[1]]
-    min_val = np.min([np.min(I_opt_norm), np.min(I_gt_norm)])
-    max_val = np.min([np.max(I_opt_norm), np.max(I_gt_norm)])
-    I_opt_norm = (I_opt_norm-min_val)/(max_val-min_val)
-    I_gt_norm = (I_gt_norm-min_val)/(max_val-min_val)
+    I_opt = I_opt[cam_ind,:ex_pix[0], :ex_pix[1]]
+    I_gt = I_gt_pad[cam_ind,:ex_pix[0],:ex_pix[1]]
+    min_val = np.min([np.min(I_opt), np.min(I_gt)])
+    max_val = np.min([np.max(I_opt), np.max(I_gt)])
+    I_opt_norm = (I_opt-min_val)/(max_val-min_val)
+    I_gt_norm = (I_gt-min_val)/(max_val-min_val)
     plt.figure()
     ax = plt.subplot(1,2,1)
     ax.imshow(I_opt_norm, cmap="gray")
@@ -142,9 +150,10 @@ for cam_ind in tqdm(np.arange(N_cams)):
     if cam_ind != exclude_index:
         continue
     # mask = I_opt_norm !=0
-    X = I_gt_norm.reshape(-1)
-    Y = I_opt_norm.reshape(-1)
+    X = I_gt.reshape(-1)
+    Y = I_opt.reshape(-1)
     max_val = np.max([X.max(), Y.max()])
+    min_val = np.min([X.min(), Y.min()])
     # N = int(Y.shape[0] * N)
     N = 1500
     relative_point_num = N/Y.shape[0]
@@ -155,14 +164,14 @@ for cam_ind in tqdm(np.arange(N_cams)):
     plt.scatter(X[rand_inds], Y[rand_inds])
     # plt.scatter(X, Y, s=3)
 
-    plt.plot([0,max_val], [0,max_val], color="red")
+    plt.plot([min_val,max_val], [min_val,max_val], color="red")
     # plt.plot([0,10], [0,10])
-    fs = 20
-    plt.xlabel("Ground Truth", fontsize=fs)
-    plt.ylabel("Estimated", fontsize=fs)
+    fs = 18
+    # plt.xlabel("Ground Truth", fontsize=fs)
+    # plt.ylabel("Estimated", fontsize=fs)
     # plt.title(f"iter: {iter}")
-    plt.xticks([])
-    plt.yticks([])
+    plt.xticks(fontsize=fs)
+    plt.yticks(fontsize=fs)
     # plt.axes().set_aspect('equal')
     plt.tight_layout()
     plt.savefig(join("experiments","plots","airmspi_results",f"{checkpoint_id}_{iter}_airmspi_scatter_plot.pdf"))

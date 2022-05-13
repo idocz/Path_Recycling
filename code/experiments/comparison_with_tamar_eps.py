@@ -3,7 +3,7 @@ from os.path import join
 import matplotlib.pyplot as plt
 from scipy.io import loadmat, savemat
 from utils import relative_distance, mask_grader, get_scalars_from_TB
-plt.rcParams['font.family'] = 'DeJavu Serif'
+plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman']
 
 scene = "smallcf"
@@ -17,20 +17,22 @@ if scene == "smallcf":
     # iter = 17840
     # checkpoint_id = "2901-1933-52_smallcf_Nr=10_ss=2.50e+10"
     # iter = 2670
-    checkpoint_id = "3101-1529-15_smallcf_Nr=10_ss=5.00e+09"
-    iter = -1
+    # checkpoint_id = "3101-1529-15_smallcf_Nr=10_ss=5.00e+09"
+    checkpoint_id = "2402-1249-05_smallcf_Nr=10_ss=5.00e+09"
+    iter = 9300
 
     # iter = 1000
 
 elif scene == "jplext":
     tamar_exp = "single cloud res - 8stages l1 1 l2 1 w air and ocean 9 sensors SC mask beta0 2_84.mat"
-    # checkpoint_id = "0711-2006-49"
     # iter = 7000
-    checkpoint_id = "2801-0932-51_Nr=10"
-    iter = 4600
+    # checkpoint_id = "2801-0932-51_Nr=10"
+    # iter = 4600
+    checkpoint_id = "2602-0737-36_jplext_Nr=10_ss=2.0e+09_tosort=1"
+    iter = 2600
 
-# output_dir = join("experiments","plots")
-output_dir = "C:\\Users\\idocz\OneDrive - Technion\\Thesis\\my paper\\figures\\comparison_tamar_SUP"
+output_dir = join("experiments","plots")
+# output_dir = "C:\\Users\\idocz\OneDrive - Technion\\Thesis\\my paper\\figures\\comparison_tamar_SUP"
 
 text_size = 13
 tick_size = 17
@@ -40,7 +42,7 @@ tamar_res = loadmat(input_path)
 iteration = tamar_res["iteration"][0,0]
 cost_mean = tamar_res["mb"] / 100
 runtime = tamar_res["runtime"] / 3600
-plt.figure(figsize=(8,2.5))
+plt.figure(figsize=(6,3))
 # plt.loglog(np.linspace(1,iteration, iteration), cost_mean[0, :iteration], '--',  marker='o', markersize=5, color='blue')
 plot_func(runtime[0,:iteration], cost_mean[0, :iteration], label="[Loeub et al.2020]")
 # plt.title('Loss vs Time', fontweight='bold')
@@ -78,8 +80,11 @@ plot_func(ts_rec, values_rec, label="Ours")
 # plt.title('Loss vs Time', fontweight='bold')
 # plt.xlim(5e-3, np.max(ts_rec))
 # plt.legend(fontsize=text_size)
-plt.xlim(1e-3,2e2)
-plt.ylim(0.4,2)
+if scene == "smallcf":
+    plt.xlim(1e-3,2e2)
+    plt.ylim(0.4,2)
+else:
+    plt.xlim(5e-4,runtime[0,iteration-1])
 plt.xticks(fontsize=tick_size)
 plt.yticks(fontsize=tick_size)
 plt.grid()
@@ -92,7 +97,7 @@ plt.tight_layout()
 # plt.text(1.7, 0.03, "Loeub et al.2020", fontsize=fontsize)
 # plt.text(0.38, 0.013, "Ours", fontsize=fontsize)
 output_dir = join("experiments","plots")
-plt.savefig(join(output_dir,f"{scene}_loss_both_{scene}.pdf"), bbox_inches='tight')
+plt.savefig(join(output_dir,f"{scene}_eps_both_{scene}.pdf"), bbox_inches='tight')
 plt.show()
 
 print(np.max(ts_rec))

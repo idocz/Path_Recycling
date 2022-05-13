@@ -25,117 +25,39 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="Have fun ROI">
-      <change afterPath="$PROJECT_DIR$/classes/scene_multi_eff.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/scene_nostore.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/scene_rr_noNEgrad.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/scene_seed_noNEgrad.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/drafts/exp_result_extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/drafts/numba_pytorch_test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/comparison_with_tamar_eps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/path_recycling_memory_vs_Np.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr_ablation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/loop_runner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/multi_eff_render_jplext.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/multi_inverse_jplext_oneStage_loop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage_loop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/rr_inverse_smallcf_oneStage_loop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seed_render_jplext.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="scene seed has added. Splitting forward and gradient for stabler convergence.">
+      <change afterPath="$PROJECT_DIR$/classes/scene_seed_NEgrad.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes/scene_seed_roi.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/ablation_plots.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/ablation_table.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender_new.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr_norender.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seedNEgrad_inverse_jplext_oneStage.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seedNeGrad_render_jplext.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage_loop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_smallcf_oneStage_loop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_smoke_oneStage.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/arg_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/arg_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/checkpoint_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/deprecated/scene_gpu_deprecated.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_gpu_deprecated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/deprecated/scene_graph.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_graph.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/optimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/optimizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/path.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/path.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/phase_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/phase_function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_airmspi_backward_norecycling.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_airmspi_backward_norecycling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_airmspi_backward_recycling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_airmspi_periodic.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_airmspi_periodic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_basic_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_basic_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_ddis.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_ddis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_hybrid_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_hybrid_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_lowmem_gpu.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/deprecated/scene_lowmem_gpu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/build_path_gput_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/build_path_gput_draft.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_rr.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_rr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/scene_seed_noNEgrad.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_seed_noNEgrad.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/first_gpu_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/first_gpu_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/mask_grader.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/mask_grader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/rotation_3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/rotation_3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/second_gpu_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/second_gpu_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/shdom_constant_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/shdom_constant_finder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/space_curving_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/space_curving_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/space_curving_gpu_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/space_curving_gpu_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/sun_direction_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/sun_direction_draft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/upscaling_constant_finder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/visual_wrapper_draft.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/visual_wrapper_draft.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drafts/exp_result_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/exp_result_extractor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/camera_setting.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/camera_setting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/comparison_with_tamar.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/comparison_with_tamar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/comparison_with_tamar_eps.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/comparison_with_tamar_eps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/confergence_figure.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/confergence_figure.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/confergence_figure_rerender.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/recycling_illustration.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/recycling_illustration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/rotating_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/rotating_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_background_finder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/airmspi_render_background.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_render_background.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/airmspi_render_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/airmspi_render_backward.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/bbox_estimator.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/bbox_estimator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/convergence_rate.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/convergence_rate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/convergence_rate_comparison.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/convergence_rate_comparison.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/basic_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/basic_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/basic_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/basic_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/ddis_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/ddis_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/ddis_std_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/ddis_std_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/differntiable_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/differntiable_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/gpu_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/gpu_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/gpu_inverse_script_deprecated.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/gpu_inverse_script_deprecated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/gpu_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/gpu_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/gpu_render_script_deprecated.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/gpu_render_script_deprecated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/graph_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/graph_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/hybrid_inverse_smoke_sunabove.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/hybrid_inverse_smoke_sunabove.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/hybrid_inverse_smoke_upscaling.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/hybrid_inverse_smoke_upscaling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/hybrid_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/hybrid_render_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/inverse_lbfgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/inverse_lbfgs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_smoke_upscaling.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_inverse_smoke_upscaling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/lowmem_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/lowmem_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/lowmem_render_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/numba_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/numba_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/numba_render_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/numba_render_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/scene_gpu_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/scene_gpu_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deprecated/sparse_inverse_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deprecated/sparse_inverse_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/noise_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/noise_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_init_finder_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_init_finder_jplext.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_init_finder_smallcf.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_init_finder_smallcf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam_norecycling.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward_adam_norecycling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_shdom.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_shdom.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_cloud1.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_cloud1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext_roi.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_roi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_smallcf.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_smallcf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_smoke_mitsuba.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_smoke_mitsuba.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_smoke_sunabove.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_airmspi.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_airmspi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_cloud1.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_cloud1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_cloud2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_cloud2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_jplext.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_jplext_multiple_distances.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_jplext_multiple_distances.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_smallcf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_smoke.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_render_smoke_mitsuba.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_render_smoke_mitsuba.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/error_scatter_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/error_scatter_plot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/loop_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/loop_runner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage_loop.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage_loop.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/seed_render_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/seed_render_jplext.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,9 +115,9 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Path_Recycling_Surfaces/code" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/experiments" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -218,7 +140,7 @@
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts\deprecated" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.seed_inverse_jplext_oneStage">
+  <component name="RunManager" selected="Python.ablation_plots">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -255,6 +177,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/abblation_study_rel_dist.npz.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ablation_plots" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/ablation_plots.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -307,17 +251,42 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="comparison_with_tamar_eps" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="confergence_figure_rerender_new" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/comparison_with_tamar_eps.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/confergence_figure_rerender_new.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="confergence_figure_rerender_transposed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -392,25 +361,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="exp_result_extractor" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/exp_result_extractor.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="gpu_inverse_script" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -425,6 +375,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/gpu_inverse_script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="loop_runner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/loop_runner.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -455,55 +427,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="path_recycling_memory_vs_Np" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="seed_inverse_smoke_oneStage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/path_recycling_memory_vs_Np.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="path_recycling_speedup_vs_Nr" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="seed_inverse_jplext_oneStage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/seed_inverse_smoke_oneStage.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -516,6 +453,9 @@
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -541,19 +481,19 @@
       <item itemvalue="Python.down_up_sample" />
       <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.airmspi_img_comp" />
-      <item itemvalue="Python.comparison_with_tamar_eps" />
-      <item itemvalue="Python.path_recycling_memory_vs_Np" />
-      <item itemvalue="Python.path_recycling_speedup_vs_Nr" />
-      <item itemvalue="Python.exp_result_extractor" />
-      <item itemvalue="Python.seed_inverse_jplext_oneStage" />
+      <item itemvalue="Python.seed_inverse_smoke_oneStage" />
+      <item itemvalue="Python.loop_runner" />
+      <item itemvalue="Python.ablation_plots" />
+      <item itemvalue="Python.confergence_figure_rerender_transposed" />
+      <item itemvalue="Python.confergence_figure_rerender_new" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.seed_inverse_jplext_oneStage" />
-        <item itemvalue="Python.exp_result_extractor" />
-        <item itemvalue="Python.comparison_with_tamar_eps" />
-        <item itemvalue="Python.path_recycling_memory_vs_Np" />
-        <item itemvalue="Python.path_recycling_speedup_vs_Nr" />
+        <item itemvalue="Python.ablation_plots" />
+        <item itemvalue="Python.confergence_figure_rerender_new" />
+        <item itemvalue="Python.confergence_figure_rerender_transposed" />
+        <item itemvalue="Python.loop_runner" />
+        <item itemvalue="Python.seed_inverse_smoke_oneStage" />
       </list>
     </recent_temporary>
   </component>
@@ -609,7 +549,16 @@
       <workItem from="1640693406078" duration="10170000" />
       <workItem from="1642421668692" duration="2385000" />
       <workItem from="1643114032233" duration="113912000" />
-      <workItem from="1643465995847" duration="124890000" />
+      <workItem from="1643465995847" duration="143364000" />
+      <workItem from="1644176126870" duration="468000" />
+      <workItem from="1644321688582" duration="16886000" />
+      <workItem from="1644479818132" duration="6652000" />
+      <workItem from="1644528581370" duration="2144000" />
+      <workItem from="1644744571406" duration="1838000" />
+      <workItem from="1644943436201" duration="44629000" />
+      <workItem from="1645690448738" duration="10572000" />
+      <workItem from="1645786209037" duration="57366000" />
+      <workItem from="1646992183584" duration="8838000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -821,7 +770,14 @@
       <option name="project" value="LOCAL" />
       <updated>1640699687200</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="scene seed has added. Splitting forward and gradient for stabler convergence.">
+      <created>1643970210933</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1643970210933</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -852,7 +808,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="non-active has implemented" />
     <MESSAGE value="commit before eff_scatter branch" />
     <MESSAGE value="still buggy" />
     <MESSAGE value="bugg was fixed." />
@@ -877,7 +832,8 @@
     <MESSAGE value="working on airmspi background finder. Changing the tracer to ignore beta_air in bbox" />
     <MESSAGE value="AirMSPI works!!" />
     <MESSAGE value="Have fun ROI" />
-    <option name="LAST_COMMIT_MESSAGE" value="Have fun ROI" />
+    <MESSAGE value="scene seed has added. Splitting forward and gradient for stabler convergence." />
+    <option name="LAST_COMMIT_MESSAGE" value="scene seed has added. Splitting forward and gradient for stabler convergence." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1052,14 +1008,26 @@
           <line>34</line>
           <option name="timeStamp" value="111" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/rr_render_smallcf.py</url>
+          <line>44</line>
+          <option name="timeStamp" value="113" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/classes/scene_seed_NEgrad.py</url>
+          <line>498</line>
+          <option name="timeStamp" value="114" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/code$rr_render_smallcf.coverage" NAME="rr_render_smallcf Coverage Results" MODIFIED="1644139089363" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$seedNeGrad_render_jplext.coverage" NAME="seedNeGrad_render_jplext Coverage Results" MODIFIED="1645608842099" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
     <SUITE FILE_PATH="coverage/code$seed_inverse_jplext_oneStage.coverage" NAME="seed_inverse_jplext_oneStage Coverage Results" MODIFIED="1643888037351" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$path_recycling_memory_vs_Np.coverage" NAME="path_recycling_memory_vs_Np Coverage Results" MODIFIED="1643316853682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$path_recycling_speedup_vs_Nr.coverage" NAME="path_recycling_speedup_vs_Nr Coverage Results" MODIFIED="1643657925574" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/code$seed_render_jplext.coverage" NAME="seed_render_jplext Coverage Results" MODIFIED="1643883819463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/code$seed_render_jplext.coverage" NAME="seed_render_jplext Coverage Results" MODIFIED="1644481246794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$multi_eff_render_jplext.coverage" NAME="multi_eff_render_jplext Coverage Results" MODIFIED="1643497398314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
   </component>
 </project>

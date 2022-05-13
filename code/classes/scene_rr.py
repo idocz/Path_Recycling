@@ -14,6 +14,7 @@ threadsperblock = 256
 
 class SceneRR(object):
     def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob):
+        print("NEE gradient")
         self.rr_depth = rr_depth
         self.rr_stop_prob = rr_stop_prob
         rr_factor = 1.0 / (1.0 - self.rr_stop_prob)

@@ -95,16 +95,16 @@ hit_threshold = 0.9
 spp = 100000
 
 # Simulation parameters
-Np_gt = int(1e9)
+Np_gt = int(5e7)
 Np_gt_batch = int(5e7)
 batches = Np_gt // Np_gt_batch
-print("Np_gt=",Np_gt_batch*batches)
+print(f"Np_gt={Np_gt_batch*batches:.2E}")
 Np = int(5e7)
 resample_freq = int(sys.argv[1])
 runtime = int(sys.argv[2]) #minutes
 to_sort = int(sys.argv[3])
 
-step_size = 2.5e9
+step_size = 1e9
 beta_scalar_start = 10
 # Ns = 15
 rr_depth = 20
@@ -183,7 +183,6 @@ beta_init[volume.cloud_mask] = beta_scalar_start
 volume.set_beta_cloud(beta_init)
 beta_opt = volume.beta_cloud
 loss = 1
-start_loop = time()
 start_loop = time()
 i = 0
 while time() - start_loop < runtime*60:

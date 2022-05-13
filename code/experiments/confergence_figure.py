@@ -7,14 +7,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
-exp_name = "0705-2057-19"
-exp_dir = join("checkpoints",exp_name)
+# exp_name = "0705-2057-19"
+exp_name = "0505-1724-36"
+exp_dir = join("checkpoints_old",exp_name)
 # iter = 100
 # scene_rr = pickle.load(open(join(exp_dir,"data","checkpoint_loader"), "rb" )).recreate_scene()
 
 output_dir = join("experiments","plots")
 views = [0,3,8]
-steps = [0,500,2000]
+steps = [0,1600,5000]
 N = len(views)
 M = len(steps) + 1
 image_list = np.empty((N,M), dtype=np.object)

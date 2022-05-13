@@ -107,36 +107,35 @@ rr_depth = 20
 rr_stop_prob = 0.05
 iterations = 10000000
 to_mask = True
-tensorboard = False
+tensorboard = True
 tensorboard_freq = 5
 beta_max = beta_cloud.max()
 
 
 
 # scene_rr = SceneRR_noNE(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
-scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
-# scene_rr = SceneSeed(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
+# scene_rr = SceneRR(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
+scene_seed = SceneSeed(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 
-visual = Visual_wrapper(scene_rr)
+visual = Visual_wrapper(scene_seed)
 # visual.create_grid()
 # visual.plot_cameras()
 # visual.plot_medium()
 plt.show()
-cuda_paths = scene_rr.build_paths_list(Np_gt)
-I_gt = scene_rr.render(cuda_paths)
-del(cuda_paths)
-cuda_paths = None
+scene_seed.init_cuda_param(Np_gt, init=True)
+scene_seed.build_paths_list(Np_gt)
+I_gt = scene_seed.render()
 max_val = np.max(I_gt, axis=(1,2))
 # visual.plot_images(I_gt, "GT")
 plt.show()
 
 print("Calculating Cloud Mask")
-cloud_mask = scene_rr.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
+cloud_mask = scene_seed.space_curving(I_gt, image_threshold=image_threshold, hit_threshold=hit_threshold, spp=spp)
 mask_grader(cloud_mask, beta_gt>0.1, beta_gt)
-scene_rr.set_cloud_mask(cloud_mask)
+scene_seed.set_cloud_mask(cloud_mask)
 # beta_scalar_init = scene_rr.find_best_initialization(beta_gt, I_gt,0,30,10,Np_gt,True)
 
-scene_rr.init_cuda_param(Np)
+scene_seed.init_cuda_param(Np, init=True)
 alpha = 0.9
 beta1 = 0.9
 beta2 = 0.999
@@ -151,13 +150,13 @@ optimizer = MomentumSGD(volume, step_size, alpha, beta_mean, beta_max)
 
 if tensorboard:
     tb = TensorBoardWrapper(I_gt, beta_gt)
-    cp_wrapper = CheckpointWrapper(scene_rr, optimizer, Np_gt, Np, rr_depth, rr_stop_prob, None, None, resample_freq, step_size, iterations,
+    cp_wrapper = CheckpointWrapper(scene_seed, optimizer, Np_gt, Np, rr_depth, rr_stop_prob, None, None, resample_freq, step_size, iterations,
                                    tensorboard_freq, tb.train_id, image_threshold, hit_threshold, spp)
     tb.add_scene_text(str(cp_wrapper))
     pickle.dump(cp_wrapper, open(join(tb.folder,"data","checkpoint_loader"), "wb"))
     print("Checkpoint wrapper has been saved")
     tb.update_gt(I_gt)
-scene_rr.upscale_cameras(ps)
+# scene_seed.upscale_cameras(ps)
 
 
 
@@ -183,18 +182,17 @@ for iter in range(iterations):
 
         print("RESAMPLING PATHS ")
         start = time()
-        del(cuda_paths)
-        cuda_paths = scene_rr.build_paths_list(Np, to_print=False)
+        scene_seed.build_paths_list(Np, to_print=False)
         end = time()
         print(f"building path list took: {end - start}")
     # differentiable forward model
     start = time()
-    I_opt, total_grad = scene_rr.render(cuda_paths, I_gt=I_gt, to_print=True)
+    I_opt, total_grad = scene_seed.render(I_gt=I_gt, to_print=True)
     total_grad *= (ps*ps)
     end = time()
     print(f"rendering took: {end-start}")
 
-    dif = (I_opt - I_gt).reshape(1,1,1, N_cams, *scene_rr.pixels_shape)
+    dif = (I_opt - I_gt).reshape(1,1,1, N_cams, *scene_seed.pixels_shape)
     grad_norm = np.linalg.norm(total_grad)
 
     start = time()

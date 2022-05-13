@@ -1,7 +1,9 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from classes.scene_rr_noNEgrad import *
+from classes.scene_seed_NEgrad import SceneSeed
+from classes.grid import Grid
+# from classes.scene_rr_noNEgrad import *
 # from classes.scene_rr import *
 from classes.camera import *
 from classes.visual import *
@@ -17,7 +19,7 @@ from os.path import join
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman']
 
-cuda.select_device(1)
+cuda.select_device(0)
 
 
 ########################
@@ -95,7 +97,7 @@ cameras.append(Camera(t, euler_angles, cameras[0].focal_length, cameras[0].senso
 rr_depth = 20
 rr_stop_prob = 0.05
 
-scene_rr = SceneRR_noNE(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
+scene_rr = SceneSeed(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 # scene_rr = S(volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob)
 
 Np = int(5e7)
@@ -132,7 +134,7 @@ for to_sort in [False, True]:
 # plt.figure()
 text_size = 22
 tick_size = 17
-plt.figure(figsize=(8,2.5))
+plt.figure(figsize=(4,4))
 output_dir = join("experiments","plots")
 plt.plot(Nrs, speed_ups[0], label="no sorting")
 plt.plot(Nrs, speed_ups[1], label="sorting")

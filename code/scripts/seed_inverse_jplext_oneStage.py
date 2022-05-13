@@ -1,7 +1,8 @@
 import os, sys
 my_lib_path = os.path.abspath('./')
 sys.path.append(my_lib_path)
-from classes.scene_seed_noNEgrad import *
+# from classes.scene_seed_noNEgrad import *
+from classes.scene_seed_NEgrad import *
 # from classes.scen import *
 from classes.camera import *
 from classes.visual import *
@@ -97,7 +98,7 @@ spp = 100000
 # Simulation parameters
 Np_gt = int(5e7)
 Np = int(5e7)
-resample_freq = 10
+resample_freq = 5
 step_size = 1e9
 beta_scalar_start = 10
 # Ns = 15
@@ -117,7 +118,7 @@ visual = Visual_wrapper(scene_seed)
 # visual.create_grid()
 # visual.plot_cameras()
 # visual.plot_medium()
-plt.show()
+# plt.show()
 scene_seed.init_cuda_param(Np, init=True)
 scene_seed.build_paths_list(Np_gt)
 I_gt = scene_seed.render()
@@ -166,10 +167,10 @@ loss = 1
 start_loop = time()
 
 # First diff Image
-scene_seed.init_cuda_param(Np, init=True)
-scene_seed.build_paths_list(Np, to_print=True)
-I_first = scene_seed.render()
-I_dif = I_first - I_gt
+# scene_seed.init_cuda_param(Np, init=True)
+# scene_seed.build_paths_list(Np, to_print=True)
+# I_first = scene_seed.render()
+# I_dif = I_first - I_gt
 for iter in range(iterations):
     abs_dist = np.abs(beta_cloud[cloud_mask] - beta_opt[cloud_mask])
     max_dist = np.max(abs_dist)
@@ -177,19 +178,17 @@ for iter in range(iterations):
 
     print(f"rel_dist1={rel_dist1}, loss={loss} max_dist={max_dist}, Np={Np:.2e}, ps={ps}")
 
-    if iter % resample_freq == 0 and iter > 0:
+    if iter % resample_freq == 0: #and iter > 0:
 
         print("RESAMPLING PATHS ")
         start = time()
         scene_seed.build_paths_list(Np, to_print=True)
-        I_opt = scene_seed.render(I_diff=None, to_print=False)
-        I_dif = I_opt - I_gt
         end = time()
         print(f"building path list took: {end - start}")
     # differentiable forward model
     start = time()
     # I_opt = scene_seed.render(I_diff=None, to_print=False)
-    I_opt, total_grad = scene_seed.render(I_dif)
+    I_opt, total_grad = scene_seed.render(I_gt)
     I_dif = I_opt - I_gt
     total_grad *= (ps*ps)
     end = time()

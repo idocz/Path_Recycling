@@ -6,7 +6,6 @@ from utils import relative_distance
 from utils import cuda_weight
 from time import time
 from scipy.ndimage import binary_dilation
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 import torch
 
@@ -20,6 +19,7 @@ def torch_lexsort(a, dim=-1):
 
 class SceneSeed(object):
     def __init__(self, volume: Volume, cameras, sun_angles, g_cloud, rr_depth, rr_stop_prob):
+        print("sedd NE grad")
         self.rr_depth = rr_depth
         self.rr_stop_prob = rr_stop_prob
         rr_factor = 1.0 / (1.0 - self.rr_stop_prob)
@@ -337,7 +337,7 @@ class SceneSeed(object):
         @cuda.jit()
         def render_cuda(beta_cloud, beta_zero, beta_air, g_cloud, w0_cloud, w0_air, sun_direction, bbox, bbox_size,
                         voxel_size, N_cams,
-                        ts, Ps, pixel_shape, is_in_medium, rng_states, scatter_inds, I_total, grad_contrib):
+                        ts, Ps, pixel_shape, is_in_medium, rng_states, scatter_inds, I_total, path_contrib):
 
             tid = cuda.grid(1)
             if tid < rng_states.shape[0] - 1:
@@ -429,7 +429,7 @@ class SceneSeed(object):
 
                     # LOCAL ESTIMATION TO CAMERAS
                     # grad_contrib[seg_ind] = 0
-                    grad_contrib[seg_ind] = attenuation
+                    # grad_contrib[seg_ind] = attenuation
                     for k in range(N_cams):
                         project_point(current_point, Ps[k], pixel_shape, pixel)
                         if pixel[0] != 255:
@@ -475,7 +475,7 @@ class SceneSeed(object):
                             ######################## local estimation save ############################
                             ###########################################################################
                             pc *= math.exp(-tau)
-                            # path_contrib[k,seg_ind] = pc
+                            path_contrib[k,seg_ind] = pc
 
                             # if seg != 0:
                             cuda.atomic.add(I_total, (k, pixel[0], pixel[1]), pc)
@@ -494,7 +494,7 @@ class SceneSeed(object):
         def gradcontrib_cuda(beta_cloud, beta_zero, beta_air, g_cloud,  w0_cloud, w0_air, sun_direction, bbox,
                                     bbox_size, voxel_size, N_cams,
                                     ts, Ps, pixel_shape, is_in_medium, rng_states, scatter_inds, I_diff,
-                                    grad_contrib):
+                                    grad_contrib, path_contrib, cloud_mask, total_grad):
             tid = cuda.grid(1)
             if tid < rng_states.shape[0] - 1:
                 scatter_ind = scatter_inds[tid]
@@ -565,20 +565,20 @@ class SceneSeed(object):
 
                     # LOCAL ESTIMATION TO CAMERAS
 
-                    attenuation = grad_contrib[seg_ind]
+                    # attenuation = grad_contrib[seg_ind]
                     grad_contrib[seg_ind] = 0
                     cloud_prob_scat0 = (w0_cloud * beta0_c) / (w0_cloud * beta0_c + w0_air * beta_air)
-                    cloud_prob_scat = (w0_cloud * beta_c) / (w0_cloud * beta_c + w0_air * beta_air)
+                    # beta_c
+                    # cloud_prob_scat = (w0_cloud * beta_c) / (w0_cloud * beta_c + w0_air * beta_air)
+                    beta_c += divide_beta_eps
                     for k in range(N_cams):
                         project_point(current_point, Ps[k], pixel_shape, pixel)
                         if pixel[0] != 255:
                             assign_3d(camera_voxel, current_voxel)
                             assign_3d(camera_point, current_point)
-                            distance_to_camera = distance_and_direction(camera_point, ts[k], cam_direction)
+                            distance_and_direction(camera_point, ts[k], cam_direction)
                             cos_theta = dot_3d(direction, cam_direction)
-                            le_pdf = cloud_prob_scat * HG_pdf(cos_theta, g_cloud) \
-                                     + (1 - cloud_prob_scat) * rayleigh_pdf(cos_theta)
-                            pc = (1 / (distance_to_camera * distance_to_camera)) * le_pdf * attenuation
+
                             if is_in_medium[k]:
                                 assign_3d(next_point, ts[k])
                             else:
@@ -586,9 +586,18 @@ class SceneSeed(object):
 
                             get_voxel_of_point(next_point, grid_shape, bbox, bbox_size, dest_voxel)
                             path_size = estimate_voxels_size(dest_voxel, current_voxel)
+
+                            # GRAD CALCULATION (LOCAL ESTIMATION DERIVATIVE)
+                            grad_temp = path_contrib[k, seg_ind] * I_diff[k, pixel[0], pixel[1]]
+                            if cloud_mask[camera_voxel[0], camera_voxel[1], camera_voxel[2]]:
+                                # seg_contrib = le_contrib + (beta_c + (rayleigh_pdf(cos_theta) / HG_pdf(cos_theta, g_cloud)) * beta_air) ** (-1)
+                                omega_fp_c = w0_cloud * HG_pdf(cos_theta, g_cloud)
+                                seg_contrib = omega_fp_c / \
+                                              (beta_c * omega_fp_c + beta_air * w0_air * rayleigh_pdf(cos_theta))
+                                cuda.atomic.add(total_grad, (camera_voxel[0], camera_voxel[1], camera_voxel[2]),
+                                                seg_contrib * grad_temp)
                             ###########################################################################
                             ######################## local estimation save ############################
-                            tau = 0
                             for pi in range(path_size):
                                 ##### border traversal #####
                                 border_x = (camera_voxel[0] + (cam_direction[0] > 0)) * voxel_size[0]
@@ -599,23 +608,23 @@ class SceneSeed(object):
                                 t_z = (border_z - camera_point[2]) / cam_direction[2]
                                 length, border_ind = argmin(t_x, t_y, t_z)
                                 ###############################
-                                # length, border, border_ind = travel_to_voxels_border_fast(camera_point, camera_voxel, cam_direction,
-                                #                                  voxel_size)
-                                beta_cam = beta_cloud[camera_voxel[0], camera_voxel[1], camera_voxel[2]] + beta_air
-                                tau += beta_cam * length
-                                # assign_3d(camera_voxel, next_voxel)
+                                # GRAD CALCULATION (LOCAL ESTIMATION DERIVATIVE)
+                                if cloud_mask[camera_voxel[0], camera_voxel[1], camera_voxel[2]]:
+                                    cuda.atomic.add(total_grad, (camera_voxel[0], camera_voxel[1], camera_voxel[2]),
+                                                    -length * grad_temp)
+
                                 step_in_direction(camera_point, cam_direction, length)
                                 # camera_point[border_ind] = border
                                 camera_voxel[border_ind] += sign(cam_direction[border_ind])
                             # Last Step
                             length = calc_distance(camera_point, next_point)
-                            beta_cam = beta_cloud[camera_voxel[0], camera_voxel[1], camera_voxel[2]] + beta_air
-                            tau += beta_cam * length
+                            # GRAD CALCULATION (LOCAL ESTIMATION DERIVATIVE)
+                            if cloud_mask[camera_voxel[0], camera_voxel[1], camera_voxel[2]]:
+                                cuda.atomic.add(total_grad, (camera_voxel[0], camera_voxel[1], camera_voxel[2]), -length * grad_temp)
                             ######################## local estimation save ############################
                             ###########################################################################
-                            pc *= math.exp(-tau)
                             # path_contrib[k,seg_ind] = pc
-                            grad_contrib[seg_ind] += pc * I_diff[k, pixel[0], pixel[1]]
+                            grad_contrib[seg_ind] += path_contrib[k,seg_ind] * I_diff[k, pixel[0], pixel[1]]
                             # if seg != 0:
 
                     # New Direction
@@ -822,7 +831,7 @@ class SceneSeed(object):
         self.Np = Np
         self.init_cuda_param(Np, init=False)
         # inputs
-        # del(self.dpath_contrib)
+        del(self.dpath_contrib)
         del(self.dgrad_contrib)
         del(self.dscatter_inds)
         del(self.drng_states)
@@ -882,7 +891,7 @@ class SceneSeed(object):
 
         self.total_num_of_scatter = total_scatter_num
         self.Np_nonan = Np_nonan
-        # self.dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
+        self.dpath_contrib = cuda.to_device(np.empty((self.N_cams, self.total_num_of_scatter), dtype=float_reg))
         self.dgrad_contrib = cuda.to_device(np.empty(self.total_num_of_scatter, dtype=float_reg))
 
         self.drng_states = cuda.device_array(self.rng_states_mod.shape, self.rng_states.dtype)
@@ -907,7 +916,7 @@ class SceneSeed(object):
         self.render_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dsun_direction, self.dbbox, self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, self.drng_states, self.dscatter_inds, self.dI_total,
-            self.dgrad_contrib)
+            self.dpath_contrib)
         cuda.synchronize()
 
         I_total = self.dI_total.copy_to_host()
@@ -920,20 +929,19 @@ class SceneSeed(object):
 
         self.dI_total.copy_to_device(I_total - I_gt)
         self.drng_states.copy_to_device(self.rng_states_mod)
+        ##### differentiable part ####
+        self.dtotal_grad.copy_to_device(np.zeros_like(self.volume.beta_cloud, dtype=float_reg))
         self.gradcontrib_cuda[blockspergrid, threadsperblock] \
             (self.dbeta_cloud, self.dbeta_zero, beta_air, g_cloud, w0_cloud, w0_air, self.dsun_direction, self.dbbox,
              self.dbbox_size,
              self.dvoxel_size, N_cams, self.dts, self.dPs, self.dpixels_shape, self.dis_in_medium, self.drng_states,
-             self.dscatter_inds, self.dI_total, self.dgrad_contrib)
+             self.dscatter_inds, self.dI_total, self.dgrad_contrib, self.dpath_contrib, self.dcloud_mask, self.dtotal_grad)
         cuda.synchronize()
         # print("voxel counter",dcounter.copy_to_host())
 
         if to_print:
             print("render_cuda took (twice):",time() - start)
 
-
-        ##### differentiable part ####
-        self.dtotal_grad.copy_to_device(np.zeros_like(self.volume.beta_cloud, dtype=float_reg))
         # precalculating gradient contributions
         start = time()
         self.drng_states.copy_to_device(self.rng_states_mod)

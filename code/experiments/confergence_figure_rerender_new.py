@@ -6,21 +6,18 @@ from utils import *
 import pickle
 from camera import Camera
 from tqdm import tqdm
-import matplotlib.transforms as mtrans
+from numba import cuda
+cuda.select_device(0)
 
 def transfrom_image(img, gamma):
     img = (img-img.min())/(img.max()-img.min())
     return img**gamma
 
-# exp_name = "2907-1847-02"
-exp_name = "0505-1724-36"
-exp_dir = join("checkpoints_old",exp_name)
+exp_name = "0503-0955-58_smoke_Nr=10_ss=2.00e+11"
+exp_dir = join("checkpoints",exp_name)
+
 scene_name = "smoke"
-
-output_dir = join("experiments","plots")
-# output_dir = "C:\\Users\\idocz\OneDrive - Technion\\Thesis\\my paper\\figures\\image_convergence"
-
-
+# scene_name = "smallcf"
 
 cp = pickle.load(open(join(exp_dir,"data","checkpoint_loader"), "rb" ))
 scene_rr = cp.recreate_scene()
@@ -31,7 +28,7 @@ bbox = scene_rr.volume.grid.bbox
 if scene_name == "smoke":
     ## smoke ##
     # steps = [0,5000,10000,26000] # for smoke
-    steps = [0, 1600, 5000]
+    steps = [0, 10, 150] # for smoke
     views = [3,7]
     focal_factor = 1.9
     volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.65
@@ -44,11 +41,13 @@ elif scene_name == "cloud1":
     focal_factor = 0.8
     volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.8
 
+
+
 betas_gt = np.load(join(exp_dir,"data","gt.npz"))["betas"]
 betas_list = [np.load(join(exp_dir,"data",f"opt_{step}.npz"))["betas"] for step in steps]
 wall_time_list = [int(np.load(join(exp_dir,"data",f"opt_{step}.npz"))["time"]//60) for step in steps]
 betas_list.append(betas_gt)
-
+output_dir = join("experiments","plots")
 
 # Adding New view
 
@@ -58,7 +57,7 @@ edge_z = voxel_size_z * betas_list[0].shape[2]
 cameras = [scene_rr.cameras[view] for view in views]
 height_factor = 1.5
 focal_length = 50e-3
-ps = 80
+ps = 100
 sensor_size = np.array((47e-3, 47e-3)) / height_factor
 R = height_factor * edge_z
 theta = 90
@@ -78,74 +77,64 @@ N = len(cameras)
 M = len(steps) + 1
 image_list = np.empty((N,M), dtype=np.object)
 # Np_gt = cp.Np_gt
-Np_gt = int(8e7)
-# Np_gt = int(1e3)
+Np_gt = int(5e8)
 
 for j in tqdm(range(M)):
     scene_rr.volume.beta_cloud = betas_list[j]
     cuda_paths = scene_rr.build_paths_list(Np_gt)
     I = scene_rr.render(cuda_paths)
     del(cuda_paths)
+    for _ in range(9):
+        cuda_paths = scene_rr.build_paths_list(Np_gt)
+        I += scene_rr.render(cuda_paths)
+        del(cuda_paths)
+    I /= 10
     # I = np.zeros(shape=(N,*cameras[0].pixels))
     for i in range(N):
         image_list[i,j] = I[i]
 
-scale_x = 1.55
-scale_y = 1.5
-fig, axes = plt.subplots(N,M, squeeze=False)
-fig.set_size_inches(M*scale_x,N*scale_y, forward=True)
-# plt.subplots_adjust(left=0.01,
-#                     bottom=0.005,
-#                     right=0.99,
-#                     top=0.95,
-#                     wspace=0.05,
-#                     hspace=0.05)
-# fig.tight_layout()
-
-r = fig.canvas.get_renderer()
-get_bbox = lambda ax: ax.get_tightbbox(r).transformed(fig.transFigure.inverted())
-bboxes = np.array(list(map(get_bbox, axes.flat)), mtrans.Bbox).reshape(axes.shape)
-ymax = np.array(list(map(lambda b: b.x1, bboxes.flat))).reshape(axes.shape).max(axis=0)
-ymin = np.array(list(map(lambda b: b.x0, bboxes.flat))).reshape(axes.shape).min(axis=0)
-skew = (ymax[0] - ymin[1])/2
-ys = np.c_[ymax[1:], ymin[:-1]].mean(axis=1)
-
-for i in range(N):
-    for j in range(M):
-        img = image_list[i,j]
-        ax = axes[i,j]
+scale = 1
+fig, axes = plt.subplots(N,M)
+fig.set_size_inches(M*scale,N*scale*1.05, forward=True)
+for j in range(N):
+    for i in range(M):
+        img = image_list[j,i]
+        plt.imsave(join(output_dir,"smoke_convergence", f"{scene_name}_convergence_{j}_{i}.pdf"), img, cmap="gray")
+        ax = axes[j,i]
         # if i != N-1:
         img = np.rot90(img,k=1)
         # img = transfrom_image(img, 1.3)
         # else:
         #     img = np.rot90(img,k=2)
         ax.imshow(img, cmap="gray")
-        ax.axis("off")
+        # ax.axis("off")
+        ax.set_xticks([])
+        ax.set_yticks([])
         # ax.get_xaxis().set_visible(False)
         # ax.get_yaxis().set_visible(False)
-        if i == 0:
-            if j == M-1:
-                ax.set_title("ground truth")
-            elif j==0:
-                ax.set_title("initialization")
-            else:
-                ax.set_title(f"{wall_time_list[j]} minutes")
         if j == 0:
-            if i != N-1:
-                ax.set_ylabel(f"view {i+1}")
+            if i == M-1:
+                pass
+                # ax.set_title("ground truth")
+                # ax.set_title("ground truth")
+            # elif i==0:
+                # ax.set_title("initialization")
+                # ax.set_title("initialization")
             else:
-                ax.set_ylabel(f"new view")
-
-# Draw a horizontal lines at those coordinates
-# unit = ys[1] - ys[0]
-# skew = (unit - 0.2)/2
-# skew = 0.02
-y = ys[-1]
-line = plt.Line2D([y+skew,y+skew], [0,1], transform=fig.transFigure, color="black")
-fig.add_artist(line)
-
-
-
+                # ax.set_title(f"{wall_time_list[j]} minutes")
+                ax.set_title(f"{wall_time_list[i]}")
+        # if j == 0:
+        #     if i != N-1:
+        #         ax.set_ylabel(f"view {i+1}")
+        #     else:
+        #         ax.set_ylabel(f"new view")
+fig.tight_layout()
+# plt.subplots_adjust(left=0.075,
+#                     bottom=0.005,
+#                     right=0.99,
+#                     top=0.995,
+#                     wspace=0.05,
+#                     hspace=0.05)
 plt.savefig(join(output_dir, f"{scene_name}_convergence_grid.pdf"), bbox_inches='tight')
 
 plt.show()

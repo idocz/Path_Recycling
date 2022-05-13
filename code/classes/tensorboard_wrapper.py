@@ -3,7 +3,6 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from os.path import join
 from datetime import datetime
-import matplotlib.pyplot as plt
 from utils import relative_distance, relative_bias
 import pickle
 
@@ -60,7 +59,8 @@ class TensorBoardWrapper(object):
         self.gt_counter += 1
 
     def add_scatter_plot(self, I_gt, I_opt, step):
-        fig = plt.figure()
+        # fig = plt.figure()
+        fig = None
         ax = fig.add_subplot(111)
         X = I_gt.reshape(-1)
         Y = I_opt.reshape(-1)

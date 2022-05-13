@@ -13,11 +13,11 @@ def transfrom_image(img, gamma):
     img = (img-img.min())/(img.max()-img.min())
     return img**gamma
 
-exp_name = "2907-1847-02"
+exp_name = "0503-0955-58_smoke_Nr=10_ss=2.00e+11"
 exp_dir = join("checkpoints",exp_name)
 
-# scene_name = "smoke"
-scene_name = "smallcf"
+scene_name = "smoke"
+# scene_name = "smallcf"
 
 cp = pickle.load(open(join(exp_dir,"data","checkpoint_loader"), "rb" ))
 scene_rr = cp.recreate_scene()
@@ -28,7 +28,7 @@ bbox = scene_rr.volume.grid.bbox
 if scene_name == "smoke":
     ## smoke ##
     # steps = [0,5000,10000,26000] # for smoke
-    steps = [0,5000,26000] # for smoke
+    steps = [0, 10, 150] # for smoke
     views = [3,7]
     focal_factor = 1.9
     volume_center = (bbox[:, 1] - bbox[:, 0]) / 1.65
@@ -57,7 +57,7 @@ edge_z = voxel_size_z * betas_list[0].shape[2]
 cameras = [scene_rr.cameras[view] for view in views]
 height_factor = 1.5
 focal_length = 50e-3
-ps = 80
+ps = 200
 sensor_size = np.array((47e-3, 47e-3)) / height_factor
 R = height_factor * edge_z
 theta = 90
@@ -89,12 +89,12 @@ for j in tqdm(range(M)):
         image_list[i,j] = I[i]
 
 scale = 1
-fig, axes = plt.subplots(M,N)
+fig, axes = plt.subplots(N,M)
 fig.set_size_inches(N*scale*1.05,M*scale, forward=True)
 for j in range(N):
     for i in range(M):
         img = image_list[j,i]
-        ax = axes[i,j]
+        ax = axes[j,i]
         # if i != N-1:
         img = np.rot90(img,k=1)
         # img = transfrom_image(img, 1.3)
@@ -106,16 +106,16 @@ for j in range(N):
         ax.set_yticks([])
         # ax.get_xaxis().set_visible(False)
         # ax.get_yaxis().set_visible(False)
-        if j == 0:
-            if i == M-1:
+        if i == 0:
+            if j == M-1:
                 # ax.set_title("ground truth")
-                ax.set_ylabel("ground truth")
+                ax.title("ground truth")
             elif i==0:
                 # ax.set_title("initialization")
-                ax.set_ylabel("initialization")
+                ax.title("initialization")
             else:
                 # ax.set_title(f"{wall_time_list[j]} minutes")
-                ax.set_ylabel(f"{wall_time_list[i]} minutes")
+                ax.title(f"{wall_time_list[i]} minutes")
         # if j == 0:
         #     if i != N-1:
         #         ax.set_ylabel(f"view {i+1}")
