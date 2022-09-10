@@ -25,39 +25,18 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="scene seed has added. Splitting forward and gradient for stabler convergence.">
-      <change afterPath="$PROJECT_DIR$/classes/scene_seed_NEgrad.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/scene_seed_roi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/ablation_plots.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/ablation_table.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender_new.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr_norender.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seedNEgrad_inverse_jplext_oneStage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seedNeGrad_render_jplext.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage_loop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_smallcf_oneStage_loop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_smoke_oneStage.py" afterDir="false" />
+    <list default="true" id="931b30af-17c0-4afd-9a89-169957dc129a" name="Default Changelist" comment="first push after the break">
+      <change afterPath="$PROJECT_DIR$/experiments/rotating_result_new.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/vold3d.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seed_inverse_smoke_oneStage_loop.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_rr.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_rr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/scene_seed_noNEgrad.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/scene_seed_noNEgrad.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/tensorboard_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/error_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/error_stats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drafts/exp_result_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/drafts/exp_result_extractor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/airmspi_img_comp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/comparison_with_tamar_eps.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/comparison_with_tamar_eps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/confergence_figure.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/confergence_figure.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/confergence_figure_rerender.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/error_scatter_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/error_scatter_plot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/visual.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr_norender.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr_norender.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/loop_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/loop_runner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage_loop.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_jplext_oneStage_loop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/seed_inverse_jplext_oneStage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/seed_render_jplext.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/seed_render_jplext.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,9 +94,9 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/experiments" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -128,8 +107,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\experiments" />
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts" />
+      <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\experiments" />
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\classes" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\scripts" />
       <recent name="C:\Users\idocz.VISL-143\Desktop\repos\3D_Graph_Renderer\code\classes" />
@@ -140,7 +119,7 @@
       <recent name="C:\Users\idocz\Desktop\repos\3D_Graph_Renderer\code\scripts\deprecated" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ablation_plots">
+  <component name="RunManager" selected="Python.vold3d">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -185,28 +164,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="ablation_plots" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/ablation_plots.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="airmspi_img_comp" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -243,50 +200,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/drafts/cloud_checkpoint_extractor.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="confergence_figure_rerender_new" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/confergence_figure_rerender_new.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="confergence_figure_rerender_transposed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/confergence_figure_rerender_transposed.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -383,7 +296,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="loop_runner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="loop_runner" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -391,7 +304,7 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -427,7 +340,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="seed_inverse_smoke_oneStage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="path_recycling_speedup_vs_Nr_norender" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -435,13 +348,79 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/seed_inverse_smoke_oneStage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/path_recycling_speedup_vs_Nr_norender.py" />
       <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="rotating_result_new" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/rotating_result_new.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="rr_inverse_airmspi_backward" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="seed_inverse_smoke_oneStage_loop" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/seed_inverse_smoke_oneStage_loop.py" />
+      <option name="PARAMETERS" value="10 4800 1" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -471,6 +450,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="vold3d" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/vold3d.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.seed_render_jplext" />
       <item itemvalue="Python.abblation_study_rel_dist.npz" />
@@ -481,19 +482,20 @@
       <item itemvalue="Python.down_up_sample" />
       <item itemvalue="Python.gpu_inverse_script" />
       <item itemvalue="Python.airmspi_img_comp" />
-      <item itemvalue="Python.seed_inverse_smoke_oneStage" />
       <item itemvalue="Python.loop_runner" />
-      <item itemvalue="Python.ablation_plots" />
-      <item itemvalue="Python.confergence_figure_rerender_transposed" />
-      <item itemvalue="Python.confergence_figure_rerender_new" />
+      <item itemvalue="Python.path_recycling_speedup_vs_Nr_norender" />
+      <item itemvalue="Python.rotating_result_new" />
+      <item itemvalue="Python.seed_inverse_smoke_oneStage_loop" />
+      <item itemvalue="Python.rr_inverse_airmspi_backward" />
+      <item itemvalue="Python.vold3d" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.ablation_plots" />
-        <item itemvalue="Python.confergence_figure_rerender_new" />
-        <item itemvalue="Python.confergence_figure_rerender_transposed" />
-        <item itemvalue="Python.loop_runner" />
-        <item itemvalue="Python.seed_inverse_smoke_oneStage" />
+        <item itemvalue="Python.vold3d" />
+        <item itemvalue="Python.rr_inverse_airmspi_backward" />
+        <item itemvalue="Python.rotating_result_new" />
+        <item itemvalue="Python.seed_inverse_smoke_oneStage_loop" />
+        <item itemvalue="Python.path_recycling_speedup_vs_Nr_norender" />
       </list>
     </recent_temporary>
   </component>
@@ -559,6 +561,13 @@
       <workItem from="1645690448738" duration="10572000" />
       <workItem from="1645786209037" duration="57366000" />
       <workItem from="1646992183584" duration="8838000" />
+      <workItem from="1652448188617" duration="124000" />
+      <workItem from="1652458553389" duration="4332000" />
+      <workItem from="1653642304414" duration="9822000" />
+      <workItem from="1656012582293" duration="2314000" />
+      <workItem from="1658216159438" duration="1768000" />
+      <workItem from="1658683862726" duration="1687000" />
+      <workItem from="1659187872318" duration="596000" />
     </task>
     <task id="LOCAL-00001" summary="points changed from float32 to float64">
       <created>1609504613233</created>
@@ -777,7 +786,14 @@
       <option name="project" value="LOCAL" />
       <updated>1643970210933</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="first push after the break">
+      <created>1652448229049</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1652448229049</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -808,7 +824,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="commit before eff_scatter branch" />
     <MESSAGE value="still buggy" />
     <MESSAGE value="bugg was fixed." />
     <MESSAGE value="small changes" />
@@ -833,7 +848,8 @@
     <MESSAGE value="AirMSPI works!!" />
     <MESSAGE value="Have fun ROI" />
     <MESSAGE value="scene seed has added. Splitting forward and gradient for stabler convergence." />
-    <option name="LAST_COMMIT_MESSAGE" value="scene seed has added. Splitting forward and gradient for stabler convergence." />
+    <MESSAGE value="first push after the break" />
+    <option name="LAST_COMMIT_MESSAGE" value="first push after the break" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -915,7 +931,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/classes/visual.py</url>
-          <line>93</line>
+          <line>94</line>
           <option name="timeStamp" value="74" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1018,12 +1034,18 @@
           <line>498</line>
           <option name="timeStamp" value="114" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/rr_inverse_airmspi_backward.py</url>
+          <line>55</line>
+          <option name="timeStamp" value="115" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/code$rr_render_smallcf.coverage" NAME="rr_render_smallcf Coverage Results" MODIFIED="1644139089363" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$seedNeGrad_render_jplext.coverage" NAME="seedNeGrad_render_jplext Coverage Results" MODIFIED="1645608842099" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/code$rr_inverse_airmspi_backward.coverage" NAME="rr_inverse_airmspi_backward Coverage Results" MODIFIED="1656012642988" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$seed_inverse_jplext_oneStage.coverage" NAME="seed_inverse_jplext_oneStage Coverage Results" MODIFIED="1643888037351" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$path_recycling_memory_vs_Np.coverage" NAME="path_recycling_memory_vs_Np Coverage Results" MODIFIED="1643316853682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/code$path_recycling_speedup_vs_Nr.coverage" NAME="path_recycling_speedup_vs_Nr Coverage Results" MODIFIED="1643657925574" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />

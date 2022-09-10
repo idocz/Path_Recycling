@@ -4,6 +4,7 @@ import os
 
 
 scene = "jplext"
+scene = "smoke"
 # scene = "smallcf"
 # renderer = "rr"
 renderer = "seed"
@@ -12,7 +13,7 @@ script_path = join("scripts", script_name)
 # Nrs =      [10]
 # Nrs =      [1, 2, 5, 10 ,20, 30]
 # Nrs =      [1, 2, 5, 20 ,30]
-Nrs =      [1]
+Nrs =      [10]
 # Nrs =      [5, 10, 20 ,30]
 # runtimes = [240] * len(Nrs)
 runtimes = [4800] * len(Nrs)

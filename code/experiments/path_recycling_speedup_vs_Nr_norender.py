@@ -36,7 +36,8 @@ for to_sort in [0, 1]:
 # plt.figure()
 text_size = 22
 tick_size = 17
-plt.figure(figsize=(4,4))
+plt.figure(figsize=(5,4))
+# plt.figure()
 output_dir = join("experiments","plots")
 plt.plot(Nrs, speed_ups[0], label="no sorting")
 plt.plot(Nrs, speed_ups[1], label="sorting")

@@ -78,7 +78,7 @@ N_cams = len(cam_inds)
 
 resolutions = airmspi_data["resolution"]#[:3]
 I_gt = airmspi_data["images"]#[:3]
-
+print([I.shape for I in I_gt])
 camera_array_list = airmspi_data["camera_array_list"]#[:1]
 total_num_cam = len(camera_array_list)
 camera_array_list = [np.ascontiguousarray(camera_array[::downscale, ::downscale, :6]) for camera_array in camera_array_list]

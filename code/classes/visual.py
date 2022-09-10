@@ -18,7 +18,8 @@ class Visual_wrapper(object):
         z = np.linspace(grid.bbox[2,0], grid.bbox[2,1], grid.shape[2] + 1)
         yy, xx, zz = np.meshgrid(y, x, z,)
 
-        medium = np.ones(grid.shape) * 0.5
+        # medium = np.ones(grid.shape) * 0.5
+        medium = beta_cloud/beta_cloud.max()
         medium[beta_cloud<0.1] = 0
         colors = cm.gray(medium)
         self.ax.voxels(xx, yy, zz, medium, alpha=0.7, edgecolors='gray', facecolors=colors)
